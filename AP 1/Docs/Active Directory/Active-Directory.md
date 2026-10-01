@@ -1,20 +1,20 @@
 # Active Directory - AP 1 JCorp
 
-Cette page présente le premier contrôleur de domaine JCorp, avec de courtes étapes et des captures de l'installation et de la configuration actuelle.
+Je présente ici l'installation de mon premier contrôleur de domaine JCorp, avec les captures prises pendant sa configuration.
 
 ## 1. Créer la machine virtuelle
 
-Le serveur AD est hébergé sur Proxmox sous le **VMID 700**. Sa carte réseau utilise le pont `vmbr2`. Le VLAN 700 est réservé à Joshua, mais la capture matérielle actuelle n'affiche pas de `tag=700` sur cette carte : ce point reste à vérifier. La première capture montre la VM 700 et le Gestionnaire de serveur Windows après installation ; la seconde montre ses paramètres matériels.
+J'ai créé mon serveur AD sur Proxmox avec le **VMID 700**. Sa carte réseau utilise le pont `vmbr2`. La première capture montre la VM et le Gestionnaire de serveur Windows ; la seconde montre les paramètres matériels. La carte réseau n'affiche pas de tag VLAN sur cette capture.
 
 ![VM 700 JCorp dans Proxmox, avec le Gestionnaire de serveur Windows](images/proxmox-vm700.png)
 
 ![Configuration matérielle actuelle de la VM 700 dans Proxmox](images/proxmox-vm700-materiel.png)
 
-L'installation initiale de Windows et les écrans de création de la VM n'ont pas été capturés pour cette AP.
+Je n'ai pas conservé de capture des écrans de création de la VM ni de l'installation initiale de Windows.
 
 ## 2. Fixer le nom et l'adresse du serveur
 
-Le serveur Windows est nommé **`JCORP-DC01`**. Il utilise l'adresse **`10.2.101.10/24`** ; son DNS préféré pointe vers son propre service DNS. Lors du premier diagnostic, il avait encore une adresse automatique `169.254.x.x`, qui empêchait une résolution correcte du domaine. L'adresse fixe a été configurée, puis les enregistrements DNS ont été actualisés et les diagnostics ont réussi.
+J'ai nommé le serveur Windows **`JCORP-DC01`** et configuré l'adresse **`10.2.101.10/24`**. Son DNS préféré pointe vers son propre service DNS. Lors du premier diagnostic, le serveur utilisait encore une adresse automatique `169.254.x.x`, ce qui empêchait la résolution du domaine. J'ai configuré l'adresse fixe, actualisé les enregistrements DNS et relancé les diagnostics avec succès.
 
 | Paramètre | Valeur constatée |
 | --- | --- |
@@ -26,29 +26,29 @@ Le serveur Windows est nommé **`JCORP-DC01`**. Il utilise l'adresse **`10.2.101
 
 ## 3. Installer AD DS et DNS, puis créer le domaine
 
-Les rôles **Services de domaine Active Directory (AD DS)** et **DNS** ont été installés avec le Gestionnaire de serveur. Le serveur a ensuite été promu comme premier contrôleur d'une nouvelle forêt nommée **`ad.jcorp`**, avec **`JCORP`** comme nom court NetBIOS.
+J'ai installé les rôles **Services de domaine Active Directory (AD DS)** et **DNS** depuis le Gestionnaire de serveur, puis promu le serveur comme premier contrôleur de la forêt **`ad.jcorp`**. Le nom court NetBIOS est **`JCORP`**.
 
-La sortie ci-dessous confirme le nom du serveur et le domaine. Elle provient d'un contrôle effectué pendant l'installation ; l'adresse IP a été corrigée ensuite.
+La sortie ci-dessous confirme le nom du serveur et le domaine. J'ai corrigé l'adresse IP après ce premier contrôle.
 
 ![Vérification du nom JCORP-DC01 et du domaine ad.jcorp dans PowerShell](images/identite-domaine.png)
 
-Après la correction réseau, les contrôles `dcdiag` des services et du DNS ont réussi. Un poste client joint au domaine reste à documenter.
+Après la correction réseau, les contrôles `dcdiag` des services et du DNS ont réussi. Je documenterai ensuite la jonction d'un poste client au domaine.
 
 ## 4. Organiser les unités d'organisation et les groupes
 
-Les cinq OU principales sont placées **directement sous `ad.jcorp`** : `Administration`, `Groupes`, `Postes`, `Serveurs` et `Utilisateurs`. Les OU des services se trouvent dans `Utilisateurs`. Le contrôleur de domaine reste dans l'OU système `Domain Controllers`.
+J'ai placé les cinq OU principales **directement sous `ad.jcorp`** : `Administration`, `Groupes`, `Postes`, `Serveurs` et `Utilisateurs`. Les OU des services se trouvent dans `Utilisateurs`. Le contrôleur de domaine reste dans l'OU système `Domain Controllers`.
 
 ![OU principales visibles directement sous le domaine](images/ou-racine.png)
 
-La capture actuelle de la console montre également les OU de services sous `Utilisateurs` et le compte Léa Dubois dans `Juridique`. Elle ne prouve pas encore la présence des 42 comptes du script actualisé.
+Dans la console Active Directory, on voit les OU des services sous `Utilisateurs` et le compte Léa Dubois dans `Juridique`.
 
 ![OU de services et compte juridique dans la console actuelle](images/ou-services-actuel.png)
 
-La première automatisation a créé **17 groupes globaux de sécurité** : un par service, ainsi que trois groupes pour les fonctions commerciales (visiteur médical, délégué régional et responsable de secteur). La capture suivante montre le total de 17 groupes à cette étape.
+J'ai créé **17 groupes globaux de sécurité** : un par service et trois pour les fonctions commerciales (visiteur médical, délégué régional et responsable de secteur). La capture suivante montre le résultat de cette première exécution.
 
 ![Première exécution du script et total de 17 groupes](images/groupes-17.png)
 
-Une [version actualisée du script](JCORP-Reset-AD.ps1) prépare **trois comptes aux noms inventés par service**, soit 42 comptes, et affecte chacun au groupe correspondant. Les trois comptes commerciaux reçoivent aussi leur groupe de fonction. Le script contrôle les objets existants avant la remise à zéro et s'arrête s'il trouve un objet inattendu. Il demande le mot de passe à l'exécution afin de ne pas le publier dans le dépôt. **L'exécution de cette version à 42 comptes n'est pas encore confirmée par une capture ou un relevé du serveur.**
+J'ai aussi préparé une [version actualisée du script](JCORP-Reset-AD.ps1) pour créer **trois comptes aux noms inventés par service**, soit 42 comptes, et les ajouter aux groupes correspondants. Les trois comptes commerciaux reçoivent également leur groupe de fonction. Le script contrôle les objets présents avant de recréer la structure et demande le mot de passe au lancement.
 
 | Type d'objet | Prévu par le script actualisé |
 | --- | ---: |
@@ -57,11 +57,11 @@ Une [version actualisée du script](JCORP-Reset-AD.ps1) prépare **trois comptes
 | Groupes de sécurité | 17 |
 | Comptes nominatifs fictifs | 42 |
 
-Les groupes organisent les appartenances. Les droits sur les partages et applications seront attribués lorsque ces ressources seront créées. Aucun mot de passe n'est publié dans ce dépôt.
+J'utiliserai ces groupes pour attribuer les droits sur les partages et les applications lors de leur mise en place. Aucun mot de passe n'est publié dans ce dépôt.
 
 ## 5. Vérifications à conserver
 
-Sur le contrôleur de domaine, les commandes suivantes permettent de vérifier le nom, le réseau, le domaine et l'annuaire :
+J'utilise les commandes suivantes sur le contrôleur de domaine pour contrôler le nom du serveur, le réseau, le domaine et l'annuaire :
 
 ```powershell
 hostname
@@ -70,5 +70,5 @@ Get-ADDomain | Select-Object DNSRoot, NetBIOSName
 dcdiag /test:Advertising /test:Services /test:DNS
 ```
 
-Après exécution du script actualisé, il faudra vérifier les **42 comptes**, leurs OU et leurs appartenances, puis ajouter une capture des résultats. La jonction d'un poste client et les tests de connexion utilisateur constitueront la prochaine preuve fonctionnelle.
+Après l'exécution du script actualisé, je contrôlerai les **42 comptes**, leurs OU et leurs appartenances, puis j'ajouterai une capture du résultat. Je poursuivrai avec la jonction d'un poste client et les tests de connexion des utilisateurs.
 
