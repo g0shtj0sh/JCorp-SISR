@@ -1,4 +1,4 @@
-# Architecture du réseau — AP 1
+# Architecture du réseau - AP 1
 
 ## Référence métier et adaptation
 
