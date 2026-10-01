@@ -1,6 +1,6 @@
-# JCorp — Infrastructure SISR
+# JCorp - Infrastructure SISR
 
-Ce dépôt documente les deux ateliers professionnels (AP) de JCorp. Le scénario métier et les besoins de l'AP 1 sont adaptés du [dossier RedOne](https://docs.google.com/document/d/13dC98HuGbrRNXuTOotnaGaNbwyVlJhWZ/edit). L'infrastructure réalisée porte le nom **JCorp** ; les noms, adresses et captures de l'ancien projet GSB-Jcorp ne décrivent pas cette installation.
+Ce dépôt documente les deux ateliers professionnels (AP) de JCorp. Le scénario métier et les besoins de l'AP 1 sont adaptés du [dossier RedOne](https://docs.google.com/document/d/13dC98HuGbrRNXuTOotnaGaNbwyVlJhWZ/edit). L'infrastructure réalisée porte le nom **JCorp**.
 
 | Atelier | Contenu | État |
 | --- | --- | --- |
