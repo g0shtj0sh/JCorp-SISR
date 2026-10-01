@@ -1,4 +1,4 @@
-# AP 1 — Socle infrastructure JCorp
+# AP 1 - Socle infrastructure JCorp
 
 ## Contexte et objectif
 
@@ -20,5 +20,4 @@ Pour JCorp, l'AP 1 vise d'abord un socle opérationnel sur Proxmox : réseau pro
 - **Script préparé :** réinitialisation contrôlée de cette structure et création de 42 comptes nominatifs fictifs, soit trois par service. Son exécution sur le serveur doit être confirmée avant de présenter les 42 comptes comme déployés.
 - **À documenter après réalisation :** poste client joint au domaine, GPO, partages, deuxième contrôleur de domaine, sauvegardes et autres applications utiles au scénario.
 
-Le [dépôt GSB-Jcorp](https://github.com/g0shtj0sh/GSB-Jcorp) sert de référence pour l'organisation de la documentation et le format des captures. Ses choix techniques (VMware, `JCorp.local`, `192.168.10.0/24`) appartiennent à l'ancien projet.
 
