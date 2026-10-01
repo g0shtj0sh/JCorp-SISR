@@ -1,6 +1,6 @@
-# Active Directory — AP 1 JCorp
+# Active Directory - AP 1 JCorp
 
-Cette page présente le premier contrôleur de domaine JCorp, avec de courtes étapes et des captures issues de l'installation. Elle suit le format de la [documentation AD de l'ancien projet](https://github.com/g0shtj0sh/GSB-Jcorp/blob/main/Docs/Active%20Directory/Active-Directory.md), mais décrit les paramètres de la nouvelle infrastructure.
+Cette page présente le premier contrôleur de domaine JCorp, avec de courtes étapes et des captures de l'installation et de la configuration actuelle.
 
 ## 1. Créer la machine virtuelle
 
@@ -10,7 +10,7 @@ Le serveur AD est hébergé sur Proxmox sous le **VMID 700**. Sa carte réseau u
 
 ![Configuration matérielle actuelle de la VM 700 dans Proxmox](images/proxmox-vm700-materiel.png)
 
-L'installation initiale de Windows et les écrans de création de la VM n'ont pas été capturés pour cette AP. Les anciens écrans VMware du dépôt GSB-Jcorp ne représentent pas Proxmox JCorp.
+L'installation initiale de Windows et les écrans de création de la VM n'ont pas été capturés pour cette AP.
 
 ## 2. Fixer le nom et l'adresse du serveur
 
