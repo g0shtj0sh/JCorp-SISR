@@ -10,7 +10,7 @@
   Les lecteurs reseau demandent des chemins de partage reels et ne sont pas crees ici.
   Le mot de passe LAPS n'est jamais defini dans ce fichier.
 #>
-[CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+[CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
 param(
     [switch]$ConfigureLaps
 )
