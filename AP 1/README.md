@@ -11,8 +11,7 @@ Pour JCorp, je commence l'AP 1 par la configuration de mon environnement Proxmox
 | Sujet | Contenu | État |
 | --- | --- | --- |
 | [Architecture du réseau](../Architecture%20du%20r%C3%A9seau/Architecture-du-reseau.md) | Architecture commune aux AP 1 et AP 2 | En cours |
-| [Active Directory](Docs/Active%20Directory/Active-Directory.md) | VM, domaine, DNS, DHCP, OU, groupes et comptes | En cours |
-| [GPO](Docs/GPO/README.md) | Script et règles de stratégies de groupe | En cours |
+| [Active Directory, GPO, DHCP et contrôleurs de domaine](Docs/Active%20Directory/Active-Directory-GPO-DHCP-Controleurs-de-domaine.md) | VM, domaine, DNS, DHCP, OU, comptes, GPO et second contrôleur en préparation | En cours |
 
 ## Avancement
 
@@ -20,7 +19,7 @@ Pour JCorp, je commence l'AP 1 par la configuration de mon environnement Proxmox
 - J'ai créé les OU des services et 17 groupes globaux de sécurité. La documentation AD contient une capture de cette étape.
 - J'ai préparé un script de création de 42 comptes aux noms inventés, soit trois par service, avec leurs groupes. La documentation distingue ce script de la configuration visible sur les captures.
 - J'ai ajouté le rôle DHCP sur `JCORP-DC01` et créé une étendue pour `10.2.101.0/24`, avec un pool de `10.2.101.11` à `10.2.101.150`. Une capture de la console est dans la documentation AD.
-- J'ai ajouté les GPO de postes, de serveurs et d'utilisateurs avec des exceptions fondées sur les groupes. Leur script et leurs paramètres sont documentés dans le dossier GPO.
+- J'ai ajouté les GPO de postes, de serveurs et d'utilisateurs avec des exceptions fondées sur les groupes. Leur script et leurs paramètres sont présentés dans la documentation commune.
 - Je prépare trois nouvelles VM, visibles dans Proxmox : `701` (`User1-JCorp-Windows`) pour le poste Windows 11, `702` (`User2-JCorp-Debian`) pour le poste Debian et `703` (`DC2-JCorp`) pour le second contrôleur de domaine. Leur installation et leurs tests sont en cours.
 - La suite du projet portera sur la jonction des postes au domaine, la réplication AD, les partages, les sauvegardes et les autres services prévus pour JCorp.
 
