@@ -13,9 +13,9 @@ Dans le [scénario RedOne](https://docs.google.com/document/d/13dC98HuGbrRNXuTOo
 | VLAN du premier serveur | 700 |
 | Pont Proxmox observé | `vmbr2`, compatible VLAN |
 | Contrôleur de domaine | VM 700, `JCORP-DC01`, `10.2.101.10/24` |
-| Second contrôleur de domaine | VM 701, `JCORP-DC02`, en cours de création |
-| Poste Windows 11 | VM 702, en cours de création |
-| Poste Debian | VM 703, en cours de création |
+| Poste Windows 11 | VM 701, `User1-JCorp-Windows`, en cours d'installation |
+| Poste Debian | VM 702, `User2-JCorp-Debian`, en cours d'installation |
+| Second contrôleur de domaine | VM 703, `DC2-JCorp`, en cours d'installation |
 | DHCP | Rôle installé sur `JCORP-DC01`, pool `10.2.101.11` à `10.2.101.150` |
 | Passerelle du premier serveur | `10.2.101.1` |
 
