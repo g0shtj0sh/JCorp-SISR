@@ -13,6 +13,10 @@ Dans le [scénario RedOne](https://docs.google.com/document/d/13dC98HuGbrRNXuTOo
 | VLAN du premier serveur | 700 |
 | Pont Proxmox observé | `vmbr2`, compatible VLAN |
 | Contrôleur de domaine | VM 700, `JCORP-DC01`, `10.2.101.10/24` |
+| Second contrôleur de domaine | VM 701, `JCORP-DC02`, en cours de création |
+| Poste Windows 11 | VM 702, en cours de création |
+| Poste Debian | VM 703, en cours de création |
+| DHCP | Rôle installé sur `JCORP-DC01`, pool `10.2.101.11` à `10.2.101.150` |
 | Passerelle du premier serveur | `10.2.101.1` |
 
 J'ai relié la carte réseau de la VM au pont `vmbr2`, lui-même relié à l'interface physique `eno3`. Au départ, la carte n'avait pas de tag VLAN et la VM ne joignait pas sa passerelle. J'ai ajouté le tag **700** à la carte réseau ; le ping vers **`10.2.101.1`** répond maintenant sans perte. Le routage entre les autres réseaux sera ajouté avec la suite de l'infrastructure.
