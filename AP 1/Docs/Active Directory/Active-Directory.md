@@ -14,7 +14,7 @@ Je n'ai pas conservé de capture des écrans de création de la VM ni de l'insta
 
 ## 2. Fixer le nom et l'adresse du serveur
 
-J'ai nommé le serveur Windows **`JCORP-DC01`** et configuré l'adresse **`10.2.101.10/24`**. Son DNS préféré pointe vers son propre service DNS. Lors du premier diagnostic, le serveur utilisait encore une adresse automatique `169.254.x.x`, ce qui empêchait la résolution du domaine. J'ai configuré l'adresse fixe, actualisé les enregistrements DNS et relancé les diagnostics avec succès.
+J'ai nommé le serveur Windows **`JCORP-DC01`** et configuré l'adresse **`10.2.101.10/24`**. Son DNS préféré pointe vers son propre service DNS. Mon administrateur réseau m'a indiqué **`10.2.101.1`** comme passerelle. Lors du premier diagnostic, le serveur utilisait encore une adresse automatique `169.254.x.x`, ce qui empêchait la résolution du domaine. J'ai configuré l'adresse fixe, actualisé les enregistrements DNS et relancé les diagnostics avec succès.
 
 | Paramètre | Valeur constatée |
 | --- | --- |
@@ -22,7 +22,7 @@ J'ai nommé le serveur Windows **`JCORP-DC01`** et configuré l'adresse **`10.2.
 | Adresse IPv4 | `10.2.101.10` |
 | Masque | `255.255.255.0` |
 | DNS du serveur | `10.2.101.10` ou boucle locale selon la configuration du contrôleur |
-| Passerelle | Aucune à ce stade |
+| Passerelle indiquée par l'administrateur réseau | `10.2.101.1` |
 
 ## 3. Installer AD DS et DNS, puis créer le domaine
 
