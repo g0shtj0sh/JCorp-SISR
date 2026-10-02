@@ -69,6 +69,10 @@ J'ai ajouté le rôle **DHCP** sur `JCORP-DC01`. Dans la console, l'étendue IPv
 
 J'ai préparé et utilisé le [script de création des GPO](../GPO/JCORP-GPO.ps1) pour appliquer les règles aux OU `Postes`, `Serveurs` et `Utilisateurs`. Elles couvrent le verrouillage des postes, le pare-feu, les mises à jour, les journaux des serveurs, CMD, Regedit et la lecture seule des clés USB pour certains services. Les exceptions CMD et Regedit reposent sur les groupes de la DSI et du développement. Le [détail des GPO](../GPO/README.md) précise les groupes concernés et les prérequis.
 
+Dans la console **Gestion de stratégie de groupe**, je vois les neuf GPO `JCORP-*` créées dans `ad.jcorp` : trois pour les postes, une pour les serveurs et cinq pour les utilisateurs. Cette capture prouve leur présence dans le domaine. Je testerai leur application sur le poste Windows 11 après sa jonction au domaine.
+
+![GPO JCorp visibles dans la console Gestion de stratégie de groupe](images/gpo-jcorp-console.png)
+
 Pour afficher la liste réelle des GPO créées sur le domaine depuis Windows PowerShell, j'utilise :
 
 ```powershell
