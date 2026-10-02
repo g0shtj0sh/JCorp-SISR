@@ -32,7 +32,7 @@ La sortie ci-dessous confirme le nom du serveur et le domaine. J'ai corrigé l'a
 
 ![Vérification du nom JCORP-DC01 et du domaine ad.jcorp dans PowerShell](images/identite-domaine.png)
 
-Après la correction réseau, les contrôles `dcdiag` des services et du DNS ont réussi. Je documenterai ensuite la jonction d'un poste client au domaine.
+Après la correction réseau, les contrôles `dcdiag` des services et du DNS ont réussi.
 
 ## 4. Organiser les unités d'organisation et les groupes
 
@@ -57,9 +57,26 @@ J'ai aussi préparé une [version actualisée du script](JCORP-Reset-AD.ps1) pou
 | Groupes de sécurité | 17 |
 | Comptes nominatifs fictifs | 42 |
 
-J'utiliserai ces groupes pour attribuer les droits sur les partages et les applications lors de leur mise en place. Aucun mot de passe n'est publié dans ce dépôt.
+J'utilise ces groupes pour cibler les [GPO](../GPO/README.md). Ils serviront aussi aux droits sur les partages et les applications. Aucun mot de passe n'est publié dans ce dépôt.
 
-## 5. Vérifications à conserver
+## 5. DHCP sur JCORP-DC01
+
+J'ai ajouté le rôle **DHCP** sur `JCORP-DC01`. Dans la console, l'étendue IPv4 du réseau `10.2.101.0/24` et son pool d'adresses de **`10.2.101.11` à `10.2.101.150`** sont visibles. Cette capture montre la plage configurée, pas un bail reçu par un poste client.
+
+![Rôle DHCP sur JCORP-DC01 et pool d'adresses 10.2.101.11 à 10.2.101.150](images/dhcp-etendue-10.2.101.png)
+
+## 6. Stratégies de groupe
+
+J'ai préparé et utilisé le [script de création des GPO](../GPO/JCORP-GPO.ps1) pour appliquer les règles aux OU `Postes`, `Serveurs` et `Utilisateurs`. Elles couvrent le verrouillage des postes, le pare-feu, les mises à jour, les journaux des serveurs, CMD, Regedit et la lecture seule des clés USB pour certains services. Les exceptions CMD et Regedit reposent sur les groupes de la DSI et du développement. Le [détail des GPO](../GPO/README.md) précise les groupes concernés et les prérequis.
+
+Pour afficher la liste réelle des GPO créées sur le domaine depuis Windows PowerShell, j'utilise :
+
+```powershell
+Import-Module GroupPolicy
+Get-GPO -All -Domain ad.jcorp | Where-Object DisplayName -like 'JCORP-*' | Sort-Object DisplayName | Select-Object DisplayName, Id
+```
+
+## 7. Vérifications à conserver
 
 J'utilise les commandes suivantes sur le contrôleur de domaine pour contrôler le nom du serveur, le réseau, le domaine et l'annuaire :
 
@@ -70,5 +87,5 @@ Get-ADDomain | Select-Object DNSRoot, NetBIOSName
 dcdiag /test:Advertising /test:Services /test:DNS
 ```
 
-Après l'exécution du script actualisé, je contrôlerai les **42 comptes**, leurs OU et leurs appartenances, puis j'ajouterai une capture du résultat. Je poursuivrai avec la jonction d'un poste client et les tests de connexion des utilisateurs.
+La prochaine étape est la jonction de la VM Windows 11 au domaine, puis le test de connexion d'un utilisateur et de l'application des GPO avec `gpresult /r`.
 
