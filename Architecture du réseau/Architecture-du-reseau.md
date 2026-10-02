@@ -13,8 +13,9 @@ Dans le [scénario RedOne](https://docs.google.com/document/d/13dC98HuGbrRNXuTOo
 | VLAN prévu pour le premier serveur | 700 |
 | Pont Proxmox observé | `vmbr2`, compatible VLAN |
 | Contrôleur de domaine | VM 700, `JCORP-DC01`, `10.2.101.10/24` |
+| Passerelle indiquée par l'administrateur réseau | `10.2.101.1` |
 
-J'ai relié la carte réseau de la VM au pont `vmbr2`, lui-même relié à l'interface physique `eno3`. Sur la capture matérielle, la carte affiche `bridge=vmbr2` sans tag VLAN. La passerelle et le routage entre les réseaux seront configurés avec la suite de l'infrastructure.
+J'ai relié la carte réseau de la VM au pont `vmbr2`, lui-même relié à l'interface physique `eno3`. Sur la capture matérielle, la carte affiche `bridge=vmbr2` sans tag VLAN. Mon administrateur réseau m'a indiqué `10.2.101.1` comme passerelle pour le réseau `10.2.101.0/24`. Le routage entre les autres réseaux sera ajouté avec la suite de l'infrastructure.
 
 ## Flux prévus
 
