@@ -4,7 +4,7 @@ Je présente ici l'installation de mon premier contrôleur de domaine JCorp, ave
 
 ## 1. Créer la machine virtuelle
 
-J'ai créé mon serveur AD sur Proxmox avec le **VMID 700**. Sa carte réseau utilise le pont `vmbr2`. La première capture montre la VM et le Gestionnaire de serveur Windows ; la seconde montre les paramètres matériels. La carte réseau n'affiche pas de tag VLAN sur cette capture.
+J'ai créé mon serveur AD sur Proxmox avec le **VMID 700**. Sa carte réseau utilise le pont `vmbr2` avec le tag **VLAN 700**. La première capture montre la VM et le Gestionnaire de serveur Windows ; la seconde montre les paramètres matériels avant l'ajout du tag VLAN.
 
 ![VM 700 JCorp dans Proxmox, avec le Gestionnaire de serveur Windows](images/proxmox-vm700.png)
 
@@ -14,7 +14,7 @@ Je n'ai pas conservé de capture des écrans de création de la VM ni de l'insta
 
 ## 2. Fixer le nom et l'adresse du serveur
 
-J'ai nommé le serveur Windows **`JCORP-DC01`** et configuré l'adresse **`10.2.101.10/24`**. Son DNS préféré pointe vers son propre service DNS. Mon administrateur réseau m'a indiqué **`10.2.101.1`** comme passerelle. Lors du premier diagnostic, le serveur utilisait encore une adresse automatique `169.254.x.x`, ce qui empêchait la résolution du domaine. J'ai configuré l'adresse fixe, actualisé les enregistrements DNS et relancé les diagnostics avec succès.
+J'ai nommé le serveur Windows **`JCORP-DC01`** et configuré l'adresse **`10.2.101.10/24`**. Son DNS préféré pointe vers son propre service DNS. J'ai renseigné **`10.2.101.1`** comme passerelle, selon les indications de mon administrateur réseau. Lors du premier diagnostic, le serveur utilisait encore une adresse automatique `169.254.x.x`, ce qui empêchait la résolution du domaine. J'ai configuré l'adresse fixe, actualisé les enregistrements DNS et relancé les diagnostics avec succès. Après l'ajout du tag VLAN 700, le ping de la passerelle répond avec **0 % de perte**.
 
 | Paramètre | Valeur constatée |
 | --- | --- |
@@ -22,7 +22,7 @@ J'ai nommé le serveur Windows **`JCORP-DC01`** et configuré l'adresse **`10.2.
 | Adresse IPv4 | `10.2.101.10` |
 | Masque | `255.255.255.0` |
 | DNS du serveur | `10.2.101.10` ou boucle locale selon la configuration du contrôleur |
-| Passerelle indiquée par l'administrateur réseau | `10.2.101.1` |
+| Passerelle | `10.2.101.1` |
 
 ## 3. Installer AD DS et DNS, puis créer le domaine
 
