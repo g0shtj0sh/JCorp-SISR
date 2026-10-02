@@ -10,12 +10,12 @@ Dans le [scénario RedOne](https://docs.google.com/document/d/13dC98HuGbrRNXuTOo
 | Mes VLAN | 700 à 799 |
 | Mes VMID | 700 à 799 |
 | Réseau du premier serveur | `10.2.101.0/24` |
-| VLAN prévu pour le premier serveur | 700 |
+| VLAN du premier serveur | 700 |
 | Pont Proxmox observé | `vmbr2`, compatible VLAN |
 | Contrôleur de domaine | VM 700, `JCORP-DC01`, `10.2.101.10/24` |
-| Passerelle indiquée par l'administrateur réseau | `10.2.101.1` |
+| Passerelle du premier serveur | `10.2.101.1` |
 
-J'ai relié la carte réseau de la VM au pont `vmbr2`, lui-même relié à l'interface physique `eno3`. Sur la capture matérielle, la carte affiche `bridge=vmbr2` sans tag VLAN. Mon administrateur réseau m'a indiqué `10.2.101.1` comme passerelle pour le réseau `10.2.101.0/24`. Le routage entre les autres réseaux sera ajouté avec la suite de l'infrastructure.
+J'ai relié la carte réseau de la VM au pont `vmbr2`, lui-même relié à l'interface physique `eno3`. Au départ, la carte n'avait pas de tag VLAN et la VM ne joignait pas sa passerelle. J'ai ajouté le tag **700** à la carte réseau ; le ping vers **`10.2.101.1`** répond maintenant sans perte. Le routage entre les autres réseaux sera ajouté avec la suite de l'infrastructure.
 
 ## Flux prévus
 
