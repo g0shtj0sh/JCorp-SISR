@@ -1,10 +1,10 @@
-# Architecture du réseau - AP 1
+# Architecture du réseau - JCorp
 
 ## Référence métier et adaptation
 
 Dans le [scénario RedOne](https://docs.google.com/document/d/13dC98HuGbrRNXuTOotnaGaNbwyVlJhWZ/edit), les services sont séparés par VLAN. Un commutateur de niveau 3 contrôle les échanges entre réseaux, tandis qu'un pare-feu/proxy encadre la sortie vers Internet. Je reprends ce principe de segmentation pour JCorp, avec les plages qui me sont attribuées sur Proxmox.
 
-| Élément | JCorp AP 1 |
+| Élément | JCorp |
 | --- | --- |
 | Mes réseaux IP | `10.2.101.0/24` à `10.2.120.0/24` |
 | Mes VLAN | 700 à 799 |

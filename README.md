@@ -1,11 +1,13 @@
 # JCorp - Infrastructure SISR
 
-Je documente ici mes deux ateliers professionnels (AP) pour l'infrastructure JCorp. Pour l'AP 1, je m'appuie sur le [dossier RedOne](https://docs.google.com/document/d/13dC98HuGbrRNXuTOotnaGaNbwyVlJhWZ/edit) pour définir les besoins de l'entreprise.
+Je documente ici l'infrastructure JCorp, construite progressivement au fil des deux ateliers professionnels. L'AP 2 poursuit le même projet et ajoute des services au socle mis en place pendant l'AP 1. Je m'appuie sur le [dossier RedOne](https://docs.google.com/document/d/13dC98HuGbrRNXuTOotnaGaNbwyVlJhWZ/edit) pour définir les besoins de l'entreprise.
+
+L'[architecture du réseau](Architecture%20du%20r%C3%A9seau/Architecture-du-reseau.md) se trouve à la racine, car elle concerne l'ensemble de JCorp.
 
 | Atelier | Contenu | État |
 | --- | --- | --- |
-| [AP 1](AP%201/README.md) | Socle réseau, virtualisation et services de base ; documentation de l'Active Directory | En cours |
-| AP 2 | Réservé pour la suite du projet | À venir |
+| [AP 1](AP%201/README.md) | Mise en place initiale, avec le premier contrôleur de domaine et l'Active Directory | En cours |
+| AP 2 | Suite de l'infrastructure et ajout des autres services | À venir |
 
 ## Ma partie sur Proxmox
 
