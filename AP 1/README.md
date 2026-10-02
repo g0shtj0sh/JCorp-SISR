@@ -12,6 +12,7 @@ Pour JCorp, je commence l'AP 1 par la configuration de mon environnement Proxmox
 | --- | --- | --- |
 | [Architecture du réseau](../Architecture%20du%20r%C3%A9seau/Architecture-du-reseau.md) | Architecture commune aux AP 1 et AP 2 | En cours |
 | [Active Directory](Docs/Active%20Directory/Active-Directory.md) | VM, domaine, DNS, OU, groupes et comptes | En cours |
+| [GPO](Docs/GPO/README.md) | Script de création des stratégies de groupe | Préparé |
 
 ## Avancement
 
