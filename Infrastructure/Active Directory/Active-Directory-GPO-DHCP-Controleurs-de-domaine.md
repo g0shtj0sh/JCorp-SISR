@@ -59,7 +59,7 @@ J'ai aussi préparé une [version actualisée du script](JCORP-Reset-AD.ps1) pou
 | Groupes de sécurité | 17 |
 | Comptes nominatifs fictifs | 42 |
 
-J'utilise ces groupes pour cibler les GPO. Ils serviront aussi aux droits sur les partages et les applications. Aucun mot de passe n'est publié dans ce dépôt.
+J'utilise ces groupes pour cibler les GPO. Ils serviront aussi aux droits sur les partages et les applications. Le mot de passe commun du projet est indiqué dans le [README principal](../../README.md).
 
 ## 5. DHCP sur JCORP-DC01
 
