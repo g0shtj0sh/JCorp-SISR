@@ -4,6 +4,7 @@ Je regroupe ici les configurations techniques de mon projet JCorp, communes aux 
 
 | Documentation | Contenu | État |
 | --- | --- | --- |
+| [Postes utilisateurs](Postes%20utilisateurs/Postes-utilisateurs.md) | VM Debian et Windows 11, caractéristiques et suivi de configuration | En cours |
 | [Architecture du réseau](Architecture-du-reseau.md) | Plages IP, VLAN, pont Proxmox et machines virtuelles | En cours |
 | [Active Directory, GPO, DHCP et contrôleurs de domaine](Active%20Directory/Active-Directory-GPO-DHCP-Controleurs-de-domaine.md) | Installation, domaine, DNS, OU, comptes, DHCP, GPO et captures | En cours |
 
