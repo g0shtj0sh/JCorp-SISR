@@ -1,4 +1,4 @@
-# JCorp - Infrastructure SISR
+# JCorp
 
 Je documente ici l'infrastructure JCorp, construite progressivement au fil des deux ateliers professionnels. L'AP 2 poursuit le même projet et ajoute des services au socle mis en place pendant l'AP 1. Je m'appuie sur le [dossier RedOne](https://docs.google.com/document/d/13dC98HuGbrRNXuTOotnaGaNbwyVlJhWZ/edit) pour définir les besoins de l'entreprise.
 
