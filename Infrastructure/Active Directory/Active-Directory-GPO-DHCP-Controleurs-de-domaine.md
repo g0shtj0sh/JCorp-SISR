@@ -1,6 +1,6 @@
-# Active Directory, GPO, DHCP et contrôleurs de domaine - AP 1 JCorp
+# Active Directory, GPO, DHCP et contrôleurs de domaine - JCorp
 
-Je présente ici l'installation de mon premier contrôleur de domaine JCorp, la configuration DHCP et les GPO, avec les captures prises dans mon infrastructure.
+Je présente ici l'installation de mon premier contrôleur de domaine JCorp, la configuration DHCP et les GPO, avec les captures prises dans mon infrastructure. Cette documentation appartient à l'[infrastructure commune du projet](../README.md) et évolue au fil des ateliers.
 
 ## 1. Créer la machine virtuelle
 

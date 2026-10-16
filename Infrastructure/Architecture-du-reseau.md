@@ -1,5 +1,7 @@
 # Architecture du réseau - JCorp
 
+Cette architecture fait partie de mon [infrastructure commune](README.md). La configuration AD, DNS, DHCP et GPO est présentée dans la [documentation des services de domaine](Active%20Directory/Active-Directory-GPO-DHCP-Controleurs-de-domaine.md).
+
 ## Référence métier et adaptation
 
 Dans le [scénario RedOne](https://docs.google.com/document/d/13dC98HuGbrRNXuTOotnaGaNbwyVlJhWZ/edit), les services sont séparés par VLAN. Un commutateur de niveau 3 contrôle les échanges entre réseaux, tandis qu'un pare-feu/proxy encadre la sortie vers Internet. Je reprends ce principe de segmentation pour JCorp, avec les plages qui me sont attribuées sur Proxmox.

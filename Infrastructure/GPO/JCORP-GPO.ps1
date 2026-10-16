@@ -1,7 +1,7 @@
 #requires -Modules ActiveDirectory, GroupPolicy
 <#
 .SYNOPSIS
-  Cree les GPO JCorp de l'AP 1 sur le domaine ad.jcorp.
+  Cree les GPO de l'infrastructure JCorp sur le domaine ad.jcorp.
 .EXAMPLE
   .\JCORP-GPO.ps1 -WhatIf
   .\JCORP-GPO.ps1

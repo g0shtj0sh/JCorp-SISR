@@ -1,17 +1,18 @@
-# AP 1 - Active Directory JCorp
+# AP 1 - Suivi du premier atelier JCorp
 
 ## Contexte et objectif
 
 Je pars du dossier [RedOne](https://docs.google.com/document/d/13dC98HuGbrRNXuTOotnaGaNbwyVlJhWZ/edit), qui décrit un siège avec plusieurs services : direction, DSI, administration, communication, développement, commercial et recherche. Le projet prévoit notamment un réseau segmenté, un annuaire centralisé, DNS, DHCP et des applications métier. Le scénario mentionne plus de 350 terminaux au siège et 540 visiteurs médicaux ; ces chiffres donnent l'échelle du projet.
 
-Pour JCorp, je commence l'AP 1 par la configuration de mon environnement Proxmox, du premier contrôleur de domaine, de DNS et des comptes Active Directory. Les autres services viendront compléter cette même infrastructure dans la suite du projet.
+Pour JCorp, je commence l'AP 1 par la configuration de mon environnement Proxmox, du premier contrôleur de domaine, de DNS et des comptes Active Directory. Je centralise la configuration technique dans le dossier Infrastructure, commun à tout le projet. Les autres services viendront compléter cette même infrastructure dans la suite du projet.
 
 ## Documentation
 
 | Sujet | Contenu | État |
 | --- | --- | --- |
-| [Architecture du réseau](../Architecture%20du%20r%C3%A9seau/Architecture-du-reseau.md) | Architecture commune aux AP 1 et AP 2 | En cours |
-| [Active Directory, GPO, DHCP et contrôleurs de domaine](Docs/Active%20Directory/Active-Directory-GPO-DHCP-Controleurs-de-domaine.md) | VM, domaine, DNS, DHCP, OU, comptes, GPO et second contrôleur en préparation | En cours |
+| [Infrastructure](../Infrastructure/README.md) | Documentation technique commune au projet, scripts et captures | En cours |
+| [Architecture du réseau](../Infrastructure/Architecture-du-reseau.md) | Réseaux, VLAN et machines virtuelles | En cours |
+| [Active Directory, GPO, DHCP et contrôleurs de domaine](../Infrastructure/Active%20Directory/Active-Directory-GPO-DHCP-Controleurs-de-domaine.md) | Domaine, DNS, DHCP, OU, comptes et stratégies de groupe | En cours |
 
 ## Avancement
 
