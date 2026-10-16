@@ -57,9 +57,57 @@ Le fichier `/etc/resolv.conf` contient `search ad.jcorp` et `nameserver 10.2.101
 
 ![Résolution DNS du contrôleur JCorp et test ping réussi depuis Debian](images/debian-tests-dns-ping.png)
 
-### Suite de la configuration
+### Installer les outils de jonction au domaine
 
-La prochaine étape est la jonction de Debian au domaine `ad.jcorp`, puis un test de connexion avec un compte utilisateur du domaine.
+J'ai lancé l'installation des outils nécessaires à l'intégration de Debian dans mon Active Directory :
+
+```bash
+sudo apt update
+sudo apt install realmd sssd-ad sssd-tools adcli libnss-sss libpam-sss samba-common-bin
+```
+
+`realmd` permet de découvrir et de joindre le domaine, `adcli` participe à la création du compte ordinateur dans AD, et SSSD fournit l'accès aux identités et à l'authentification du domaine. Les modules NSS et PAM permettent à Debian d'utiliser ces comptes pour les connexions.
+
+![Installation en cours des paquets pour joindre Debian au domaine AD](images/debian-installation-outils-ad.png)
+
+Sur cette capture, j'ai confirmé l'installation et APT est encore en cours de téléchargement. Les lignes `Ign` ne prouvent pas que l'installation a réussi : je dois attendre le résultat final et le retour de l'invite de commande avant de continuer.
+
+### Découvrir le domaine (étape suivante)
+
+Une fois les paquets installés, je lancerai :
+
+```bash
+realm discover ad.jcorp
+```
+
+Le résultat attendu doit identifier le domaine `ad.jcorp` et indiquer `server-software: active-directory`.
+
+### Joindre Debian au domaine (à effectuer)
+
+Je joindrai le poste directement à l'OU `Postes` avec un compte administrateur du domaine :
+
+```bash
+sudo realm join --user=Administrateur --computer-ou="OU=Postes,DC=ad,DC=jcorp" ad.jcorp
+```
+
+Je saisirai le mot de passe du compte AD uniquement à l'invite de commande, sans l'inscrire dans la commande.
+
+### Préparer et tester une connexion AD (à effectuer)
+
+J'activerai la création automatique du dossier personnel lors de la première connexion :
+
+```bash
+sudo pam-auth-update --enable mkhomedir
+```
+
+Je contrôlerai ensuite la jonction et la reconnaissance d'un compte existant dans AD :
+
+```bash
+realm list
+id 'jfernandes@ad.jcorp'
+```
+
+Enfin, je fermerai ma session graphique et sélectionnerai « Autre utilisateur » pour tester une connexion avec `jfernandes@ad.jcorp` et son mot de passe AD. La jonction et la connexion seront validées à partir de leurs résultats, puis documentées avec leurs captures.
 
 ## 2. Poste Windows 11
 
