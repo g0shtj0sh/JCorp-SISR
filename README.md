@@ -17,6 +17,7 @@ Je regroupe dans [Infrastructure](Infrastructure/README.md) la documentation tec
 | Domaine Active Directory | `ad.jcorp` |
 | Serveur AD / DNS / DHCP | `JCORP-DC01` - `10.2.101.10` |
 | Passerelle réseau | `10.2.101.1` |
+| Mot de passe commun du projet | `JCorp-123` |
 
 ## Ma partie sur Proxmox
 
