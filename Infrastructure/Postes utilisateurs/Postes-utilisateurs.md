@@ -121,6 +121,16 @@ Sur l'écran de connexion professionnelle, j'ai ouvert les **options de connexio
 
 Ce choix prépare l'installation avec un compte local : le poste n'est pas encore membre de `ad.jcorp`. La jonction au domaine se fera ensuite depuis les paramètres Windows, après le contrôle du réseau et du DNS.
 
+### Ouvrir l'assistant de jonction au domaine local
+
+Depuis le bureau Windows, j'ai ouvert **Paramètres > Comptes > Accès professionnel ou scolaire**, puis cliqué sur **Connecter**.
+
+Dans la fenêtre « Configurer un compte professionnel ou scolaire », j'ai choisi le lien **Joindre cet appareil à un domaine Active Directory local**, situé dans les actions alternatives en bas de la fenêtre.
+
+![Accès à la jonction à un domaine Active Directory local dans Windows 11](images/windows-jonction-domaine-local.png)
+
+Cette étape ouvre l'assistant où je renseignerai `ad.jcorp`. La capture montre l'accès à cet assistant ; la jonction au domaine et le redémarrage seront documentés après leur réalisation.
+
 La suite comprendra la jonction au domaine `ad.jcorp`, le placement du poste dans l'OU `Postes`, puis les tests de connexion et d'application des GPO.
 
 [Retour à l'infrastructure](../README.md)
