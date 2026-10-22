@@ -129,7 +129,15 @@ Dans la fenêtre « Configurer un compte professionnel ou scolaire », j'ai choi
 
 ![Accès à la jonction à un domaine Active Directory local dans Windows 11](images/windows-jonction-domaine-local.png)
 
-Cette étape ouvre l'assistant où je renseignerai `ad.jcorp`. La capture montre l'accès à cet assistant ; la jonction au domaine et le redémarrage seront documentés après leur réalisation.
+### Renseigner le domaine et le compte autorisé
+
+J'ai saisi **`ad.jcorp`** dans le champ « Nom du domaine », puis cliqué sur **Suivant**. Windows affiche alors la fenêtre « Sécurité Windows » pour demander un compte autorisé à joindre le poste au domaine.
+
+![Demande d'un compte AD autorisé à joindre le poste Windows au domaine](images/windows-identifiants-jonction-ad.png)
+
+Dans « Nom d'utilisateur », je renseigne **`JCORP\Administrateur`**, puis je saisis le mot de passe de ce compte AD et valide avec **OK**. Il s'agit du compte administrateur du domaine, distinct du compte local créé sur le poste Windows.
+
+La capture montre la demande d'identifiants, avant leur saisie. La confirmation de la jonction, le redémarrage et la première connexion avec un compte AD seront ajoutés à la suite.
 
 La suite comprendra la jonction au domaine `ad.jcorp`, le placement du poste dans l'OU `Postes`, puis les tests de connexion et d'application des GPO.
 
