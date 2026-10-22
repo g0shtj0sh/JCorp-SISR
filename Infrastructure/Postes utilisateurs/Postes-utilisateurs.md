@@ -113,6 +113,14 @@ Enfin, je fermerai ma session graphique et sélectionnerai « Autre utilisateur 
 
 J'ai créé la VM **701**, nommée **`User1-JCorp-Windows`** dans Proxmox. L'installation de Windows 11 est terminée. J'ajouterai ses caractéristiques et les captures de configuration au fil de sa mise en place.
 
+### Premier démarrage de Windows 11
+
+Pendant la configuration initiale, j'ai choisi **Configurer pour le travail ou l'école** pour préparer mon poste à un usage dans l'entreprise.
+
+Sur l'écran de connexion professionnelle, j'ai ouvert les **options de connexion**, puis choisi **Joindre un domaine à la place**. J'ai ensuite créé le compte local demandé et terminé les écrans de configuration pour accéder au bureau Windows.
+
+Ce choix prépare l'installation avec un compte local : le poste n'est pas encore membre de `ad.jcorp`. La jonction au domaine se fera ensuite depuis les paramètres Windows, après le contrôle du réseau et du DNS.
+
 La suite comprendra la jonction au domaine `ad.jcorp`, le placement du poste dans l'OU `Postes`, puis les tests de connexion et d'application des GPO.
 
 [Retour à l'infrastructure](../README.md)
