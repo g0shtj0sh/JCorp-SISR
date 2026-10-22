@@ -137,7 +137,17 @@ J'ai saisi **`ad.jcorp`** dans le champ « Nom du domaine », puis cliqué sur *
 
 Dans « Nom d'utilisateur », je renseigne **`JCORP\Administrateur`**, puis je saisis le mot de passe de ce compte AD et valide avec **OK**. Il s'agit du compte administrateur du domaine, distinct du compte local créé sur le poste Windows.
 
-La capture montre la demande d'identifiants, avant leur saisie. La confirmation de la jonction, le redémarrage et la première connexion avec un compte AD seront ajoutés à la suite.
+### Choisir le compte utilisateur du poste
+
+Après la saisie des identifiants du domaine, l'assistant affiche **Ajouter un compte**. Cet écran permet de choisir un compte AD existant et de lui attribuer un type de compte sur ce poste.
+
+![Choix du compte JCORP Administrateur et du type Administrateur sur le poste Windows](images/windows-compte-utilisateur-poste.png)
+
+Dans cette capture, le compte affiché est **`JCORP\Administrateur`** et le type sélectionné est **Administrateur**. Ce choix concerne les droits locaux sur le poste Windows ; il ne crée pas un nouvel utilisateur dans Active Directory.
+
+Je peux cliquer sur **Suivant** pour retenir ce choix ou sur **Ignorer** pour passer cette étape. Pour un poste utilisé au quotidien par un salarié, je choisirai son compte nominatif avec le type **Utilisateur standard**.
+
+Le redémarrage et la première connexion avec un compte AD seront documentés à la suite.
 
 La suite comprendra la jonction au domaine `ad.jcorp`, le placement du poste dans l'OU `Postes`, puis les tests de connexion et d'application des GPO.
 
