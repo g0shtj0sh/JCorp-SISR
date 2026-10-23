@@ -133,8 +133,24 @@ La capture montre également que le lecteur CD/DVD ne contient plus de média et
 
 Le futur pool de données sera créé avec ce seul disque, en **Stripe**. Cette configuration ne fournit pas de redondance ZFS : la perte du disque de données peut entraîner la perte du pool. Je prévois donc les sauvegardes séparément.
 
+## 10. Préparer le pool JCORP-DATA
+
+Dans l'interface web TrueNAS, j'ai ouvert **Storage > Create Pool** et renseigné le nom **`JCORP-DATA`**. Dans la partie **Data**, j'ai retenu **Stripe** avec le seul disque de données de **64 Gio**, puis consulté le récapitulatif.
+
+![Récapitulatif du pool JCORP-DATA avec un disque de 64 Gio en Stripe](images/truenas-pool-jcorp-data-recapitulatif.png)
+
+Le récapitulatif indique **1 x STRIPE | 1 x 64 GiB (HDD)** et une capacité brute estimée de **64 Gio**. Il s'agit de la configuration prévue avant création, pas encore d'un pool utilisable.
+
+### Blocage : numéros de série des disques virtuels
+
+Lors de la tentative de création, TrueNAS affiche l'erreur **Disks have duplicate serial numbers: None (sda, sdb)**.
+
+![Erreur de création du pool : numéros de série absents ou identiques pour sda et sdb](images/truenas-erreur-numeros-serie.png)
+
+Les disques virtuels système et données sont signalés sans numéro de série distinct. Je dois leur attribuer des numéros de série uniques dans Proxmox, VM arrêtée, puis redémarrer TrueNAS et vérifier leur identification avant de relancer la création du pool. Cette correction est distincte du choix Stripe : le pool reste prévu sur le seul disque de données de 64 Gio.
+
 ## Suite de la configuration
 
-L'installation est terminée, les paramètres réseau sont renseignés et le disque de données de 64 Gio est ajouté. Je poursuivrai dans l'interface web avec la création du pool `JCORP-DATA` en Stripe sur ce disque, puis la jonction à `ad.jcorp` et la création des datasets et des partages.
+L'installation et le réseau sont configurés, et le disque de données est ajouté. La création du pool `JCORP-DATA` est bloquée par les numéros de série des disques virtuels. Après correction et création du pool, je poursuivrai avec la jonction à `ad.jcorp`, les datasets et les partages.
 
 [Retour à l'infrastructure](../README.md)
