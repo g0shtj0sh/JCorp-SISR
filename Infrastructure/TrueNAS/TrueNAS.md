@@ -39,10 +39,24 @@ L'écran **Choose Destination Media** présente le disque **`sda`**, identifié 
 
 Je sélectionne le disque avec la **barre d'espace**, puis je valide avec **OK**. La case est encore vide sur cette capture, prise avant la sélection.
 
+La vue rapprochée ci-dessous montre ce même disque de 32 Gio dans l'écran de sélection :
+
+![Vue rapprochée du disque système de 32 Gio à sélectionner](images/truenas-selection-disque-32gio.png)
+
 Le disque choisi sera effacé lors de l'installation et réservé au système TrueNAS. Il ne servira pas de disque de données pour les partages.
+
+## 4. Choisir le compte d'administration
+
+L'écran **Web UI Authentication Method** propose de définir le compte d'administration pendant l'installation ou de reporter cette configuration à l'interface web.
+
+![Choix de la méthode d'authentification administrative TrueNAS](images/truenas-authentification-admin.png)
+
+Je conserve l'option **1 - Administrative user (`truenas_admin`)**, puis je valide avec **OK**. L'étape suivante demande de définir et de confirmer le mot de passe de ce compte. J'utiliserai ensuite `truenas_admin` pour me connecter à l'interface d'administration TrueNAS.
+
+Ce compte est propre au NAS : il est distinct du compte `JCORP\Administrateur` de mon Active Directory.
 
 ## Suite de la configuration
 
-Je poursuivrai avec le compte d'administration et la fin de l'installation, puis le retrait de l'ISO et le démarrage sur le disque système. Je configurerai ensuite le réseau, les deux disques de données et leur pool, avant l'intégration à `ad.jcorp` et la création des partages.
+Je poursuivrai avec la définition du mot de passe d'administration et la fin de l'installation, puis le retrait de l'ISO et le démarrage sur le disque système. Je configurerai ensuite le réseau, les deux disques de données et leur pool, avant l'intégration à `ad.jcorp` et la création des partages.
 
 [Retour à l'infrastructure](../README.md)
