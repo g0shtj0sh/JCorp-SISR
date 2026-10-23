@@ -85,8 +85,24 @@ Je valide avec **OK** pour revenir au menu de l'installateur. Pour démarrer sur
 
 TrueNAS doit ensuite démarrer depuis le disque système de 32 Gio, sans relancer l'installateur.
 
+## 7. Configurer l'adresse IP fixe
+
+Après le démarrage de TrueNAS, j'ai ouvert **Configure network interfaces** depuis le menu console. Sur l'interface **`ens18`**, j'ai désactivé l'adressage IPv4 par DHCP et renseigné l'alias **`10.2.101.152/24`**, puis enregistré et appliqué la modification.
+
+![Adresse fixe 10.2.101.152 appliquée sur ens18, en attente de confirmation persistante](images/truenas-ip-fixe.png)
+
+La capture montre `10.2.101.152/24` dans les colonnes **aliases** et **state.aliases**. Le message précise que les changements sont appliqués temporairement et seront annulés à la fin du délai sans confirmation. Pour les conserver, j'appuie sur **`p`** (*persist*), puis sur **`q`** pour revenir au menu principal.
+
+| Paramètre de l'interface | Valeur |
+| --- | --- |
+| Interface | `ens18` |
+| Adresse IPv4 | `10.2.101.152` |
+| Préfixe / masque | `/24` / `255.255.255.0` |
+
+Cette adresse est hors du pool DHCP actuel, de `10.2.101.11` à `10.2.101.150`.
+
 ## Suite de la configuration
 
-L'installation est terminée. Après le premier démarrage sur le disque système, je configurerai le réseau, les deux disques de données et leur pool, avant l'intégration à `ad.jcorp` et la création des partages.
+L'installation est terminée et l'adresse fixe est renseignée. Je poursuivrai avec les paramètres réseau globaux (passerelle, DNS, nom et domaine), les deux disques de données et leur pool, avant l'intégration à `ad.jcorp` et la création des partages.
 
 [Retour à l'infrastructure](../README.md)

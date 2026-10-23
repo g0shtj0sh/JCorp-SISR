@@ -18,7 +18,7 @@ Dans le [scénario RedOne](https://docs.google.com/document/d/13dC98HuGbrRNXuTOo
 | Poste Windows 11 | VM 701, `User1-JCorp-Windows`, en cours d'installation |
 | Poste Debian | VM 702, `User2-JCorp-Debian`, Debian installé, pont `vmbr2` et VLAN 700 |
 | Second contrôleur de domaine | VM 703, `DC2-JCorp`, en cours d'installation |
-| NAS TrueNAS | VM 704, `NAS-JCorp`, TrueNAS CE 25.10.1 en cours d'installation, pont `vmbr2` et VLAN 700 |
+| NAS TrueNAS | VM 704, `NAS-JCorp`, TrueNAS CE 25.10.1 installé, IP fixe `10.2.101.152/24` renseignée, pont `vmbr2` et VLAN 700 |
 | DHCP | Rôle installé sur `JCORP-DC01`, pool `10.2.101.11` à `10.2.101.150` |
 | Passerelle du premier serveur | `10.2.101.1` |
 
