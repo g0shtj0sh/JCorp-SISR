@@ -21,7 +21,7 @@ J'ai créé la VM **704**, nommée **`NAS-JCorp`**, sur le nœud Proxmox **`pve`
 | Carte réseau | VirtIO, `net0`, pont `vmbr2`, tag VLAN `700` |
 | Pare-feu Proxmox sur la carte | Activé |
 
-La capture présente uniquement le disque système de 32 Gio. Les deux disques de données de 64 Gio seront ajoutés séparément pour préparer le pool de stockage. J'ai configuré le tag VLAN **700** sur la carte réseau afin de placer le NAS dans le même réseau que les autres VM JCorp.
+La capture présente uniquement le disque système de 32 Gio. J'ai ensuite ajouté un seul disque de données de 64 Gio, présenté dans l'étape dédiée au stockage. J'ai configuré le tag VLAN **700** sur la carte réseau afin de placer le NAS dans le même réseau que les autres VM JCorp.
 
 ## 2. Démarrer sur l'ISO
 
@@ -118,8 +118,23 @@ Depuis le menu console, j'ai ouvert **Configure network settings** pour définir
 
 Je valide ces paramètres avec **Save**. Le DNS pointe vers mon contrôleur de domaine pour permettre la résolution des noms JCorp. Renseigner `ad.jcorp` ici définit le domaine réseau du NAS ; cela ne réalise pas encore sa jonction à Active Directory.
 
+## 9. Ajouter le disque de données
+
+Pour mon projet, j'ai retenu **un seul disque de données de 64 Gio**, séparé du disque système de 32 Gio. Dans Proxmox, j'ai ouvert **VM 704 > Hardware > Add > Hard Disk**, choisi le bus **SCSI**, le stockage **`Raid5-VMs`** et une taille de **64 Gio**.
+
+![Matériel TrueNAS après l'ajout du disque de données scsi1 de 64 Gio](images/truenas-disque-donnees-64gio.png)
+
+| Disque | Taille | Utilisation |
+| --- | --- | --- |
+| `scsi0` | 32 Gio | Système TrueNAS et pool de démarrage |
+| `scsi1` | 64 Gio | Données et futurs partages |
+
+La capture montre également que le lecteur CD/DVD ne contient plus de média et que la carte réseau utilise toujours le pont `vmbr2` avec le VLAN **700**.
+
+Le futur pool de données sera créé avec ce seul disque, en **Stripe**. Cette configuration ne fournit pas de redondance ZFS : la perte du disque de données peut entraîner la perte du pool. Je prévois donc les sauvegardes séparément.
+
 ## Suite de la configuration
 
-L'installation est terminée, l'adresse fixe et les paramètres réseau sont renseignés. Je poursuivrai avec le contrôle de l'accès à l'interface web, les deux disques de données et leur pool, avant la jonction à `ad.jcorp` et la création des partages.
+L'installation est terminée, les paramètres réseau sont renseignés et le disque de données de 64 Gio est ajouté. Je poursuivrai dans l'interface web avec la création du pool `JCORP-DATA` en Stripe sur ce disque, puis la jonction à `ad.jcorp` et la création des datasets et des partages.
 
 [Retour à l'infrastructure](../README.md)
