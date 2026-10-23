@@ -70,8 +70,23 @@ La console affiche les opérations suivantes :
 
 Je laisse l'installation se terminer sans éteindre la VM. Sur cette capture, l'extraction est encore en cours ; le pool de démarrage est distinct du futur pool de données destiné aux partages.
 
+## 6. Terminer l'installation et retirer l'ISO
+
+L'installateur affiche **Installation Succeeded** et confirme que TrueNAS a été installé sur **`sda`**. Il demande de redémarrer et de retirer le support d'installation.
+
+![Confirmation de la réussite de l'installation TrueNAS sur sda](images/truenas-installation-reussie.png)
+
+Je valide avec **OK** pour revenir au menu de l'installateur. Pour démarrer sur le système installé, la procédure est la suivante :
+
+1. Choisir **Shutdown System** dans le menu de l'installateur et attendre l'arrêt de la VM.
+2. Dans Proxmox, ouvrir **VM 704 > Hardware > CD/DVD Drive > Edit**.
+3. Sélectionner **Do not use any media**, puis valider.
+4. Redémarrer la VM avec **Start**. Si nécessaire, vérifier dans **Options > Boot Order** que le disque `scsi0` est activé pour le démarrage.
+
+TrueNAS doit ensuite démarrer depuis le disque système de 32 Gio, sans relancer l'installateur.
+
 ## Suite de la configuration
 
-Après le message de réussite de l'installation, je retirerai l'ISO du lecteur virtuel pour démarrer sur le disque système. Je configurerai ensuite le réseau, les deux disques de données et leur pool, avant l'intégration à `ad.jcorp` et la création des partages.
+L'installation est terminée. Après le premier démarrage sur le disque système, je configurerai le réseau, les deux disques de données et leur pool, avant l'intégration à `ad.jcorp` et la création des partages.
 
 [Retour à l'infrastructure](../README.md)
