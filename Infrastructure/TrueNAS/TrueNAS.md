@@ -101,8 +101,25 @@ La capture montre `10.2.101.152/24` dans les colonnes **aliases** et **state.ali
 
 Cette adresse est hors du pool DHCP actuel, de `10.2.101.11` à `10.2.101.150`.
 
+## 8. Renseigner les paramètres réseau globaux
+
+Depuis le menu console, j'ai ouvert **Configure network settings** pour définir le nom du NAS, son domaine de recherche, la passerelle et le serveur DNS.
+
+![Paramètres réseau globaux de TrueNAS : nom du NAS, domaine, passerelle et DNS AD](images/truenas-configuration-reseau.png)
+
+| Champ | Valeur renseignée |
+| --- | --- |
+| `hostname` | `JCORP-NAS01` |
+| `domain` | `ad.jcorp` |
+| `ipv4gateway` | `10.2.101.1` |
+| `ipv6gateway` | Vide |
+| `nameserver1` | `10.2.101.10` |
+| `nameserver2` et `nameserver3` | Vides |
+
+Je valide ces paramètres avec **Save**. Le DNS pointe vers mon contrôleur de domaine pour permettre la résolution des noms JCorp. Renseigner `ad.jcorp` ici définit le domaine réseau du NAS ; cela ne réalise pas encore sa jonction à Active Directory.
+
 ## Suite de la configuration
 
-L'installation est terminée et l'adresse fixe est renseignée. Je poursuivrai avec les paramètres réseau globaux (passerelle, DNS, nom et domaine), les deux disques de données et leur pool, avant l'intégration à `ad.jcorp` et la création des partages.
+L'installation est terminée, l'adresse fixe et les paramètres réseau sont renseignés. Je poursuivrai avec le contrôle de l'accès à l'interface web, les deux disques de données et leur pool, avant la jonction à `ad.jcorp` et la création des partages.
 
 [Retour à l'infrastructure](../README.md)
