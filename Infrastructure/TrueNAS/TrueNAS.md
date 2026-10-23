@@ -131,7 +131,7 @@ Pour mon projet, j'ai retenu **un seul disque de données de 64 Gio**, séparé 
 
 La capture montre également que le lecteur CD/DVD ne contient plus de média et que la carte réseau utilise toujours le pont `vmbr2` avec le VLAN **700**.
 
-Le futur pool de données sera créé avec ce seul disque, en **Stripe**. Cette configuration ne fournit pas de redondance ZFS : la perte du disque de données peut entraîner la perte du pool. Je prévois donc les sauvegardes séparément.
+Le pool de données utilise ce seul disque, en **Stripe**. Cette configuration ne fournit pas de redondance ZFS : la perte du disque de données peut entraîner la perte du pool. Je prévois donc les sauvegardes séparément.
 
 ## 10. Préparer le pool JCORP-DATA
 
@@ -147,10 +147,43 @@ Lors de la tentative de création, TrueNAS affiche l'erreur **Disks have duplica
 
 ![Erreur de création du pool : numéros de série absents ou identiques pour sda et sdb](images/truenas-erreur-numeros-serie.png)
 
-Les disques virtuels système et données sont signalés sans numéro de série distinct. Je dois leur attribuer des numéros de série uniques dans Proxmox, VM arrêtée, puis redémarrer TrueNAS et vérifier leur identification avant de relancer la création du pool. Cette correction est distincte du choix Stripe : le pool reste prévu sur le seul disque de données de 64 Gio.
+Les disques virtuels système et données sont signalés sans numéro de série distinct. J'ai corrigé ce blocage en attribuant des numéros de série uniques dans Proxmox, VM arrêtée, puis redémarré TrueNAS avant de relancer la création du pool. Cette correction est distincte du choix Stripe : le pool reste prévu sur le seul disque de données de 64 Gio.
+
+## 11. Attribuer des numéros de série uniques
+
+J'ai arrêté la VM **704**, puis ouvert le **Shell du nœud `pve`** dans Proxmox. La commande suivante m'a permis de contrôler les paramètres des disques :
+
+```bash
+qm config 704
+```
+
+J'ai ensuite ajouté un numéro de série différent à chaque disque en conservant ses paramètres :
+
+```bash
+qm set 704 --scsi0 'Raid5-VMs:vm-704-disk-0,iothread=1,size=32G,serial=JCORP-BOOT01'
+qm set 704 --scsi1 'Raid5-VMs:vm-704-disk-1,iothread=1,size=64G,serial=JCORP-DATA01'
+```
+
+Ces commandes modifient l'identification présentée à la VM ; elles ne recréent pas les disques. J'ai redémarré TrueNAS, puis relancé la création du pool avec le seul disque de données de 64 Gio.
+
+## 12. Vérifier la création du pool
+
+Le tableau de bord **Storage** affiche le message **Pool created successfully** et le pool **`JCORP-DATA`**.
+
+![Pool JCORP-DATA créé avec succès et état du stockage dans TrueNAS](images/truenas-pool-jcorp-data-cree.png)
+
+| Élément | Résultat affiché |
+| --- | --- |
+| Nom du pool | `JCORP-DATA` |
+| Configuration | Un disque de données de 64 Gio |
+| Capacité utilisable | 61,05 Gio |
+| Espace disponible sur la capture | 61,04 Gio |
+| État du stockage | En ligne, aucune erreur |
+
+La capacité utilisable est inférieure aux 64 Gio bruts du disque en raison de l'espace réservé et des métadonnées du stockage. Le pool est maintenant prêt pour la création des datasets et des partages. Il reste sans redondance ZFS, conformément au choix d'un seul disque.
 
 ## Suite de la configuration
 
-L'installation et le réseau sont configurés, et le disque de données est ajouté. La création du pool `JCORP-DATA` est bloquée par les numéros de série des disques virtuels. Après correction et création du pool, je poursuivrai avec la jonction à `ad.jcorp`, les datasets et les partages.
+L'installation, le réseau et le pool `JCORP-DATA` sont opérationnels. Je poursuivrai avec la jonction du NAS à `ad.jcorp`, puis la création des datasets, des permissions fondées sur les groupes AD et des partages.
 
 [Retour à l'infrastructure](../README.md)
