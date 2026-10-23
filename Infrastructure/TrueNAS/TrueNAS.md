@@ -6,7 +6,7 @@ Je mets en place un serveur TrueNAS pour le stockage et les partages de mon infr
 
 J'ai créé la VM **704**, nommée **`NAS-JCorp`**, sur le nœud Proxmox **`pve`**. L'ISO montée est celle de **TrueNAS Community Edition 25.10.1**.
 
-![Configuration matérielle initiale de la VM TrueNAS 704 dans Proxmox](images/truenas-vm704-materiel.png)
+![Configuration matérielle de la VM TrueNAS 704 avec le VLAN 700](images/truenas-vm704-materiel.png)
 
 | Élément | Configuration visible |
 | --- | --- |
@@ -18,10 +18,10 @@ J'ai créé la VM **704**, nommée **`NAS-JCorp`**, sur le nœud Proxmox **`pve`
 | Contrôleur SCSI | VirtIO SCSI single |
 | Disque système | 32 Gio, `scsi0`, stockage `Raid5-VMs`, IO thread activé |
 | ISO | TrueNAS CE 25.10.1 sur le stockage `local` |
-| Carte réseau | VirtIO, `net0`, pont `vmbr2` |
+| Carte réseau | VirtIO, `net0`, pont `vmbr2`, tag VLAN `700` |
 | Pare-feu Proxmox sur la carte | Activé |
 
-La capture présente uniquement le disque système de 32 Gio. Les deux disques de données de 64 Gio seront ajoutés séparément pour préparer le pool de stockage. Aucun tag VLAN n'apparaît encore dans la ligne de la carte réseau : je dois renseigner **700** pour placer le NAS dans le même réseau que les autres VM JCorp.
+La capture présente uniquement le disque système de 32 Gio. Les deux disques de données de 64 Gio seront ajoutés séparément pour préparer le pool de stockage. J'ai configuré le tag VLAN **700** sur la carte réseau afin de placer le NAS dans le même réseau que les autres VM JCorp.
 
 ## 2. Démarrer sur l'ISO
 
