@@ -55,8 +55,23 @@ Je conserve l'option **1 - Administrative user (`truenas_admin`)**, puis je vali
 
 Ce compte est propre au NAS : il est distinct du compte `JCORP\Administrateur` de mon Active Directory.
 
+## 5. Installer le système sur le disque
+
+Après avoir défini et confirmé le mot de passe de `truenas_admin`, j'ai validé les choix de l'installateur pour lancer l'installation sur le disque système de 32 Gio.
+
+![Installation de TrueNAS : formatage du disque, création du pool de démarrage et extraction des fichiers](images/truenas-installation-systeme.png)
+
+La console affiche les opérations suivantes :
+
+1. **Formatting disk sda** : préparation et formatage du disque système sélectionné.
+2. **Creating boot pool** : création du pool ZFS réservé au démarrage de TrueNAS.
+3. **Creating dataset** : création du dataset utilisé par le système.
+4. **Extracting** : extraction des fichiers de TrueNAS sur le disque.
+
+Je laisse l'installation se terminer sans éteindre la VM. Sur cette capture, l'extraction est encore en cours ; le pool de démarrage est distinct du futur pool de données destiné aux partages.
+
 ## Suite de la configuration
 
-Je poursuivrai avec la définition du mot de passe d'administration et la fin de l'installation, puis le retrait de l'ISO et le démarrage sur le disque système. Je configurerai ensuite le réseau, les deux disques de données et leur pool, avant l'intégration à `ad.jcorp` et la création des partages.
+Après le message de réussite de l'installation, je retirerai l'ISO du lecteur virtuel pour démarrer sur le disque système. Je configurerai ensuite le réseau, les deux disques de données et leur pool, avant l'intégration à `ad.jcorp` et la création des partages.
 
 [Retour à l'infrastructure](../README.md)
