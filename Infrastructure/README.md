@@ -9,7 +9,7 @@ Je regroupe ici les configurations techniques de mon projet JCorp, communes aux 
 | [Grafana et Prometheus](Supervision/Grafana-Prometheus.md) | Supervision commune aux deux AP | Planifiés, non installés |
 | [Dokploy](Dokploy/Dokploy.md) | Déploiement du site et de sa base, AP 2 | Planifié, non installé |
 | [TrueNAS](TrueNAS/TrueNAS.md) | VM 704, stockage, jonction AD, partage Commun et lecteur S: par GPO | Opérationnel |
-| [Postes utilisateurs](Postes%20utilisateurs/Postes-utilisateurs.md) | Windows 11 joint au domaine ; Debian à finaliser | En cours |
+| [Postes utilisateurs](Postes%20utilisateurs/Postes-utilisateurs.md) | Windows 11 et Debian joints au domaine, connexions AD validées | Opérationnels |
 | [Architecture du réseau](Architecture-du-reseau.md) | Plages IP, VLAN, pont Proxmox et machines virtuelles | En cours |
 | [Active Directory, GPO, DHCP et contrôleurs de domaine](Active%20Directory/Active-Directory-GPO-DHCP-Controleurs-de-domaine.md) | Domaine, DNS, OU, comptes, DHCP, GPO et second contrôleur | Opérationnel |
 
@@ -24,7 +24,7 @@ Je conserve une infrastructure simple : Proxmox, réseau VLAN 700, deux contrôl
 - [x] Second contrôleur de domaine fonctionnel, selon la validation de Joshua ; aucun nouveau diagnostic de réplication n'est présenté ici.
 - [x] NAS, partage Commun et permissions terminés ; Joshua confirme les contrôles complémentaires du NAS.
 - [x] Lecteur Commun S: déployé par GPO et ouvert avec succès après reconnexion.
-- [ ] Terminer la jonction de Debian au domaine, dans la prochaine étape.
+- [x] Debian VM 702 joint à `ad.jcorp` dans l'OU `Postes` ; SSSD, identité AD et connexion graphique validés.
 
 Le programme est complété le 29 octobre 2026 :
 

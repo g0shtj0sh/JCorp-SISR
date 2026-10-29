@@ -6,7 +6,7 @@
 
 | Étape | Travail | Critère pour passer à la suite |
 | --- | --- | --- |
-| 1 | Terminer la jonction du poste Debian existant | Machine membre du domaine, résolution AD correcte et utilisateur AD identifiable ; connexion testée |
+| 1 — terminé | Jonction du poste Debian existant | Membre du domaine dans l'OU Postes, résolution AD/Internet, identité et test de jonction validés ; connexion graphique confirmée |
 | 2 | Vérifier les ressources Proxmox et les paramètres disponibles | VMID/IP libres, RAM/CPU/disque disponibles, sortie réseau et résolution DNS confirmées |
 | 3 | Installer GLPI et son agent sur un poste pilote | Poste visible dans l'inventaire et ticket créé, attribué puis résolu |
 | 4 | Installer Prometheus, Grafana et les collecteurs nécessaires | Mesures réelles de Windows et Linux, tableau lisible et alerte déclenchée puis résolue |

@@ -36,6 +36,10 @@ Après la correction réseau, les contrôles `dcdiag` des services et du DNS ont
 
 Le second contrôleur sur la VM Proxmox **703**, nommée `DC2-JCorp`, est fonctionnel selon la validation de Joshua. Aucun nouveau contrôle de réplication n'a été exécuté pendant la vérification DHCP du 29 octobre 2026.
 
+### Correction des redirecteurs DNS pour Debian — 29 octobre 2026
+
+La résolution des noms du domaine fonctionnait mais le DNS ne répondait pas aux demandes externes de Debian. Dans les propriétés DNS de `JCORP-DC01`, onglet **Redirecteurs**, j'ai remplacé les trois anciennes adresses `fec0:0:0:ffff::1`, `::2` et `::3` par `10.2.101.1`, puis appliqué la configuration. Depuis Debian, `deb.debian.org` est ensuite résolu via le DNS AD `10.2.101.10` et APT a pu installer les outils AD. Les captures avant/après et les contrôles se trouvent dans la [procédure Debian](../Postes%20utilisateurs/Postes-utilisateurs.md#corriger-la-résolution-dns-externe).
+
 ## 4. Organiser les unités d'organisation et les groupes
 
 J'ai placé les cinq OU principales **directement sous `ad.jcorp`** : `Administration`, `Groupes`, `Postes`, `Serveurs` et `Utilisateurs`. Les OU des services se trouvent dans `Utilisateurs`. Le contrôleur de domaine reste dans l'OU système `Domain Controllers`.
@@ -143,5 +147,5 @@ Get-ADDomain | Select-Object DNSRoot, NetBIOSName
 dcdiag /test:Advertising /test:Services /test:DNS
 ```
 
-Windows 11 est joint au domaine, la connexion utilisateur et le lecteur S: sont fonctionnels. Le NAS est terminé selon les contrôles documentés et la validation complémentaire de Joshua. La prochaine étape est la jonction du poste Debian ; elle n'est pas commencée pendant cette intervention. Le programme est ensuite complété par GLPI et Grafana/Prometheus en AP 1, puis Dokploy et un site avec sa base en AP 2. Ces services sont planifiés, pas encore installés ; voir la [feuille de route](../Feuille-de-route.md). La segmentation complète, le chantier global de sauvegarde/restauration et les autres applications restent exclus.
+Windows 11 est joint au domaine, la connexion utilisateur et le lecteur S: sont fonctionnels. Le NAS est terminé selon les contrôles documentés et la validation complémentaire de Joshua. Le poste Debian est maintenant joint dans l'OU `Postes` ; `adcli testjoin`, SSSD et l'identité de Joshua ont été contrôlés, puis sa connexion graphique a été confirmée. Les preuves figurent dans la [documentation des postes](../Postes%20utilisateurs/Postes-utilisateurs.md). Le programme est ensuite complété par GLPI et Grafana/Prometheus en AP 1, puis Dokploy et un site avec sa base en AP 2. Ces services sont planifiés, pas encore installés ; voir la [feuille de route](../Feuille-de-route.md). La segmentation complète, le chantier global de sauvegarde/restauration et les autres applications restent exclus.
 

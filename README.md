@@ -4,7 +4,7 @@ Je documente l'infrastructure JCorp réalisée sur Proxmox et son évolution au 
 
 | Partie | Objectif | État au 29 octobre 2026 |
 | --- | --- | --- |
-| [Infrastructure commune](Infrastructure/README.md) | Réseau, AD, DNS, DHCP, GPO, postes et NAS ; documentation des futurs services | Socle opérationnel, jonction Debian à terminer |
+| [Infrastructure commune](Infrastructure/README.md) | Réseau, AD, DNS, DHCP, GPO, postes et NAS ; documentation des futurs services | Socle terminé ; Debian joint et connexion AD validée |
 | [AP 1](AP%201/README.md) | Administrer le parc, gérer le support avec GLPI et superviser avec Grafana/Prometheus | Socle réalisé ; GLPI et supervision planifiés |
 | [AP 2](AP%202/README.md) | Déployer avec Dokploy un site de présentation d'offres de serveurs de jeux et sa base | Cadrage et documentation préparés ; aucun déploiement réalisé |
 
@@ -15,7 +15,7 @@ Je documente l'infrastructure JCorp réalisée sur Proxmox et son évolution au 
 - [x] Windows joint au domaine et lecteur Commun S: fonctionnel.
 - [x] Second contrôleur fonctionnel selon la validation de Joshua.
 - [x] NAS TrueNAS joint au domaine, partage et permissions terminés.
-- [ ] Jonction du poste Debian au domaine.
+- [x] Poste Debian joint au domaine ; identité AD contrôlée et connexion graphique validée.
 
 Les preuves et les limites des contrôles sont précisées dans chaque documentation technique.
 

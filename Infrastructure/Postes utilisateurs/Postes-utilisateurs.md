@@ -4,8 +4,8 @@ Je regroupe ici la mise en place de mes postes utilisateurs Debian et Windows 11
 
 | Poste | VMID | Nom dans Proxmox | Avancement |
 | --- | --- | --- | --- |
-| Debian | 702 | `User2-JCorp-Debian` | Réseau et résolution DNS validés, jonction au domaine à suivre |
-| Windows 11 | 701 | `User1-JCorp-Windows` | Système installé, jonction au domaine à suivre |
+| Debian | 702 | `User2-JCorp-Debian` | Jonction AD, identité et connexion graphique validées |
+| Windows 11 | 701 | `User1-JCorp-Windows` | Joint au domaine ; connexion AD et lecteur S: validés |
 
 ## 1. Poste Debian
 
@@ -57,57 +57,93 @@ Le fichier `/etc/resolv.conf` contient `search ad.jcorp` et `nameserver 10.2.101
 
 ![Résolution DNS du contrôleur JCorp et test ping réussi depuis Debian](images/debian-tests-dns-ping.png)
 
-### Installer les outils de jonction au domaine
+### Corriger la résolution DNS externe
 
-J'ai lancé l'installation des outils nécessaires à l'intégration de Debian dans mon Active Directory :
+Le 29 octobre 2026, les noms AD se résolvaient mais les téléchargements APT restaient bloqués. Depuis Debian, le DNS `10.2.101.10` ne répondait pas à une requête pour `deb.debian.org`, alors que la passerelle `10.2.101.1` répondait.
 
-```bash
-sudo apt update
-sudo apt install realmd sssd-ad sssd-tools adcli libnss-sss libpam-sss samba-common-bin
-```
+Dans le Gestionnaire DNS de `JCORP-DC01`, les propriétés du serveur, onglet **Redirecteurs**, contenaient trois adresses IPv6 `fec0:0:0:ffff::1`, `::2` et `::3`. Je les ai remplacées par `10.2.101.1`, validée par la console, puis appliqué la modification. Le client conserve uniquement le DNS AD `10.2.101.10` : c'est le serveur AD qui transmet les demandes externes.
 
-`realmd` permet de découvrir et de joindre le domaine, `adcli` participe à la création du compte ordinateur dans AD, et SSSD fournit l'accès aux identités et à l'authentification du domaine. Les modules NSS et PAM permettent à Debian d'utiliser ces comptes pour les connexions.
+![Redirecteurs DNS avant correction](images/dns-redirecteurs-avant.jpg)
 
-![Installation en cours des paquets pour joindre Debian au domaine AD](images/debian-installation-outils-ad.png)
+![Redirecteur DNS enregistré sur JCORP-DC01](images/dns-redirecteurs-apres.jpg)
 
-Sur cette capture, j'ai confirmé l'installation et APT est encore en cours de téléchargement. Les lignes `Ign` ne prouvent pas que l'installation a réussi : je dois attendre le résultat final et le retour de l'invite de commande avant de continuer.
-
-### Découvrir le domaine (étape suivante)
-
-Une fois les paquets installés, je lancerai :
+La mention « Résolution impossible » dans la colonne du nom du redirecteur ne donne pas son nom inverse ; le contrôle fonctionnel suivant confirme que les demandes externes aboutissent.
 
 ```bash
-realm discover ad.jcorp
+cat /etc/resolv.conf
+getent ahostsv4 deb.debian.org
+getent hosts jcorp-dc01.ad.jcorp
+timedatectl
 ```
 
-Le résultat attendu doit identifier le domaine `ad.jcorp` et indiquer `server-software: active-directory`.
+Le nom externe et `jcorp-dc01.ad.jcorp` sont résolus. L'horloge indique `System clock synchronized: yes` et `NTP service: active`.
 
-### Joindre Debian au domaine (à effectuer)
+![DNS AD et Internet fonctionnels, horloge synchronisée](images/debian-dns-horloge-valides.jpg)
 
-Je joindrai le poste directement à l'OU `Postes` avec un compte administrateur du domaine :
+La première tentative d'installation, conservée ci-dessous, restait bloquée sur les téléchargements. Cette capture historique ne constituait pas une preuve de réussite.
+
+![Première tentative d’installation avant correction DNS](images/debian-installation-outils-ad.png)
+
+### Installer les outils et découvrir le domaine
 
 ```bash
-sudo realm join --user=Administrateur --computer-ou="OU=Postes,DC=ad,DC=jcorp" ad.jcorp
+sudo apt-get update
+sudo apt-get install -y realmd sssd-ad sssd-tools adcli libnss-sss libpam-sss samba-common-bin
+dpkg -s realmd
+/usr/sbin/realm discover ad.jcorp
 ```
 
-Je saisirai le mot de passe du compte AD uniquement à l'invite de commande, sans l'inscrire dans la commande.
+L'installation s'est terminée et le statut de `realmd` est `install ok installed`. Dans cette session Debian, `realm` n'était pas dans le PATH du compte local ; j'utilise donc `/usr/sbin/realm`. La découverte identifie `AD.JCORP`, `server-software: active-directory`, `client-software: sssd` et, avant jonction, `configured: no`.
 
-### Préparer et tester une connexion AD (à effectuer)
+![Paquet realmd installé et domaine AD découvert](images/debian-decouverte-ad.jpg)
 
-J'activerai la création automatique du dossier personnel lors de la première connexion :
+### Joindre Debian dans l'OU Postes
+
+```bash
+sudo /usr/sbin/realm join --verbose --user=Administrateur --computer-ou="OU=Postes,DC=ad,DC=jcorp" ad.jcorp
+```
+
+Le mot de passe AD est saisi uniquement à l'invite interactive. La commande crée `CN=USER2-JCORP,OU=Postes,DC=ad,DC=jcorp`, configure le fichier keytab et SSSD, puis affiche **Successfully enrolled machine in realm**. Le nom pleinement qualifié utilisé est `User2-JCorp.ad.jcorp`.
+
+![Compte ordinateur créé dans Postes et jonction réussie](images/debian-jonction-reussie.jpg)
+
+### Activer le dossier personnel et contrôler l'intégration
 
 ```bash
 sudo pam-auth-update --enable mkhomedir
+/usr/sbin/realm list
+id jfernandes@ad.jcorp
+getent passwd jfernandes@ad.jcorp
+sudo adcli testjoin
+systemctl is-active sssd
+grep pam_mkhomedir /etc/pam.d/common-session
 ```
 
-Je contrôlerai ensuite la jonction et la reconnaissance d'un compte existant dans AD :
+Résultats observés :
+
+- `configured: kerberos-member`, `login-formats: %U@ad.jcorp` et `login-policy: allow-realm-logins`.
+- Joshua Fernandes est reconnu sous `jfernandes@ad.jcorp`, UID `1278801205`, avec les groupes du domaine et `gg_direction`.
+- Son dossier personnel prévu est `/home/jfernandes@ad.jcorp` et son shell `/bin/bash`.
+- `adcli testjoin` affiche **Successfully validated join to domain ad.jcorp**.
+- SSSD est `active` et `pam_mkhomedir.so` figure dans la configuration PAM.
+
+![Jonction vérifiée, compte Joshua reconnu et SSSD actif](images/debian-controles-ad-valides.jpg)
+
+### Valider la connexion graphique AD
+
+Après déconnexion du compte local, je sélectionne « Absent de la liste ? » / « Autre utilisateur », saisis `jfernandes@ad.jcorp`, puis son mot de passe AD. Joshua confirme que le bureau s'ouvre correctement. Je relève ensuite l'identité et le dossier personnel dans cette session :
 
 ```bash
-realm list
-id 'jfernandes@ad.jcorp'
+whoami
+id
+printf '%s\n' "$HOME"
+pwd
+loginctl session-status --no-pager
 ```
 
-Enfin, je fermerai ma session graphique et sélectionnerai « Autre utilisateur » pour tester une connexion avec `jfernandes@ad.jcorp` et son mot de passe AD. La jonction et la connexion seront validées à partir de leurs résultats, puis documentées avec leurs captures.
+Le contrôle réalisé dans le bureau ouvert confirme `whoami = jfernandes@ad.jcorp`, ses groupes AD et `$HOME = /home/jfernandes@ad.jcorp`, également affiché par `pwd`. `loginctl` montre une session `active`, de type `wayland`, avec le service `gdm-password` et `Remote: no`. La connexion graphique AD et la création du dossier personnel sont ainsi validées.
+
+![Session graphique Debian de Joshua active, identité AD et dossier personnel](images/debian-session-joshua-ad.jpg)
 
 ## 2. Poste Windows 11
 
@@ -147,8 +183,6 @@ Dans cette capture, le compte affiché est **`JCORP\Administrateur`** et le type
 
 Je peux cliquer sur **Suivant** pour retenir ce choix ou sur **Ignorer** pour passer cette étape. Pour un poste utilisé au quotidien par un salarié, je choisirai son compte nominatif avec le type **Utilisateur standard**.
 
-Le redémarrage et la première connexion avec un compte AD seront documentés à la suite.
-
-La suite comprendra la jonction au domaine `ad.jcorp`, le placement du poste dans l'OU `Postes`, puis les tests de connexion et d'application des GPO.
+Le poste Windows est désormais joint au domaine. Une session de Joshua Fernandes et l'accès au lecteur S: ont été validés ; les captures du lecteur et de sa GPO figurent dans la [documentation TrueNAS](../TrueNAS/TrueNAS.md#déployer-le-lecteur-par-gpo). Les écrans ci-dessus conservent les étapes historiques de la configuration.
 
 [Retour à l'infrastructure](../README.md)

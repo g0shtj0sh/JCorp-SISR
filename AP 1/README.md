@@ -17,7 +17,7 @@ Le périmètre est complété par GLPI pour l'inventaire et le support, puis Gra
 | [GLPI](../Infrastructure/GLPI/GLPI.md) | Inventaire du poste pilote et cycle de ticket | Planifié |
 | [Grafana et Prometheus](../Infrastructure/Supervision/Grafana-Prometheus.md) | Tableaux de bord et alerte testée | Planifié |
 | [Feuille de route](../Infrastructure/Feuille-de-route.md) | Ordre des étapes et ressources proposées | Préparée |
-| [Postes utilisateurs](../Infrastructure/Postes%20utilisateurs/Postes-utilisateurs.md) | Installation et configuration des clients | Jonction Debian à finaliser |
+| [Postes utilisateurs](../Infrastructure/Postes%20utilisateurs/Postes-utilisateurs.md) | Installation et configuration des clients | Windows et Debian opérationnels |
 
 ## Avancement au 29 octobre 2026
 
@@ -29,7 +29,7 @@ Le périmètre est complété par GLPI pour l'inventaire et le support, puis Gra
 - [x] Second contrôleur, VM 703 `DC2-JCorp`, fonctionnel selon la validation de Joshua.
 - [x] NAS TrueNAS, VM 704 `JCORP-NAS01`, joint au domaine ; partage Commun et permissions terminés. Joshua confirme les contrôles complémentaires du NAS.
 - [x] Lecteur S: déployé par la GPO `JCORP-Utilisateurs-LecteursReseau`, visible et accessible après reconnexion de Joshua.
-- [ ] Finaliser la jonction de Debian, VM 702, au domaine lors de la prochaine étape.
+- [x] Debian, VM 702, joint au domaine dans l'OU `Postes` ; SSSD actif, compte Joshua reconnu et connexion graphique validée.
 
 ## Compléments AP 1 retenus le 29 octobre 2026
 
@@ -39,7 +39,7 @@ Le périmètre est complété par GLPI pour l'inventaire et le support, puis Gra
 - [ ] Afficher CPU, RAM, disque et disponibilité.
 - [ ] Déclencher puis résoudre une alerte de test ; documenter les résultats.
 
-Ces services ne sont pas encore installés. La prochaine action technique reste la jonction Debian, avant les nouvelles VM. Les critères détaillés sont dans les procédures GLPI et supervision.
+Ces services ne sont pas encore installés. Le socle est terminé. La prochaine étape est de vérifier les ressources et paramètres proposés pour les nouvelles VM. Les critères détaillés sont dans les procédures GLPI et supervision.
 
 ## Lien avec l'AP 2
 
