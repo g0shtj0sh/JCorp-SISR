@@ -301,7 +301,7 @@ Le partage **Commun** existe déjà dans **Shares > Windows (SMB) Shares**. Son 
 
 ![Partage Commun activé et service SMB démarré](images/truenas-commun-smb-actif.png)
 
-L'ACL de partage présente l'entrée par défaut `everyone@`, **FULL**, **ALLOWED**. Cette autorisation de partage ne dépasse pas les droits accordés par les ACL du système de fichiers : le groupe des utilisateurs du domaine reste limité à Modify sur le dataset. Le démarrage automatique du service n'a pas encore été contrôlé.
+L'ACL de partage présente l'entrée par défaut `everyone@`, **FULL**, **ALLOWED**. Cette autorisation de partage ne dépasse pas les droits accordés par les ACL du système de fichiers : le groupe des utilisateurs du domaine reste limité à Modify sur le dataset. Les contrôles complémentaires du NAS sont confirmés comme terminés par Joshua ; ils n'ont pas été réexécutés pendant le contrôle DHCP.
 
 ### Tester depuis le poste Windows du domaine
 
@@ -315,7 +315,7 @@ Le dossier s'est ouvert sans demande supplémentaire d'identifiants. J'ai créé
 
 ![Ouverture du partage Commun et création du dossier de test depuis Windows](images/truenas-commun-test-ecriture.png)
 
-Ce test valide l'ouverture, la liste du dossier et la création d'un sous-dossier avec la session Windows en cours. Le dossier de test est conservé. La modification du contenu d'un fichier, la suppression et le test avec un second compte restent à effectuer.
+Ce test valide l'ouverture, la liste du dossier et la création d'un sous-dossier avec la session Windows en cours. Le dossier de test est conservé. Joshua confirme ensuite avoir terminé les contrôles complémentaires du NAS. Les captures de cette section restent celles des vérifications effectuées pendant la configuration.
 
 ### Déployer le lecteur par GPO
 
@@ -352,6 +352,6 @@ J'ai ouvert le lecteur par double-clic : le dossier de test `t`, créé précéd
 
 ![Ouverture du lecteur S et affichage du dossier de test](images/gpo-commun-lecteur-s-ouvert.png)
 
-Il reste aussi à terminer les tests de fichiers, vérifier un second compte et contrôler le démarrage automatique de SMB.
+Le NAS est retenu comme terminé pour le périmètre du projet : les captures valident le partage et le lecteur réseau ; Joshua confirme les contrôles complémentaires.
 
 [Retour à l'infrastructure](../README.md)

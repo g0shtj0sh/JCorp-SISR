@@ -34,7 +34,7 @@ La sortie ci-dessous confirme le nom du serveur et le domaine. J'ai corrigé l'a
 
 Après la correction réseau, les contrôles `dcdiag` des services et du DNS ont réussi.
 
-Je prépare également la VM Proxmox **703**, nommée `DC2-JCorp`, pour ajouter un second contrôleur au domaine existant. Sa promotion et la réplication AD seront documentées après leur réalisation.
+Le second contrôleur sur la VM Proxmox **703**, nommée `DC2-JCorp`, est fonctionnel selon la validation de Joshua. Aucun nouveau contrôle de réplication n'a été exécuté pendant la vérification DHCP du 29 octobre 2026.
 
 ## 4. Organiser les unités d'organisation et les groupes
 
@@ -59,6 +59,8 @@ J'ai aussi préparé une [version actualisée du script](JCORP-Reset-AD.ps1) pou
 | Groupes de sécurité | 17 |
 | Comptes nominatifs fictifs | 42 |
 
+Les comptes et groupes sont désormais retenus comme opérationnels ; la connexion de Joshua Fernandes a été validée. Le tableau décrit le contenu prévu par le script, sans constituer une vérification individuelle de chacun des 42 comptes.
+
 J'utilise ces groupes pour cibler les GPO. Ils serviront aussi aux droits sur les partages et les applications. Les principales informations réseau sont indiquées dans le [README principal](../../README.md).
 
 ## 5. DHCP sur JCORP-DC01
@@ -66,6 +68,30 @@ J'utilise ces groupes pour cibler les GPO. Ils serviront aussi aux droits sur le
 J'ai ajouté le rôle **DHCP** sur `JCORP-DC01`. Dans la console, l'étendue IPv4 du réseau `10.2.101.0/24` et son pool d'adresses de **`10.2.101.11` à `10.2.101.150`** sont visibles. Cette capture montre la plage configurée, pas un bail reçu par un poste client.
 
 ![Rôle DHCP sur JCORP-DC01 et pool d'adresses 10.2.101.11 à 10.2.101.150](images/dhcp-etendue-10.2.101.png)
+
+### Contrôle DHCP du 29 octobre 2026
+
+Depuis Proxmox, j'ai ouvert la console DHCP de la VM 700, puis `JCORP-DC01 > IPv4 > Étendue > Baux d'adresses`. Un bail DHCP est visible pour **User1.ad.jcorp**, en **10.2.101.12**, avec une expiration affichée au **6 novembre 2026 à 11:54:24**.
+
+![Bail DHCP du poste Windows User1 en 10.2.101.12](images/dhcp-baux-adresses.png)
+
+La liste contient aussi d'anciens baux `truenas-installer.local` et `JCORP-NAS01`. Leur présence ne prouve pas que ces adresses sont encore utilisées. Le NAS est désormais configuré en IP fixe `10.2.101.152`.
+
+Dans **Options d'étendue**, le contrôle initial montre `006 Serveurs DNS = 10.2.101.10, 8.8.8.8` et `015 Nom de domaine DNS = ad.jcorp`. Aucune option routeur n'est définie, y compris dans les options de serveur consultées.
+
+![Options d'étendue avant correction : deux DNS et aucune passerelle](images/dhcp-options-etendue-controle.png)
+
+J'ai ouvert **Configurer les options**, ajouté **003 Routeur = 10.2.101.1**, puis retiré **8.8.8.8** de **006 Serveurs DNS** pour conserver uniquement le DNS du domaine. Après validation avec **OK** et actualisation de la console, les trois options enregistrées sont visibles :
+
+| Option | Valeur finale |
+| --- | --- |
+| 003 Routeur | `10.2.101.1` |
+| 006 Serveurs DNS | `10.2.101.10` |
+| 015 Nom de domaine DNS | `ad.jcorp` |
+
+![Options d'étendue enregistrées et actualisées après correction](images/dhcp-options-etendue-corrigees.jpg)
+
+Le contrôle valide le bail Windows enregistré sur le serveur et la persistance des options corrigées. Aucun renouvellement forcé ni nouveau relevé réseau côté client n'a été effectué après cette correction ; ces captures ne prouvent donc pas encore la réception des nouvelles options par le poste. Elles seront prises en compte lors du renouvellement du bail.
 
 ## 6. Stratégies de groupe
 
@@ -89,15 +115,15 @@ Depuis Windows PowerShell 5.1, avec un compte administrateur du domaine, j'utili
 
 Les exceptions reposent sur les groupes AD : le script ne cible pas des personnes par leur nom. Le contrôleur de domaine `JCORP-DC01` reste dans l'OU système `Domain Controllers`, donc la GPO liée à `OU=Serveurs` ne s'applique pas à lui.
 
-Dans la console **Gestion de stratégie de groupe**, je vois les neuf GPO `JCORP-*` créées dans `ad.jcorp` : trois pour les postes, une pour les serveurs et cinq pour les utilisateurs. Cette capture prouve leur présence dans le domaine. Je testerai leur application sur le poste Windows 11 après sa jonction au domaine.
+Dans la console **Gestion de stratégie de groupe**, je vois les neuf GPO `JCORP-*` créées dans `ad.jcorp` : trois pour les postes, une pour les serveurs et cinq pour les utilisateurs. Cette capture historique prouve leur présence dans le domaine. Le poste Windows est maintenant joint au domaine ; aucune campagne supplémentaire de tests des GPO générales n'est prévue dans le périmètre retenu.
 
 ![GPO JCorp visibles dans la console Gestion de stratégie de groupe](images/gpo-jcorp-console.png)
 
 La configuration **Windows LAPS** est facultative : `-ConfigureLaps` crée sa GPO uniquement si le schéma Windows LAPS existe déjà. Je dois d'abord préparer les droits d'écriture des ordinateurs et les droits de lecture des mots de passe pour les administrateurs habilités. Le script ne modifie pas le schéma AD.
 
-Je n'ai pas créé de GPO de lecteurs réseau, car les chemins des futurs partages ne sont pas encore définis. Les GPO limitant les réglages Windows, bloquant les macros Office venant d'Internet ou limitant de manière générale les logiciels ne font pas partie de ce script.
+J'ai ensuite ajouté une dixième GPO JCorp, **JCORP-Utilisateurs-LecteursReseau**, liée à l'OU **Utilisateurs**. Elle mappe **S:** vers `\\JCORP-NAS01.ad.jcorp\Commun` avec l'action **Mettre à jour** et **Reconnecter**. Après fermeture et réouverture de la session de Joshua Fernandes, le lecteur apparaît et son ouverture fonctionne. Les paramètres et captures sont dans la [documentation TrueNAS](../TrueNAS/TrueNAS.md#déployer-le-lecteur-par-gpo). Les GPO limitant les réglages Windows, bloquant les macros Office venant d'Internet ou limitant de manière générale les logiciels ne font pas partie de ce script.
 
-Les GPO de postes s'appliqueront après la jonction d'un poste à `ad.jcorp` et son placement dans `OU=Postes`. Sur ce poste, je pourrai lancer `gpupdate /force` puis `gpresult /r` pour contrôler les règles reçues. Les stratégies de mots de passe du domaine se configurent au niveau du domaine, et non dans l'OU `Utilisateurs`.
+Les GPO de postes nécessitent la jonction à `ad.jcorp` et le placement dans `OU=Postes`. Les commandes `gpupdate /force` et `gpresult /r` restent des moyens de diagnostic si nécessaire ; elles n'ont pas été réexécutées pendant ce contrôle DHCP. Les stratégies de mots de passe du domaine se configurent au niveau du domaine, et non dans l'OU `Utilisateurs`.
 
 Pour afficher la liste réelle des GPO créées sur le domaine depuis Windows PowerShell, j'utilise :
 
@@ -117,5 +143,5 @@ Get-ADDomain | Select-Object DNSRoot, NetBIOSName
 dcdiag /test:Advertising /test:Services /test:DNS
 ```
 
-La prochaine étape est la jonction de la VM Windows 11 au domaine, puis le test de connexion d'un utilisateur et de l'application des GPO avec `gpresult /r`.
+Windows 11 est joint au domaine, la connexion utilisateur et le lecteur S: sont fonctionnels. Le NAS est terminé selon les contrôles documentés et la validation complémentaire de Joshua. La prochaine étape est la jonction du poste Debian ; elle n'est pas commencée pendant cette intervention. La segmentation complète, les sauvegardes/restaurations et les applications ou services supplémentaires restent hors du périmètre simplifié retenu.
 

@@ -1,29 +1,31 @@
 # AP 1 - Suivi du premier atelier JCorp
 
-## Contexte et objectif
+## Contexte et périmètre
 
-Je pars du dossier [RedOne](https://docs.google.com/document/d/13dC98HuGbrRNXuTOotnaGaNbwyVlJhWZ/edit), qui décrit un siège avec plusieurs services : direction, DSI, administration, communication, développement, commercial et recherche. Le projet prévoit notamment un réseau segmenté, un annuaire centralisé, DNS, DHCP et des applications métier. Le scénario mentionne plus de 350 terminaux au siège et 540 visiteurs médicaux ; ces chiffres donnent l'échelle du projet.
+Le dossier [RedOne](https://docs.google.com/document/d/13dC98HuGbrRNXuTOotnaGaNbwyVlJhWZ/edit) sert de référence métier. Pour JCorp, je retiens une infrastructure simple sur Proxmox : un réseau VLAN 700, deux contrôleurs de domaine, DNS, DHCP, les comptes et groupes, les GPO, un poste Windows, un poste Debian et un NAS.
 
-Pour JCorp, je commence l'AP 1 par la configuration de mon environnement Proxmox, du premier contrôleur de domaine, de DNS et des comptes Active Directory. Je centralise la configuration technique dans le dossier Infrastructure, commun à tout le projet. Les autres services viendront compléter cette même infrastructure dans la suite du projet.
+La segmentation complète, les sauvegardes/restaurations, les applications métier et les services supplémentaires ne font pas partie du périmètre retenu.
 
 ## Documentation
 
 | Sujet | Contenu | État |
 | --- | --- | --- |
-| [Infrastructure](../Infrastructure/README.md) | Documentation technique commune au projet, scripts et captures | En cours |
-| [Architecture du réseau](../Infrastructure/Architecture-du-reseau.md) | Réseaux, VLAN et machines virtuelles | En cours |
-| [Active Directory, GPO, DHCP et contrôleurs de domaine](../Infrastructure/Active%20Directory/Active-Directory-GPO-DHCP-Controleurs-de-domaine.md) | Domaine, DNS, DHCP, OU, comptes et stratégies de groupe | En cours |
-| [Postes utilisateurs](../Infrastructure/Postes%20utilisateurs/Postes-utilisateurs.md) | Poste Debian installé et poste Windows 11 en cours d'installation | En cours |
+| [Infrastructure](../Infrastructure/README.md) | Vue globale, avancement, scripts et captures | À jour |
+| [Architecture du réseau](../Infrastructure/Architecture-du-reseau.md) | Réseau VLAN 700 et machines virtuelles | À jour |
+| [Active Directory, GPO, DHCP et contrôleurs](../Infrastructure/Active%20Directory/Active-Directory-GPO-DHCP-Controleurs-de-domaine.md) | Domaine, DNS, DHCP, OU, comptes et GPO | Opérationnel |
+| [TrueNAS](../Infrastructure/TrueNAS/TrueNAS.md) | Stockage, jonction AD, partage Commun, permissions et lecteur S: | Terminé |
+| [Postes utilisateurs](../Infrastructure/Postes%20utilisateurs/Postes-utilisateurs.md) | Installation et configuration des clients | Jonction Debian à finaliser |
 
-## Avancement
+## Avancement au 29 octobre 2026
 
-- J'ai installé le serveur `JCORP-DC01` sur la VM 700, créé le domaine `ad.jcorp` (`JCORP` en NetBIOS) et configuré DNS avec l'adresse `10.2.101.10/24`. Les diagnostics AD/DNS ont réussi après la correction de l'adressage.
-- J'ai créé les OU des services et 17 groupes globaux de sécurité. La documentation AD contient une capture de cette étape.
-- J'ai préparé un script de création de 42 comptes aux noms inventés, soit trois par service, avec leurs groupes. La documentation distingue ce script de la configuration visible sur les captures.
-- J'ai ajouté le rôle DHCP sur `JCORP-DC01` et créé une étendue pour `10.2.101.0/24`, avec un pool de `10.2.101.11` à `10.2.101.150`. Une capture de la console est dans la documentation AD.
-- J'ai ajouté les GPO de postes, de serveurs et d'utilisateurs avec des exceptions fondées sur les groupes. Leur script et leurs paramètres sont présentés dans la documentation commune.
-- J'ai installé Debian sur la VM `702` (`User2-JCorp-Debian`). La carte réseau VirtIO utilise `vmbr2` et le VLAN `700`. Les caractéristiques et la capture Proxmox sont dans la documentation des postes utilisateurs.
-- Les VM `701` (`User1-JCorp-Windows`) pour Windows 11 et `703` (`DC2-JCorp`) pour le second contrôleur de domaine sont en cours d'installation.
-- La suite du projet portera sur la jonction des postes au domaine, la réplication AD, les partages, les sauvegardes et les autres services prévus pour JCorp.
+- [x] Premier contrôleur `JCORP-DC01`, VM 700 : domaine `ad.jcorp`, NetBIOS `JCORP`, DNS `10.2.101.10/24`, passerelle `10.2.101.1`.
+- [x] OU, groupes et comptes en place ; connexion de Joshua Fernandes validée. Cette validation fonctionnelle ne constitue pas un inventaire individuel de tous les comptes.
+- [x] DHCP contrôlé dans la console : bail de `User1.ad.jcorp` en `10.2.101.12`. Options corrigées : routeur `10.2.101.1`, DNS AD `10.2.101.10` seul, suffixe `ad.jcorp`. Captures et limites du contrôle dans la documentation AD/DHCP.
+- [x] GPO configurées ; aucune campagne supplémentaire de contrôle des GPO générales demandée pour cette étape.
+- [x] Windows 11, VM 701, joint au domaine avec une connexion utilisateur AD fonctionnelle.
+- [x] Second contrôleur, VM 703 `DC2-JCorp`, fonctionnel selon la validation de Joshua.
+- [x] NAS TrueNAS, VM 704 `JCORP-NAS01`, joint au domaine ; partage Commun et permissions terminés. Joshua confirme les contrôles complémentaires du NAS.
+- [x] Lecteur S: déployé par la GPO `JCORP-Utilisateurs-LecteursReseau`, visible et accessible après reconnexion de Joshua.
+- [ ] Finaliser la jonction de Debian, VM 702, au domaine lors de la prochaine étape.
 
-
+La configuration et la documentation technique du poste Debian ne sont pas modifiées pendant ce contrôle DHCP. La suite du travail portera sur ce poste.
