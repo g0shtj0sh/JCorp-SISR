@@ -8,6 +8,8 @@ Déployer et exploiter un site de présentation d'offres de serveurs de jeux sur
 
 Le site de [Nexus Games](https://nexus-games.com/) sert de référence fonctionnelle pour le catalogue et la présentation des offres. Le projet utilisera son propre nom, ses textes et ses visuels. Il s'agit d'une démonstration pédagogique : les commandes sont simulées.
 
+La VM AP 2 fait partie d'une architecture de **deux nouvelles VM** : **4 vCPU, 4 Gio RAM et 60 Gio disque**, avec passage à 6 Gio RAM si nécessaire. GLPI et la supervision partagent l'autre VM, côté AP 1. Les identifiants et paramètres réseau proposés sont dans la [feuille de route](../Infrastructure/Feuille-de-route.md#2-deux-vm-supplémentaires-retenues), à vérifier avant création.
+
 ## Livrables
 
 | Document | Contenu |

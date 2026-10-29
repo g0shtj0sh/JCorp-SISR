@@ -31,6 +31,8 @@ Le périmètre est complété par GLPI pour l'inventaire et le support, puis Gra
 - [x] Lecteur S: déployé par la GPO `JCORP-Utilisateurs-LecteursReseau`, visible et accessible après reconnexion de Joshua.
 - [x] Debian, VM 702, joint au domaine dans l'OU `Postes` ; SSSD actif, compte Joshua reconnu et connexion graphique validée.
 
+GLPI/MariaDB et Grafana/Prometheus seront regroupés dans une seule nouvelle VM Linux de services (**2 vCPU, 4 Gio RAM, 40 Gio disque**). La seconde nouvelle VM sera dédiée à l'hébergement AP 2. La [feuille de route](../Infrastructure/Feuille-de-route.md#2-deux-vm-supplémentaires-retenues) conserve les paramètres à reprendre lors de leur création.
+
 ## Compléments AP 1 retenus le 29 octobre 2026
 
 - [ ] Installer GLPI et inventorier au moins le poste Windows pilote avec GLPI Agent.

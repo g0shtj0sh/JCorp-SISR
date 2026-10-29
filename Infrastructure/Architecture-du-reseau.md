@@ -34,7 +34,7 @@ Le DNS AD conserve la résolution interne et transmet les demandes externes à `
 
 ## Extensions planifiées pour les AP
 
-Trois rôles supplémentaires sont proposés : GLPI, supervision Grafana/Prometheus, et hébergement Docker/Dokploy. Les VMID 705–707 et IP 10.2.101.153–155 sont uniquement des propositions à vérifier : aucune VM ou réservation n'a été créée. Le dimensionnement, les noms et les URL sont détaillés dans la [feuille de route](Feuille-de-route.md).
+Deux VM supplémentaires sont retenues : services AP 1 (GLPI, MariaDB, Grafana et Prometheus, 2 vCPU, 4 Gio RAM, 40 Gio disque) et hébergement AP 2 (Docker/Dokploy, site et sa base, 4 vCPU, 4 Gio RAM extensibles à 6 Gio selon besoin, 60 Gio disque). Les VMID proposés sont 705 et 706, les noms JCORP-SRV01 et JCORP-APP01, les IP 10.2.101.153 et 10.2.101.154. Ces paramètres restent à vérifier : aucune VM ni réservation n'a été créée. Cette décision remplace la proposition de trois VM ; la VM 707 n'est plus prévue. La [feuille de route](Feuille-de-route.md#2-deux-vm-supplémentaires-retenues) sert de référence lors de leur création.
 
 L'AP 1 ajoute l'inventaire/support et la supervision. L'AP 2 ajoute un site avec sa base et étend cette supervision aux conteneurs et à la disponibilité HTTP. La VM 702 reste un poste utilisateur Debian.
 

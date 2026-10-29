@@ -15,24 +15,34 @@
 | 7 | Configurer DNS/HTTPS et intégrer la supervision | URL fonctionnelle depuis un client, certificat valide dans le contexte retenu et disponibilité surveillée |
 | 8 | Réaliser la démonstration et terminer les preuves | Mise à jour depuis GitHub, consultation des logs et retour applicatif à une version connue |
 
-## 2. Machines supplémentaires proposées
+## 2. Deux VM supplémentaires retenues
 
-Je sépare GLPI, la supervision et l'hébergement afin que l'arrêt du serveur d'applications ne coupe pas la supervision. Cette répartition est une proposition à ajuster selon les ressources du laboratoire.
+**Décision validée le 29 octobre 2026 : créer deux VM Linux sans interface graphique.** GLPI, sa base MariaDB, Grafana et Prometheus partagent la VM de services AP 1. Docker/Dokploy, le site et sa base applicative utilisent une seconde VM, dédiée à l'AP 2. Cette décision remplace la proposition initiale de trois VM.
 
-| Rôle proposé | VMID proposé | Nom proposé | IP proposée | Point de départ pour les ressources |
-| --- | --- | --- | --- | --- |
-| GLPI | 705 | JCORP-GLPI01 | 10.2.101.153/24 | 2 vCPU, 4 Gio RAM, 40 Gio disque |
-| Grafana et Prometheus | 706 | JCORP-MON01 | 10.2.101.154/24 | 2 vCPU, 4 Gio RAM, 40 Gio disque |
-| Docker et Dokploy | 707 | JCORP-APP01 | 10.2.101.155/24 | 4 vCPU, 8 Gio RAM, 60 Gio disque |
+| VM prévue | Services | VMID proposé | Nom proposé | IP proposée | Ressources de départ retenues |
+| --- | --- | --- | --- | --- | --- |
+| Services AP 1 | GLPI, MariaDB, Grafana, Prometheus | 705 | JCORP-SRV01 | 10.2.101.153/24 | 2 vCPU, 4 Gio RAM (4096 Mio), disque 40 Gio |
+| Hébergement AP 2 | Docker, Dokploy, site et base du site | 706 | JCORP-APP01 | 10.2.101.154/24 | 4 vCPU, 4 Gio RAM (4096 Mio), disque 60 Gio ; passage à 6 Gio (6144 Mio) si les mesures ou les builds le nécessitent |
 
-Ces tailles sont un budget initial de laboratoire, pas des exigences officielles ni une capacité mesurée. Vérifier les prérequis de chaque version avant installation. Les VMID, noms et IP n'ont pas encore été contrôlés ni réservés. Les IP proposées sont hors du pool DHCP `10.2.101.11–10.2.101.150` ; cela ne garantit pas leur disponibilité.
+**Référence pour la future création des « deux VM » : reprendre ce tableau et vérifier d'abord les ressources disponibles sur Proxmox.** Les tailles sont des budgets de départ pour un petit laboratoire, pas des exigences officielles ni une capacité mesurée. Vérifier les prérequis des versions retenues avant installation.
 
-Paramètres envisagés : pont `vmbr2`, VLAN 700, passerelle `10.2.101.1`, DNS `10.2.101.10`. La distribution Linux et les versions seront choisies selon les prérequis à jour. Le poste utilisateur Debian VM 702 conserve son rôle et ne devient pas le serveur d'hébergement.
+Les VMID, noms et IP restent proposés, non contrôlés ni réservés. L'ancien projet de VM 707 n'est plus nécessaire à cette architecture. Les IP proposées sont hors du pool DHCP `10.2.101.11–10.2.101.150` ; vérifier leur disponibilité avant affectation.
+
+Paramètres réseau prévus pour les deux VM : pont `vmbr2`, VLAN 700, passerelle `10.2.101.1`, DNS AD `10.2.101.10`, masque `/24`. Distribution Linux et versions à choisir selon les prérequis à jour. Le stockage Proxmox et les autres options matérielles seront confirmés lors de la création selon les capacités disponibles.
+
+### Compromis et optimisation
+
+- Les contrôleurs de domaine gardent leurs rôles AD/DNS/DHCP ; GLPI sera installé sur la VM Linux de services.
+- La supervision reste séparée de Dokploy : l'arrêt de la VM AP 2 peut être observé depuis la VM AP 1.
+- L'arrêt de la VM AP 1 coupe simultanément GLPI et la supervision ; ce compromis est accepté pour le laboratoire.
+- La VM Debian 702 reste un poste utilisateur. Les postes clients Windows et Debian peuvent être arrêtés hors des tests et démonstrations.
+- Dimensionner la rétention Prometheus selon l'espace réellement disponible et observer CPU, RAM et disque avant d'augmenter ou de réduire les allocations.
+- TrueNAS conserve son rôle de stockage. Aucune modification des VM existantes n'est réalisée par cette décision documentaire.
 
 ## 3. Décisions à prendre avant installation
 
 - [ ] Vérifier la mémoire, les CPU et le stockage réellement disponibles.
-- [ ] Vérifier puis affecter les trois VMID, noms et IP.
+- [ ] Vérifier puis affecter les deux VMID, noms et IP.
 - [ ] Choisir les versions Linux et applicatives compatibles ; les consigner.
 - [ ] Définir les URL internes : propositions `glpi.ad.jcorp`, `grafana.ad.jcorp`, `dokploy.ad.jcorp` et `games.ad.jcorp`, non créées à ce stade.
 - [ ] Définir le contexte du site : démonstration interne ou publication Internet autorisée. L'installation ne suppose pas une ouverture automatique vers Internet.

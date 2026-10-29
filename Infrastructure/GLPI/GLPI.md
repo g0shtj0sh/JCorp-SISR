@@ -6,6 +6,8 @@
 
 Inventorier au moins le poste Windows pilote avec GLPI Agent, puis présenter le cycle complet d'un ticket : création par un demandeur, attribution à un technicien, traitement et résolution. L'intégration LDAP à Active Directory est une extension à étudier après ce premier fonctionnement ; elle n'est pas un prérequis du premier test.
 
+GLPI et sa base MariaDB seront regroupés avec Grafana et Prometheus dans la VM de services AP 1 : **2 vCPU, 4 Gio RAM, 40 Gio disque**, Linux sans interface graphique. VMID 705, nom JCORP-SRV01 et IP 10.2.101.153 sont proposés et restent à vérifier. GLPI ne sera pas installé sur un contrôleur de domaine. Voir la [décision des deux VM](../Feuille-de-route.md#2-deux-vm-supplémentaires-retenues).
+
 ## Paramètres à renseigner pendant la réalisation
 
 | Élément | Valeur |

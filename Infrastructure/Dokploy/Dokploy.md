@@ -6,6 +6,8 @@
 
 Préparer une VM Linux dédiée avec Docker et Dokploy pour héberger le site d'offres de serveurs de jeux et sa base de données. Le [cahier des charges du site](../../AP%202/Site-hebergement-jeux.md) décrit les fonctionnalités ; le [plan de validation](../../AP%202/Plan-de-validation.md) décrit la recette.
 
+La VM d'hébergement AP 2 est la seconde des deux VM retenues : **4 vCPU, 4 Gio RAM, 60 Gio disque**, Linux sans interface graphique. Prévoir 6 Gio RAM si les mesures ou les builds l'exigent. VMID 706, nom JCORP-APP01 et IP 10.2.101.154 sont proposés, à vérifier avant création. Elle hébergera Dokploy, le site et sa base ; la supervision sera sur la VM AP 1. Voir la [référence de création](../Feuille-de-route.md#2-deux-vm-supplémentaires-retenues).
+
 ## Paramètres à relever
 
 | Élément | Valeur |

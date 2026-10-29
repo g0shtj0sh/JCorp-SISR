@@ -2,6 +2,8 @@
 
 **AP 1 — Planifiée, non installée.** La supervision sera ensuite étendue aux services de l'AP 2.
 
+Grafana et Prometheus partageront la VM de services AP 1 avec GLPI et MariaDB : **2 vCPU, 4 Gio RAM, 40 Gio disque**. VMID 705, nom JCORP-SRV01 et IP 10.2.101.153 restent proposés. L'arrêt de cette VM coupe GLPI et la supervision ; ce compromis est accepté pour le laboratoire. La rétention sera adaptée à l'espace disponible. Voir la [décision des deux VM](../Feuille-de-route.md#2-deux-vm-supplémentaires-retenues).
+
 ## Architecture prévue
 
 - **Prometheus** collecte et conserve les métriques.

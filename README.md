@@ -27,6 +27,8 @@ Le site s'inspire du type de catalogue de [Nexus Games](https://nexus-games.com/
 
 La segmentation complète et un chantier de sauvegarde/restauration de toute l'infrastructure restent exclus. Le retour à une version applicative précédente est en revanche prévu dans la démonstration AP 2.
 
+Le déploiement retenu utilise **deux nouvelles VM Linux** : une VM commune GLPI/MariaDB/Grafana/Prometheus (**2 vCPU, 4 Gio RAM, 40 Gio**) et une VM Dokploy/site/base (**4 vCPU, 4 Gio RAM, 60 Gio**, extensible à 6 Gio RAM selon besoin). Les contrôleurs AD conservent leurs rôles. Ces VM ne sont pas encore créées.
+
 ## Préparer la réalisation
 
 La [feuille de route](Infrastructure/Feuille-de-route.md) donne l'ordre des étapes, les ressources proposées, les décisions à prendre et les critères de validation. Les valeurs proposées ne constituent pas des réservations ni des installations effectuées.
