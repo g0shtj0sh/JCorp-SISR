@@ -1,6 +1,6 @@
 # TrueNAS - JCorp
 
-Je mets en place un serveur TrueNAS pour le stockage et les partages de mon infrastructure JCorp. Cette documentation présente la création de la VM et les premières étapes de l'installation. Je la complète au fur et à mesure de la configuration.
+Je mets en place un serveur TrueNAS pour le stockage et les partages de mon infrastructure JCorp. Cette documentation présente l'installation, le stockage et la jonction du NAS à Active Directory. Je la complète au fur et à mesure de la configuration.
 
 ## 1. Créer la machine virtuelle
 
@@ -182,8 +182,113 @@ Le tableau de bord **Storage** affiche le message **Pool created successfully** 
 
 La capacité utilisable est inférieure aux 64 Gio bruts du disque en raison de l'espace réservé et des métadonnées du stockage. Le pool est maintenant prêt pour la création des datasets et des partages. Il reste sans redondance ZFS, conformément au choix d'un seul disque.
 
-## Suite de la configuration
+## 13. Corriger la résolution DNS inverse
 
-L'installation, le réseau et le pool `JCORP-DATA` sont opérationnels. Je poursuivrai avec la jonction du NAS à `ad.jcorp`, puis la création des datasets, des permissions fondées sur les groupes AD et des partages.
+La jonction à Active Directory échouait avec un délai DNS : **The resolution lifetime expired**, sur le serveur `10.2.101.10`, port UDP 53.
+
+Les tests depuis le NAS répondaient correctement pour les enregistrements SOA, LDAP et Kerberos du domaine ainsi que pour l'adresse du contrôleur de domaine. J'ai ensuite observé les échanges pendant une tentative de jonction :
+
+```bash
+sudo timeout 60 tcpdump -ni any -nn -vv 'host 10.2.101.10 and port 53'
+```
+
+La capture montrait des recherches inverses PTR pour `10.2.101.10` et `10.2.101.152`, avec des réponses **SERVFAIL** et des requêtes répétées. Dans le gestionnaire DNS de **JCORP-DC01**, aucune zone de recherche inversée n'était configurée.
+
+### Créer la zone inverse sur le contrôleur de domaine
+
+Dans **Gestionnaire de serveur > Outils > DNS**, j'ai développé **JCORP-DC01**, sélectionné **Zones de recherche inversée**, puis ouvert **Action > Nouvelle zone**.
+
+J'ai retenu les paramètres suivants :
+
+| Paramètre | Valeur |
+| --- | --- |
+| Type | Zone principale intégrée à Active Directory |
+| Réplication | Serveurs DNS des contrôleurs de domaine de `ad.jcorp` |
+| Recherche inverse | IPv4 |
+| ID réseau | `10.2.101` |
+| Zone créée | `101.2.10.in-addr.arpa` |
+| Mises à jour dynamiques | Sécurisées uniquement |
+
+J'ai ajouté un pointeur PTR pour le contrôleur de domaine. Pour le NAS, j'ai créé un hôte dans la zone directe `ad.jcorp`, en cochant **Créer un pointeur d'enregistrement PTR associé**.
+
+![Enregistrement A du NAS dans la zone ad.jcorp](images/truenas-dns-enregistrement-a.png)
+
+| Type | Adresse ou nom | Cible |
+| --- | --- | --- |
+| A | `jcorp-nas01.ad.jcorp` | `10.2.101.152` |
+| PTR | `10.2.101.10` | `jcorp-dc01.ad.jcorp` |
+| PTR | `10.2.101.152` | `jcorp-nas01.ad.jcorp` |
+
+Après actualisation du gestionnaire DNS, les deux pointeurs apparaissent dans la zone inverse.
+
+![Zone inverse contenant les PTR du contrôleur de domaine et du NAS](images/truenas-dns-zone-inverse-ptr.png)
+
+Pour contrôler les réponses depuis le Shell Linux du NAS, les commandes sont :
+
+```bash
+dig @10.2.101.10 -x 10.2.101.10 +time=2 +tries=1
+dig @10.2.101.10 -x 10.2.101.152 +time=2 +tries=1
+```
+
+Le résultat attendu est `NOERROR` avec le nom correspondant dans la réponse. La capture suivante valide la jonction après la correction ; ces deux commandes de contrôle ne sont pas présentées comme des résultats capturés.
+
+### Utiliser le presse-papiers noVNC
+
+Pour saisir du texte dans la VM Windows, j'ai ouvert la barre noVNC puis **Clipboard**, renseigné le texte dans la zone prévue, fermé le panneau et utilisé **Ctrl+V** dans le champ de la VM. La présence de l'icône Clipboard ne signifie pas qu'un collage direct depuis le navigateur sera transmis automatiquement.
+
+## 14. Joindre TrueNAS au domaine ad.jcorp
+
+Dans **Credentials > Directory Services > Configure Directory Services**, j'ai renseigné la configuration suivante :
+
+| Champ | Valeur |
+| --- | --- |
+| Configuration Type | Active Directory |
+| Enable Service | Activé |
+| Enable Account Cache | Activé |
+| Enable DNS Updates | Activé |
+| Timeout | 10 secondes |
+| Kerberos Realm | Vide, déterminé lors de la configuration |
+| Credential Type | Kerberos User |
+| Username | `Administrateur` |
+| Password | Mot de passe du compte de domaine, non reproduit dans la documentation |
+| TrueNAS Hostname | `JCORP-NAS01` |
+| Domain Name | `ad.jcorp` |
+| Site Name | Vide |
+| Computer Account OU | `OU=Serveurs,DC=ad,DC=jcorp` |
+| Use Default Domain | Désactivé |
+| Enable Trusted Domains | Désactivé |
+| Use TrueNAS Server IDMAP Defaults | Activé |
+
+Après validation avec **Save**, la jonction fonctionne. La page **Directory Services** affiche le domaine **AD.JCORP**, le statut **HEALTHY** et le cache des comptes **Enabled**.
+
+![Jonction Active Directory réussie : domaine AD.JCORP et statut HEALTHY](images/truenas-active-directory-healthy.png)
+
+La correction de la zone inverse et des enregistrements DNS a précédé cette tentative réussie. Le NAS est maintenant joint au domaine ; la création des partages et la validation de leurs autorisations restent à effectuer.
+
+## 15. Préparer les partages et les lecteurs réseau
+
+La capture du poste utilisateur montre uniquement le disque local et le lecteur CD. Aucun lecteur réseau du NAS n'est encore déployé.
+
+![Ce PC sur le poste Windows avant le déploiement des lecteurs réseau](images/truenas-poste-avant-lecteurs-reseau.png)
+
+La jonction au domaine ne crée pas les partages et ne connecte pas automatiquement un lecteur chez les utilisateurs. Je prévois la suite dans cet ordre :
+
+1. Créer les datasets de données dans `JCORP-DATA` avec le preset **SMB** et des ACL **NFSv4**.
+2. Définir les permissions des datasets à partir des groupes AD existants. Par exemple, réserver les données RH à `GG_RH` et les données comptables à `GG_Comptabilite`, avec le niveau d'accès retenu pour chaque service. Les accès d'administration seront définis séparément.
+3. Créer les partages **SMB**, activer le service et vérifier leurs ACL de partage ainsi que leurs ACL de fichiers.
+4. Tester un accès autorisé et un accès refusé avec des comptes de services différents.
+5. Créer la GPO utilisateur **JCORP-Utilisateurs-LecteursReseau**, liée à l'OU **Utilisateurs**, puis configurer **Configuration utilisateur > Préférences > Paramètres Windows > Mappages de lecteurs**.
+6. Cibler chaque lecteur de service selon l'appartenance au groupe de sécurité AD correspondant et tester l'affichage sur un poste Windows du domaine.
+
+Exemples de chemins proposés, à créer avant de renseigner la GPO :
+
+| Partage proposé | Chemin réseau proposé | Population |
+| --- | --- | --- |
+| RH | `\\JCORP-NAS01.ad.jcorp\RH` | Membres de `GG_RH` |
+| Comptabilite | `\\JCORP-NAS01.ad.jcorp\Comptabilite` | Membres de `GG_Comptabilite` |
+
+Le ciblage GPO règle l'affichage du lecteur. Les ACL TrueNAS imposent les droits même si une personne saisit directement le chemin réseau. Je n'accorde donc pas un accès général à tous les utilisateurs sur les datasets de service.
+
+Cette partie décrit la procédure prévue : les partages, leurs ACL et la GPO de lecteurs ne sont pas encore configurés ni validés. La GPO Windows ne déploie pas les montages sur les postes Debian.
 
 [Retour à l'infrastructure](../README.md)
