@@ -263,7 +263,7 @@ Après validation avec **Save**, la jonction fonctionne. La page **Directory Ser
 
 ![Jonction Active Directory réussie : domaine AD.JCORP et statut HEALTHY](images/truenas-active-directory-healthy.png)
 
-La correction de la zone inverse et des enregistrements DNS a précédé cette tentative réussie. Le NAS est maintenant joint au domaine ; la création des partages et la validation de leurs autorisations restent à effectuer.
+La correction de la zone inverse et des enregistrements DNS a précédé cette tentative réussie. Le NAS est maintenant joint au domaine. La section suivante présente le partage Commun et les premiers tests d'accès.
 
 ## 15. Créer l'espace commun des utilisateurs du domaine
 
@@ -282,50 +282,76 @@ La capture confirme la présence de `JCORP-DATA/Commun`, son usage SMB et enviro
 | Chemin du dataset | `/mnt/JCORP-DATA/Commun` |
 | Usage affiché | SMB |
 | Population prévue | Tous les utilisateurs du domaine JCorp |
-| Permission prévue pour les utilisateurs | Modification : lecture, création, modification et suppression des fichiers |
-| Administration prévue | Contrôle total pour les administrateurs |
+| Permission vérifiée pour les utilisateurs | Modification : lecture, création, modification et suppression des fichiers |
+| Administration vérifiée | Contrôle total pour les administrateurs |
 
-La création du dataset est confirmée. Cette capture ne prouve pas encore la configuration effective des ACL, l'activation du partage SMB ni l'accès depuis un poste utilisateur.
+### Vérifier et enregistrer les permissions du dataset
 
-### Configurer les permissions du dataset
+Dans l'éditeur ACL du dataset `/mnt/JCORP-DATA/Commun`, j'ai vérifié les entrées déjà créées par le preset SMB. Le groupe **JCORP\\utilisateurs du domaine** est présent avec **Allow**, **Modify** et **Inherit**. Le groupe **JCORP\\admins du domaine** dispose de **Full Control**. J'ai conservé les entrées existantes du propriétaire et des groupes locaux, puis enregistré avec **Save Access Control List**.
 
-La prochaine étape consiste à sélectionner **Commun > Permissions > Edit** pour vérifier les ACL **NFSv4**. Je conserve les entrées d'administration nécessaires et prévois une entrée **Allow** pour le groupe AD **Utilisateurs du domaine / Domain Users**, avec le niveau **Modify** et l'héritage sur les fichiers et sous-dossiers.
+![ACL du groupe utilisateurs du domaine : modification autorisée et héritage](images/truenas-commun-acl-domaine.png)
 
-Le groupe doit être sélectionné dans les résultats de recherche des comptes AD pour être associé au bon identifiant. Les autres autorisations existantes seront vérifiées avant toute modification ; aucun refus explicite destiné à tous les utilisateurs ne doit bloquer le groupe autorisé.
+L'application récursive n'est pas cochée : le dataset était vide au moment de cette vérification. Les nouveaux éléments héritent des permissions du dossier parent.
 
-Dans cet espace commun, le niveau Modify permet également de supprimer ou modifier les fichiers créés par les autres utilisateurs. Il ne donne pas aux utilisateurs le contrôle des ACL.
+Le niveau Modify permet aux utilisateurs de lire, créer, modifier et supprimer les fichiers de cet espace commun, y compris ceux des autres utilisateurs. Il ne leur donne pas le contrôle des ACL.
 
-### Vérifier le partage SMB et le tester
+### Vérifier le partage SMB
 
-Après configuration des ACL, je vérifierai dans **Shares > Windows (SMB) Shares** si le partage **Commun** a été créé en même temps que le dataset. S'il est présent, il ne faut pas le créer une deuxième fois.
+Le partage **Commun** existe déjà dans **Shares > Windows (SMB) Shares**. Son chemin est `/mnt/JCORP-DATA/Commun`, son bouton **Enabled** est activé et le service SMB affiche **RUNNING**. Je n'ai pas créé de deuxième partage.
 
-Le partage doit utiliser le chemin `/mnt/JCORP-DATA/Commun`, être activé et disposer de permissions de partage compatibles avec l'accès des utilisateurs du domaine. Le service **SMB** doit être démarré et configuré pour démarrer automatiquement.
+![Partage Commun activé et service SMB démarré](images/truenas-commun-smb-actif.png)
 
-Depuis un poste Windows connecté avec un utilisateur du domaine, le chemin à tester sera :
+L'ACL de partage présente l'entrée par défaut `everyone@`, **FULL**, **ALLOWED**. Cette autorisation de partage ne dépasse pas les droits accordés par les ACL du système de fichiers : le groupe des utilisateurs du domaine reste limité à Modify sur le dataset. Le démarrage automatique du service n'a pas encore été contrôlé.
+
+### Tester depuis le poste Windows du domaine
+
+Depuis l'explorateur du poste **User1-JCorp-Windows**, j'ai ouvert :
 
 ```text
 \\JCORP-NAS01.ad.jcorp\Commun
 ```
 
-Je vérifierai la création, la lecture, la modification et la suppression d'un fichier de test, puis l'accès depuis un second compte du domaine.
+Le dossier s'est ouvert sans demande supplémentaire d'identifiants. J'ai créé un dossier de test nommé `t` : il apparaît dans le partage sans erreur d'autorisation.
 
-### Déployer ensuite le lecteur par GPO
+![Ouverture du partage Commun et création du dossier de test depuis Windows](images/truenas-commun-test-ecriture.png)
 
-Une fois le partage testé, je prévois de créer la GPO **JCORP-Utilisateurs-LecteursReseau**, liée à l'OU **Utilisateurs** et à ses sous-OU concernées. Dans **Configuration utilisateur > Préférences > Paramètres Windows > Mappages de lecteurs**, je pourrai ajouter le lecteur :
+Ce test valide l'ouverture, la liste du dossier et la création d'un sous-dossier avec la session Windows en cours. Le dossier de test est conservé. La modification du contenu d'un fichier, la suppression et le test avec un second compte restent à effectuer.
 
-| Paramètre proposé | Valeur |
+### Déployer le lecteur par GPO
+
+Après le premier test SMB, j'ai créé la GPO **JCORP-Utilisateurs-LecteursReseau** depuis l'OU **Utilisateurs**, avec l'option **Créer un objet GPO dans ce domaine, et le lier ici**. Son lien est activé et son filtrage conserve **Utilisateurs authentifiés**, sans filtre WMI. Elle concerne les utilisateurs de cette OU et de ses sous-OU, sous réserve de l'héritage des stratégies.
+
+![Portée de la GPO liée à Utilisateurs et filtrage Utilisateurs authentifiés](images/gpo-commun-portee-utilisateurs.png)
+
+Dans **Modifier > Configuration utilisateur > Préférences > Paramètres Windows > Mappages de lecteurs**, j'ai choisi **Nouveau > Lecteur mappé** puis enregistré ces paramètres :
+
+| Paramètre enregistré | Valeur |
 | --- | --- |
 | Action | Mettre à jour |
 | Emplacement | `\\JCORP-NAS01.ad.jcorp\Commun` |
-| Libellé | `Commun JCorp` |
-| Lettre proposée | `S:`, à vérifier disponible sur les postes |
+| Libellé personnalisé | Vide, le partage conserve son nom Commun |
+| Lettre | `S:` |
 | Reconnecter | Activé |
 | Comptes utilisés | Session du domaine, sans identifiants enregistrés dans la GPO |
+
+![Propriétés du lecteur S : chemin UNC, mise à jour et reconnexion](images/gpo-commun-lecteur-s-proprietes.png)
+
+Après validation avec **OK**, le lecteur **S:** apparaît dans la liste des mappages de la GPO.
+
+![Mappage S enregistré dans la GPO](images/gpo-commun-lecteur-s-enregistre.png)
 
 Tous les utilisateurs visés doivent être placés dans l'OU où cette GPO utilisateur s'applique, ou dans ses sous-OU, et posséder les droits de lecture et d'application de la GPO. Un utilisateur situé hors de cette portée ne recevra pas le lecteur même s'il peut ouvrir le partage manuellement.
 
 Les ACL TrueNAS assurent les droits sur les fichiers ; la GPO sert à connecter automatiquement le lecteur. Cette GPO Windows ne monte pas le partage sur les postes Debian.
 
-Les permissions, le test SMB et la GPO décrits ci-dessus restent à réaliser et à valider.
+Les permissions du dataset, l'activation du partage SMB et le premier test d'ouverture et de création sont validés. La GPO et son mappage S: sont créés et enregistrés. Après un simple déverrouillage, S: n'était pas encore affiché. J'ai ensuite fermé puis rouvert la session de Joshua Fernandes (JCORP\\jfernandes) sur la VM 701. Le lecteur **Commun (S:)** apparaît automatiquement dans **Ce PC > Emplacements réseau**.
+
+![Lecteur Commun S présent dans Ce PC après ouverture de session](images/gpo-commun-lecteur-s-client.png)
+
+J'ai ouvert le lecteur par double-clic : le dossier de test `t`, créé précédemment sur le NAS, est visible sans demande supplémentaire d'identifiants. Le mappage et son ouverture sont donc validés sur ce poste et cette session.
+
+![Ouverture du lecteur S et affichage du dossier de test](images/gpo-commun-lecteur-s-ouvert.png)
+
+Il reste aussi à terminer les tests de fichiers, vérifier un second compte et contrôler le démarrage automatique de SMB.
 
 [Retour à l'infrastructure](../README.md)
