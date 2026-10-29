@@ -265,30 +265,67 @@ Après validation avec **Save**, la jonction fonctionne. La page **Directory Ser
 
 La correction de la zone inverse et des enregistrements DNS a précédé cette tentative réussie. Le NAS est maintenant joint au domaine ; la création des partages et la validation de leurs autorisations restent à effectuer.
 
-## 15. Préparer les partages et les lecteurs réseau
+## 15. Créer l'espace commun des utilisateurs du domaine
 
-La capture du poste utilisateur montre uniquement le disque local et le lecteur CD. Aucun lecteur réseau du NAS n'est encore déployé.
+J'ai retenu un partage **Commun**, accessible à tous les utilisateurs du domaine, plutôt que des partages séparés par service pour cette étape du projet.
 
-![Ce PC sur le poste Windows avant le déploiement des lecteurs réseau](images/truenas-poste-avant-lecteurs-reseau.png)
+Dans **Datasets**, j'ai sélectionné **JCORP-DATA**, puis utilisé **Add Dataset** avec le nom **Commun** et le preset **SMB**.
 
-La jonction au domaine ne crée pas les partages et ne connecte pas automatiquement un lecteur chez les utilisateurs. Je prévois la suite dans cet ordre :
+![Dataset Commun créé sous JCORP-DATA avec l'usage SMB](images/truenas-dataset-commun.png)
 
-1. Créer les datasets de données dans `JCORP-DATA` avec le preset **SMB** et des ACL **NFSv4**.
-2. Définir les permissions des datasets à partir des groupes AD existants. Par exemple, réserver les données RH à `GG_RH` et les données comptables à `GG_Comptabilite`, avec le niveau d'accès retenu pour chaque service. Les accès d'administration seront définis séparément.
-3. Créer les partages **SMB**, activer le service et vérifier leurs ACL de partage ainsi que leurs ACL de fichiers.
-4. Tester un accès autorisé et un accès refusé avec des comptes de services différents.
-5. Créer la GPO utilisateur **JCORP-Utilisateurs-LecteursReseau**, liée à l'OU **Utilisateurs**, puis configurer **Configuration utilisateur > Préférences > Paramètres Windows > Mappages de lecteurs**.
-6. Cibler chaque lecteur de service selon l'appartenance au groupe de sécurité AD correspondant et tester l'affichage sur un poste Windows du domaine.
+La capture confirme la présence de `JCORP-DATA/Commun`, son usage SMB et environ **61,02 Gio disponibles**. Cet espace disponible appartient au pool : le dataset ne dispose pas d'un disque supplémentaire de cette taille.
 
-Exemples de chemins proposés, à créer avant de renseigner la GPO :
+| Élément | Valeur |
+| --- | --- |
+| Pool parent | `JCORP-DATA` |
+| Dataset | `Commun` |
+| Chemin du dataset | `/mnt/JCORP-DATA/Commun` |
+| Usage affiché | SMB |
+| Population prévue | Tous les utilisateurs du domaine JCorp |
+| Permission prévue pour les utilisateurs | Modification : lecture, création, modification et suppression des fichiers |
+| Administration prévue | Contrôle total pour les administrateurs |
 
-| Partage proposé | Chemin réseau proposé | Population |
-| --- | --- | --- |
-| RH | `\\JCORP-NAS01.ad.jcorp\RH` | Membres de `GG_RH` |
-| Comptabilite | `\\JCORP-NAS01.ad.jcorp\Comptabilite` | Membres de `GG_Comptabilite` |
+La création du dataset est confirmée. Cette capture ne prouve pas encore la configuration effective des ACL, l'activation du partage SMB ni l'accès depuis un poste utilisateur.
 
-Le ciblage GPO règle l'affichage du lecteur. Les ACL TrueNAS imposent les droits même si une personne saisit directement le chemin réseau. Je n'accorde donc pas un accès général à tous les utilisateurs sur les datasets de service.
+### Configurer les permissions du dataset
 
-Cette partie décrit la procédure prévue : les partages, leurs ACL et la GPO de lecteurs ne sont pas encore configurés ni validés. La GPO Windows ne déploie pas les montages sur les postes Debian.
+La prochaine étape consiste à sélectionner **Commun > Permissions > Edit** pour vérifier les ACL **NFSv4**. Je conserve les entrées d'administration nécessaires et prévois une entrée **Allow** pour le groupe AD **Utilisateurs du domaine / Domain Users**, avec le niveau **Modify** et l'héritage sur les fichiers et sous-dossiers.
+
+Le groupe doit être sélectionné dans les résultats de recherche des comptes AD pour être associé au bon identifiant. Les autres autorisations existantes seront vérifiées avant toute modification ; aucun refus explicite destiné à tous les utilisateurs ne doit bloquer le groupe autorisé.
+
+Dans cet espace commun, le niveau Modify permet également de supprimer ou modifier les fichiers créés par les autres utilisateurs. Il ne donne pas aux utilisateurs le contrôle des ACL.
+
+### Vérifier le partage SMB et le tester
+
+Après configuration des ACL, je vérifierai dans **Shares > Windows (SMB) Shares** si le partage **Commun** a été créé en même temps que le dataset. S'il est présent, il ne faut pas le créer une deuxième fois.
+
+Le partage doit utiliser le chemin `/mnt/JCORP-DATA/Commun`, être activé et disposer de permissions de partage compatibles avec l'accès des utilisateurs du domaine. Le service **SMB** doit être démarré et configuré pour démarrer automatiquement.
+
+Depuis un poste Windows connecté avec un utilisateur du domaine, le chemin à tester sera :
+
+```text
+\\JCORP-NAS01.ad.jcorp\Commun
+```
+
+Je vérifierai la création, la lecture, la modification et la suppression d'un fichier de test, puis l'accès depuis un second compte du domaine.
+
+### Déployer ensuite le lecteur par GPO
+
+Une fois le partage testé, je prévois de créer la GPO **JCORP-Utilisateurs-LecteursReseau**, liée à l'OU **Utilisateurs** et à ses sous-OU concernées. Dans **Configuration utilisateur > Préférences > Paramètres Windows > Mappages de lecteurs**, je pourrai ajouter le lecteur :
+
+| Paramètre proposé | Valeur |
+| --- | --- |
+| Action | Mettre à jour |
+| Emplacement | `\\JCORP-NAS01.ad.jcorp\Commun` |
+| Libellé | `Commun JCorp` |
+| Lettre proposée | `S:`, à vérifier disponible sur les postes |
+| Reconnecter | Activé |
+| Comptes utilisés | Session du domaine, sans identifiants enregistrés dans la GPO |
+
+Tous les utilisateurs visés doivent être placés dans l'OU où cette GPO utilisateur s'applique, ou dans ses sous-OU, et posséder les droits de lecture et d'application de la GPO. Un utilisateur situé hors de cette portée ne recevra pas le lecteur même s'il peut ouvrir le partage manuellement.
+
+Les ACL TrueNAS assurent les droits sur les fichiers ; la GPO sert à connecter automatiquement le lecteur. Cette GPO Windows ne monte pas le partage sur les postes Debian.
+
+Les permissions, le test SMB et la GPO décrits ci-dessus restent à réaliser et à valider.
 
 [Retour à l'infrastructure](../README.md)
