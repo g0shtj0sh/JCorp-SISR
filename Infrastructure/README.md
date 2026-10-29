@@ -4,6 +4,10 @@ Je regroupe ici les configurations techniques de mon projet JCorp, communes aux 
 
 | Documentation | Contenu | État |
 | --- | --- | --- |
+| [Feuille de route](Feuille-de-route.md) | Ordre AP 1/AP 2, ressources proposées et décisions | Préparée |
+| [GLPI](GLPI/GLPI.md) | Inventaire et assistance, AP 1 | Planifié, non installé |
+| [Grafana et Prometheus](Supervision/Grafana-Prometheus.md) | Supervision commune aux deux AP | Planifiés, non installés |
+| [Dokploy](Dokploy/Dokploy.md) | Déploiement du site et de sa base, AP 2 | Planifié, non installé |
 | [TrueNAS](TrueNAS/TrueNAS.md) | VM 704, stockage, jonction AD, partage Commun et lecteur S: par GPO | Opérationnel |
 | [Postes utilisateurs](Postes%20utilisateurs/Postes-utilisateurs.md) | Windows 11 joint au domaine ; Debian à finaliser | En cours |
 | [Architecture du réseau](Architecture-du-reseau.md) | Plages IP, VLAN, pont Proxmox et machines virtuelles | En cours |
@@ -22,7 +26,14 @@ Je conserve une infrastructure simple : Proxmox, réseau VLAN 700, deux contrôl
 - [x] Lecteur Commun S: déployé par GPO et ouvert avec succès après reconnexion.
 - [ ] Terminer la jonction de Debian au domaine, dans la prochaine étape.
 
-La segmentation complète, les sauvegardes et restaurations, les applications métier et les services supplémentaires sont hors du périmètre retenu pour cette infrastructure simplifiée. Leur absence ne constitue pas une tâche restante de cette étape.
+Le programme est complété le 29 octobre 2026 :
+
+- [ ] AP 1 : GLPI pour l'inventaire et le cycle d'un ticket.
+- [ ] AP 1 : Grafana/Prometheus pour les métriques Windows/Linux et une alerte testée.
+- [ ] AP 2 : Dokploy pour déployer un site d'offres de serveurs de jeux et sa base.
+- [ ] AP 2 : DNS/HTTPS, mise à jour depuis GitHub, logs, retour de version applicative et extension de la supervision.
+
+Les procédures sont préparées ; aucune de ces nouvelles installations n'est effectuée. La segmentation complète, le chantier global de sauvegarde/restauration et les autres applications métier restent exclus. Paiement réel et création automatique de VPS ne font pas partie de la première version du site.
 
 ## Scripts
 

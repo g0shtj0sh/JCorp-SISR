@@ -30,7 +30,13 @@ J'ai relié la carte réseau de la VM au pont `vmbr2`, lui-même relié à l'int
 2. Le poste Windows est joint au domaine pour l'authentification et les GPO. La jonction de Debian reste la prochaine étape.
 3. Le NAS fixe `10.2.101.152` expose le partage Commun ; la GPO monte `\\JCORP-NAS01.ad.jcorp\Commun` en S: pour les utilisateurs de l'OU Utilisateurs.
 
-Les sauvegardes/restaurations, les applications métier et les services supplémentaires sont exclus du périmètre actuel.
+## Extensions planifiées pour les AP
+
+Trois rôles supplémentaires sont proposés : GLPI, supervision Grafana/Prometheus, et hébergement Docker/Dokploy. Les VMID 705–707 et IP 10.2.101.153–155 sont uniquement des propositions à vérifier : aucune VM ou réservation n'a été créée. Le dimensionnement, les noms et les URL sont détaillés dans la [feuille de route](Feuille-de-route.md).
+
+L'AP 1 ajoute l'inventaire/support et la supervision. L'AP 2 ajoute un site avec sa base et étend cette supervision aux conteneurs et à la disponibilité HTTP. La VM 702 reste un poste utilisateur Debian.
+
+Le chantier global de sauvegarde/restauration, la segmentation complète et les autres applications métier restent exclus du périmètre. Le retour de version applicative du site est prévu en AP 2.
 
 Les visiteurs médicaux du scénario sont des salariés nomades. Le VLAN « Visiteurs » du dossier RedOne concerne les invités Wi-Fi : ces deux notions ne doivent pas être confondues.
 

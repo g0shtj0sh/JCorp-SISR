@@ -143,5 +143,5 @@ Get-ADDomain | Select-Object DNSRoot, NetBIOSName
 dcdiag /test:Advertising /test:Services /test:DNS
 ```
 
-Windows 11 est joint au domaine, la connexion utilisateur et le lecteur S: sont fonctionnels. Le NAS est terminé selon les contrôles documentés et la validation complémentaire de Joshua. La prochaine étape est la jonction du poste Debian ; elle n'est pas commencée pendant cette intervention. La segmentation complète, les sauvegardes/restaurations et les applications ou services supplémentaires restent hors du périmètre simplifié retenu.
+Windows 11 est joint au domaine, la connexion utilisateur et le lecteur S: sont fonctionnels. Le NAS est terminé selon les contrôles documentés et la validation complémentaire de Joshua. La prochaine étape est la jonction du poste Debian ; elle n'est pas commencée pendant cette intervention. Le programme est ensuite complété par GLPI et Grafana/Prometheus en AP 1, puis Dokploy et un site avec sa base en AP 2. Ces services sont planifiés, pas encore installés ; voir la [feuille de route](../Feuille-de-route.md). La segmentation complète, le chantier global de sauvegarde/restauration et les autres applications restent exclus.
 

@@ -1,27 +1,34 @@
-# JCorp
+# JCorp — Infrastructure et hébergement
 
-Je documente ici l'infrastructure JCorp, construite progressivement au fil des deux ateliers professionnels. L'AP 2 poursuit le même projet et ajoute des services au socle mis en place pendant l'AP 1. Je m'appuie sur le [dossier RedOne](https://docs.google.com/document/d/13dC98HuGbrRNXuTOotnaGaNbwyVlJhWZ/edit) pour définir les besoins de l'entreprise.
+Je documente l'infrastructure JCorp réalisée sur Proxmox et son évolution au fil de deux ateliers professionnels. Le [dossier RedOne](https://docs.google.com/document/d/13dC98HuGbrRNXuTOotnaGaNbwyVlJhWZ/edit) sert de référence au contexte d'entreprise ; le périmètre technique retenu reste volontairement simple.
 
-Je regroupe dans [Infrastructure](Infrastructure) la documentation technique commune à tout le projet : réseau, Active Directory, DNS, DHCP, GPO et contrôleurs de domaine. Les dossiers AP 1 et AP 2 présentent le suivi des ateliers.
-
-| Partie | Contenu | État |
+| Partie | Objectif | État au 29 octobre 2026 |
 | --- | --- | --- |
-| [Infrastructure](Infrastructure) | Réseau, Active Directory, DNS, DHCP, GPO, contrôleurs de domaine, scripts et captures | En cours |
-| [AP 1](AP%201) | Objectifs et suivi du premier atelier | En cours |
-| AP 2 | Objectifs et suivi du second atelier | À venir |
+| [Infrastructure commune](Infrastructure/README.md) | Réseau, AD, DNS, DHCP, GPO, postes et NAS ; documentation des futurs services | Socle opérationnel, jonction Debian à terminer |
+| [AP 1](AP%201/README.md) | Administrer le parc, gérer le support avec GLPI et superviser avec Grafana/Prometheus | Socle réalisé ; GLPI et supervision planifiés |
+| [AP 2](AP%202/README.md) | Déployer avec Dokploy un site de présentation d'offres de serveurs de jeux et sa base | Cadrage et documentation préparés ; aucun déploiement réalisé |
 
-## Informations utiles
+## État du socle
 
-| Information | Valeur |
-| --- | --- |
-| Domaine Active Directory | `ad.jcorp` |
-| Serveur AD / DNS / DHCP | `JCORP-DC01` - `10.2.101.10` |
-| Passerelle réseau | `10.2.101.1` |
-| Mot de passe commun du projet | `JCorp-123` |
+- [x] Domaine `ad.jcorp`, DNS, OU, comptes et groupes.
+- [x] DHCP contrôlé et options corrigées.
+- [x] Windows joint au domaine et lecteur Commun S: fonctionnel.
+- [x] Second contrôleur fonctionnel selon la validation de Joshua.
+- [x] NAS TrueNAS joint au domaine, partage et permissions terminés.
+- [ ] Jonction du poste Debian au domaine.
 
-## Ma partie sur Proxmox
+Les preuves et les limites des contrôles sont précisées dans chaque documentation technique.
 
-Selon le [document de répartition Proxmox](https://docs.google.com/document/d/1TRtCmhZaJJRo_nsAT4BwWSqLR0Czhhl84VtjxAoNYOA/edit?tab=t.0), les réseaux internes **`10.2.101.0/24` à `10.2.120.0/24`**, les **VLAN 700 à 799** et les **VMID 700 à 799** me sont réservés pour réaliser mon infrastructure. J'ai créé mon premier contrôleur de domaine sur la **VM 700**, avec l'adresse **`10.2.101.10`**.
+## Programme retenu
 
-Je détaille la configuration et les étapes réalisées dans le dossier [Infrastructure](Infrastructure).
+L'AP 1 ajoute **GLPI** pour l'inventaire et le suivi d'un ticket, ainsi que **Grafana et Prometheus** pour les tableaux de bord et une alerte testée. L'AP 2 ajoute **Dokploy**, un **site web avec une base de données**, un nom DNS et HTTPS, puis la supervision de ces nouveaux services par la plateforme de l'AP 1.
 
+Le site s'inspire du type de catalogue de [Nexus Games](https://nexus-games.com/) : offres de serveurs de jeux, caractéristiques et contact, avec une identité propre au projet. Les commandes sont simulées. Paiement réel et création automatique de VPS ne font pas partie de la première version.
+
+La segmentation complète et un chantier de sauvegarde/restauration de toute l'infrastructure restent exclus. Le retour à une version applicative précédente est en revanche prévu dans la démonstration AP 2.
+
+## Préparer la réalisation
+
+La [feuille de route](Infrastructure/Feuille-de-route.md) donne l'ordre des étapes, les ressources proposées, les décisions à prendre et les critères de validation. Les valeurs proposées ne constituent pas des réservations ni des installations effectuées.
+
+Mes plages attribuées sur Proxmox restent `10.2.101.0/24` à `10.2.120.0/24`, VLAN **700 à 799**, VMID **700 à 799**. Le réseau utilisé est actuellement `10.2.101.0/24`, VLAN **700**, pont `vmbr2`. Les informations techniques détaillées se trouvent dans l'[architecture](Infrastructure/Architecture-du-reseau.md).
