@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | 1 — terminé | Jonction du poste Debian existant | Membre du domaine dans l'OU Postes, résolution AD/Internet, identité et test de jonction validés ; connexion graphique confirmée |
 | 2 — partiellement couvert | Vérifier les ressources Proxmox et les paramètres disponibles | VMID/IP libres, RAM/CPU/disque disponibles, sortie réseau et résolution DNS confirmées. **VMID et IP contrôlés libres, ressources relevées sans audit formel** (hôte manifestement surdimensionné), réseau et résolution confirmés dans les VM créées |
-| 3 | Installer GLPI et son agent sur un poste pilote | Poste visible dans l'inventaire et ticket créé, attribué puis résolu |
+| 3 — serveur en service | Installer GLPI et son agent sur un poste pilote | **GLPI 11.0.13 installé, accessible et ses actions automatiques en service** ([procédure](GLPI/GLPI.md)) ; restent l'agent sur le poste pilote, le poste visible dans l'inventaire et le ticket créé, attribué puis résolu |
 | 4 | Installer Prometheus, Grafana et les collecteurs nécessaires | Mesures réelles de Windows et Linux, tableau lisible et alerte déclenchée puis résolue |
 | 5 — VM prêtes | Préparer les VM Linux et installer Dokploy | **Les deux VM sont créées, adressées et accessibles** ([procédure](VM%20Linux/Creation-des-VM-Linux.md)) ; reste l'accès d'administration Dokploy et un premier déploiement sain |
 | 6 | Créer puis déployer le site et sa base | Catalogue et formulaire fonctionnels, données persistantes après redéploiement |
