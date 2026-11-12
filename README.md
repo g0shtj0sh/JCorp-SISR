@@ -5,7 +5,7 @@ Je documente l'infrastructure JCorp réalisée sur Proxmox et son évolution au 
 | Partie | Objectif | État au 12 novembre 2026 |
 | --- | --- | --- |
 | [Infrastructure commune](Infrastructure/README.md) | Réseau, AD, DNS, DHCP, GPO, postes et NAS ; documentation des futurs services | Socle terminé ; les deux VM Linux de services sont créées, contrôlées et la première porte GLPI |
-| [AP 1](AP%201/README.md) | Administrer le parc, gérer le support avec GLPI et superviser avec Grafana/Prometheus | Socle réalisé, GLPI 11.0.13 installé sur `JCORP-SRV01` ; inventaire, ticket et supervision à faire |
+| [AP 1](AP%201/README.md) | Administrer le parc, gérer le support avec GLPI et superviser avec Grafana/Prometheus | Socle réalisé, GLPI 11.0.13 inventoriant une première machine ; ticket et supervision à faire |
 | [AP 2](AP%202/README.md) | Déployer avec Dokploy un site de présentation d'offres de serveurs de jeux et sa base | Cadrage préparé, VM `JCORP-APP01` prête ; aucun déploiement réalisé |
 
 ## État du socle
@@ -22,7 +22,7 @@ Les preuves et les limites des contrôles sont précisées dans chaque documenta
 
 ## Programme retenu
 
-L'AP 1 ajoute **GLPI** pour l'inventaire et le suivi d'un ticket — le serveur est installé depuis le 12 novembre 2026, l'inventaire et le ticket restent à réaliser — ainsi que **Grafana et Prometheus** pour les tableaux de bord et une alerte testée, non encore installés. L'AP 2 ajoute **Dokploy**, un **site web avec une base de données**, un nom DNS et HTTPS, puis la supervision de ces nouveaux services par la plateforme de l'AP 1.
+L'AP 1 ajoute **GLPI** pour l'inventaire et le suivi d'un ticket — installé depuis le 12 novembre 2026 et inventoriant une première machine du parc, le cycle de ticket restant à démontrer — ainsi que **Grafana et Prometheus** pour les tableaux de bord et une alerte testée, non encore installés. L'AP 2 ajoute **Dokploy**, un **site web avec une base de données**, un nom DNS et HTTPS, puis la supervision de ces nouveaux services par la plateforme de l'AP 1.
 
 Le site s'inspire du type de catalogue de [Nexus Games](https://nexus-games.com/) : offres de serveurs de jeux, caractéristiques et contact, avec une identité propre au projet. Les commandes sont simulées. Paiement réel et création automatique de VPS ne font pas partie de la première version.
 

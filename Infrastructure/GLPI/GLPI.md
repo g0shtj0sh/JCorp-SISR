@@ -1,6 +1,6 @@
 # GLPI — Inventaire et assistance
 
-**AP 1 — Installé et accessible depuis le 12 novembre 2026. Inventaire du poste pilote et cycle de ticket non encore réalisés.** GLPI complète le socle AD et NAS avec la gestion du parc et des demandes d'assistance.
+**AP 1 — Installé, accessible et inventoriant depuis le 12 novembre 2026. Cycle de ticket non encore réalisé.** GLPI complète le socle AD et NAS avec la gestion du parc et des demandes d'assistance.
 
 ## Objectif et périmètre
 
@@ -28,7 +28,7 @@ Debian 13 livre PHP 8.4 et MariaDB 11 : la branche 11 est donc compatible.
 | VM, nom et IP | VM **705**, `JCORP-SRV01`, `10.2.101.153/24`, passerelle `10.2.101.1`, DNS `10.2.101.10` |
 | Distribution et version | **Debian 13 trixie**, noyau `6.12.116+deb13-amd64`, sans interface graphique |
 | Version GLPI | **11.0.13**, confirmée dans la table `glpi_configs` |
-| Version GLPI Agent | À relever lors de l'installation sur le poste pilote |
+| Version GLPI Agent | **1.21**, installateur Windows 64 bits |
 | Serveur web | **Apache 2.4.71** (Debian) |
 | PHP | **8.4.27**, module Apache et interface en ligne de commande |
 | Base de données | **MariaDB 11.8.6**, base `glpi` en `utf8mb4` / `utf8mb4_unicode_ci` |
@@ -36,7 +36,7 @@ Debian 13 livre PHP 8.4 et MariaDB 11 : la branche 11 est donc compatible.
 | Racine web | `/var/www/glpi/public`, propriétaire `www-data` |
 | URL | `http://10.2.101.153/` fonctionnelle ; `glpi.ad.jcorp` prévu, enregistrement DNS **non créé** |
 | Certificat | Aucun, service en HTTP seul à ce stade |
-| Poste pilote | VM 701 `User1-JCorp-Windows` |
+| Machine inventoriée | **VM 700 `JCORP-DC01`**, Windows Server 2022, au lieu de la VM 701 initialement prévue |
 | Date et opérateur | 12 novembre 2026, Joshua Fernandes |
 
 Le mot de passe du compte de base est généré aléatoirement à l'installation et conservé dans `/root/.glpi-db-pass` sur la VM, en lecture pour `root` seul. Conformément à la méthode documentaire du projet, il n'apparaît ni dans cette procédure ni dans les captures.
@@ -255,6 +255,133 @@ Les choix de ce couple d'unités :
 
 Une lecture à ne pas se tromper : pendant l'exécution du service, `systemctl list-timers` affiche une colonne `NEXT` **vide**. Cela ne signifie pas que le *timer* est désarmé, seulement qu'il attend la fin du service en cours. Contrôlé une seconde fois hors exécution, `NEXT` indique bien la minute suivante et le *timer* est `active` et `enabled`.
 
+## Étape 9 — Inventaire par GLPI Agent
+
+### Activation de l'inventaire natif
+
+L'inventaire est **désactivé par défaut** après installation, ce que rien ne signale tant qu'on n'envoie pas de données :
+
+```bash
+sudo -u www-data php bin/console config:set --context=inventory enabled_inventory 1
+sudo -u www-data php bin/console cache:clear
+```
+
+**Résultat observé :** `enabled_inventory` passe de `0` à `1`.
+
+Un contrôle du point de collecte en `GET` renvoie **405 Method Not Allowed**, ce qui est le comportement attendu : il n'accepte que le `POST`. Cette réponse prouve que la route existe et qu'elle est correctement servie par l'hôte virtuel.
+
+### Installation de l'agent
+
+**GLPI Agent 1.21**, installateur Windows 64 bits, récupéré depuis les publications officielles du projet.
+
+![Téléchargement de GLPI Agent 1.21](images/03-agent-telechargement.png)
+
+L'installation en ligne de commande est documentée ainsi :
+
+```bat
+msiexec /i GLPI-Agent-1.21-x64.msi /quiet SERVER="http://10.2.101.153/front/inventory.php" ^
+  GLPI_VERSION=11.0.13 TAG=JCorp RUNNOW=1 AGENTMONITOR=1 ADD_FIREWALL_EXCEPTION=1
+```
+
+La documentation de l'agent **interdit explicitement PowerShell** comme interpréteur : *« it changes some environment context the installer doesn't handle well »*. L'installation doit passer par `cmd.exe`.
+
+Dans les faits, c'est l'**assistant graphique** qui a été utilisé, le collage dans `cmd.exe` s'étant révélé impossible depuis la console `noVNC` — la console Windows n'accepte pas `Ctrl+V`, seulement le clic droit avec le mode d'édition rapide.
+
+![Assistant d'installation de GLPI Agent](images/04-agent-assistant-installation.png)
+
+Le service s'installe et démarre :
+
+![Service glpi-agent en cours d'exécution](images/05-agent-service-actif.png)
+
+### Incident — un service actif qui n'envoie rien
+
+`sc query glpi-agent` renvoie `STATE : 4 RUNNING`. Pourtant, après ce démarrage, **aucun inventaire n'arrive** : les tables `glpi_agents` et `glpi_computers` restent vides, et le journal d'Apache ne contient aucune requête provenant du poste.
+
+Un service démarré prouve que l'agent tourne, pas qu'il sait où envoyer ses données. C'est le même type d'écart que celui relevé dans le TP ClamAV avec un service marqué en échec qui était un succès : l'affichage est exact, sa lecture naïve est fausse.
+
+Le journal d'Apache est ici l'outil décisif. Il permet de distinguer trois situations que la base seule ne sépare pas :
+
+| Observation dans le journal | Interprétation |
+| --- | --- |
+| Aucune requête | l'agent n'a jamais contacté le serveur |
+| Requête en erreur `4xx` ou `5xx` | l'agent contacte le serveur mais l'échange échoue |
+| Requête `POST` en `200` sans fiche créée | l'échange réussit mais le traitement côté GLPI échoue |
+
+Ici, **aucune requête** : le problème était entièrement côté agent.
+
+### Cause — la ligne de configuration restée commentée
+
+Le fichier `C:\Program Files\GLPI-Agent\etc\agent.cfg` contenait :
+
+```ini
+#server = http://10.2.101.153/front/inventory.php
+```
+
+L'URL était correcte mais la ligne restait **commentée**, donc ignorée. L'assistant graphique n'avait pas écrit la directive, et la correction manuelle avait conservé le `#` d'origine. Pour l'agent, aucun serveur n'était configuré ; il tournait sans destination.
+
+Le fichier contient par ailleurs trois autres lignes `#server = ...` qui sont des exemples de la documentation, pointant vers `server.domain.com`. Décommenter la mauvaise ferait émettre l'agent vers une adresse inexistante.
+
+**Correction :** retirer le `#`, puis redémarrer le service.
+
+```bat
+sc stop glpi-agent
+sc start glpi-agent
+```
+
+### Déclenchement immédiat
+
+Même correctement configuré, l'agent n'aurait rien envoyé tout de suite. Le paramètre `DELAYTIME` vaut **3600 secondes par défaut**, et la documentation précise que le délai réel est tiré au hasard entre la moitié et la totalité de cette valeur : l'agent attend donc **entre 30 et 60 minutes** avant son premier contact. Attendre sans le savoir aurait fait conclure à tort à un échec.
+
+L'agent embarque un serveur web local dont `127.0.0.1` est une adresse de confiance par défaut. Depuis le navigateur de la machine inventoriée :
+
+```
+http://localhost:62354/now
+```
+
+**Résultat observé :** la page de l'agent répond `OK` et l'inventaire part immédiatement.
+
+La commande `glpi-agent --force` donnée par la documentation **ne fonctionne pas telle quelle sur Windows** : le fichier `glpi-agent` n'ayant pas d'extension exécutable, `cmd.exe` ne l'exécute pas et le système l'ouvre avec l'application associée, en l'occurrence le Bloc-notes. Le déclenchement par le serveur web local est la méthode fiable.
+
+### Résultat de l'inventaire
+
+```
+10.2.101.10 - - [12/Nov/2026:16:17:04 +0100] "POST /front/inventory.php HTTP/1.1" 200 396 "-" "GLPI-Agent_v1.21"
+10.2.101.10 - - [12/Nov/2026:16:17:48 +0100] "POST /front/inventory.php HTTP/1.1" 200 396 "-" "GLPI-Agent_v1.21"
+10.2.101.10 - - [12/Nov/2026:16:23:50 +0100] "POST /front/inventory.php HTTP/1.1" 200 484 "-" "GLPI-Agent_v1.21"
+```
+
+| Élément | Valeur remontée |
+| --- | --- |
+| Agent | `JCORP-DC01-2026-11-12-15-33-41`, version 1.21 |
+| Machine | `JCORP-DC01` |
+| Système | Microsoft Windows Server 2022 Standard Evaluation, version 21H2 |
+| Matériel | 1 processeur, 1 bloc mémoire, 1 disque |
+| Logiciels | 45 |
+| Port réseau | `Ethernet`, MAC `bc:24:11:72:15:a0` |
+| Adresses IP | `10.2.101.10` et une adresse de lien-local IPv6 |
+
+### Recoupement indépendant de la collecte
+
+La fiche créée ne prouve pas à elle seule que les données sont justes. La MAC remontée par l'agent, `bc:24:11:72:15:a0`, est **exactement celle de l'interface `net0` de la VM 700** telle que Proxmox la déclare :
+
+```
+net0: e1000=BC:24:11:72:15:A0,bridge=vmbr2,firewall=1,tag=700
+```
+
+Deux chemins indépendants — la collecte faite par l'agent dans le système invité, et la configuration de l'hyperviseur — donnent la même valeur. C'est ce recoupement qui permet d'affirmer que l'inventaire est cohérent, et non la simple présence d'une fiche.
+
+### Écart — la machine inventoriée n'est pas celle prévue
+
+L'objectif de l'AP 1 désignait la **VM 701 `User1-JCorp-Windows`** comme poste pilote. La machine effectivement inventoriée est le **contrôleur de domaine `JCORP-DC01`**, VM 700 : c'est depuis celui-ci que l'agent a été installé, ce que confirme le système remonté, Windows Server et non Windows 11.
+
+Après constat, le choix retenu est de **conserver le contrôleur de domaine comme machine inventoriée** plutôt que de refaire l'opération sur la VM 701. La chaîne d'inventaire est démontrée de bout en bout, sur une machine réelle du parc, et inventorier un serveur a sa propre valeur. L'écart est consigné ici plutôt que corrigé : le contrôle de recette porte donc sur `JCORP-DC01` et non sur le poste prévu.
+
+### Point ouvert — pas d'authentification des agents
+
+La directive `auth_required` vaut `none` : **n'importe quelle machine du VLAN 700 peut déposer un inventaire** sans s'authentifier, et donc créer ou modifier des fiches dans l'inventaire. C'est le réglage par défaut de GLPI. Il est acceptable sur un réseau de laboratoire fermé, mais devrait être remplacé par une authentification basique ou OAuth 2 dans un contexte réel. Le réglage se trouve dans le même contexte de configuration `inventory`.
+
+Le **tag n'a pas été appliqué** : `TAG=JCorp` figurait dans la commande documentée, mais l'installation ayant été menée par l'assistant graphique, le champ est resté vide et l'agent est enregistré avec un tag `NULL`.
+
 ## Recette
 
 | Contrôle | Résultat attendu | Résultat observé | Conforme |
@@ -274,14 +401,23 @@ Une lecture à ne pas se tromper : pendant l'exécution du service, `systemctl l
 | Réglages PHP appliqués | fuseau, limites et sessions | `Europe/Paris`, `256M`, `20M`, `httponly=On`, `samesite=Lax` | Oui |
 | Durcissement des sessions | `cookie_secure` actif | `Off`, décision assumée sans HTTPS | Écart documenté |
 | Actions automatiques | déclenchement périodique réussi | 3 exécutions en `0/SUCCESS`, *timer* `active` | Oui |
-| Mots de passe par défaut | comptes livrés sécurisés | **non traité**, voir ci-dessous | **Non conforme** |
-| Accès depuis un poste client | page atteinte depuis la VM 701 | non réalisé | À faire |
-| Inventaire du poste pilote | poste visible avec des données cohérentes | non réalisé | À faire |
+| Mots de passe par défaut | comptes livrés sécurisés | changés le 12 novembre 2026 | Oui |
+| Inventaire natif | activé côté serveur | `enabled_inventory` à `1` | Oui |
+| Point de collecte | route servie, méthodes restreintes | `405` sur `GET`, `200` sur `POST` | Oui |
+| Agent installé | service actif sur la machine cible | `STATE : 4 RUNNING`, version 1.21 | Oui |
+| Remontée d'inventaire | requêtes acceptées par le serveur | 4 `POST` en `200` | Oui |
+| Fiche créée | machine visible dans l'inventaire | `JCORP-DC01`, créée et datée | Oui |
+| Données cohérentes | système, matériel et logiciels crédibles | Windows Server 2022 21H2, 1 CPU, 1 disque, 45 logiciels | Oui |
+| Recoupement de la collecte | données conformes à une source indépendante | MAC identique à la configuration Proxmox de la VM | Oui |
+| Machine inventoriée | VM 701 `User1-JCorp-Windows` | `JCORP-DC01`, VM 700 | **Écart assumé** |
+| Tag de l'agent | `JCorp` | `NULL` | Non |
+| Authentification des agents | dépôt d'inventaire contrôlé | `auth_required` à `none` | Écart documenté |
+| Accès depuis un poste client | page atteinte depuis un poste du VLAN | atteinte depuis `JCORP-DC01` | Partiel |
 | Cycle de ticket | ticket créé, attribué, traité, résolu | non réalisé | À faire |
 
-## Point de sécurité ouvert — comptes par défaut
+## Comptes par défaut — traité le 12 novembre 2026
 
-GLPI livre cinq comptes, tous **actifs** après installation :
+GLPI livre cinq comptes, tous **actifs** après installation, dont quatre avec des mots de passe publiés dans la documentation du projet :
 
 | Compte | Rôle | Mot de passe |
 | --- | --- | --- |
@@ -291,22 +427,26 @@ GLPI livre cinq comptes, tous **actifs** après installation :
 | `post-only` | demandeur | par défaut, publié dans la documentation |
 | `glpi-system` | compte interne | sans connexion interactive |
 
-Le service étant joignable par l'ensemble du VLAN 700, ces identifiants constituent **la principale faiblesse de l'installation en l'état**. Leur modification est la première action à mener, avant toute autre étape, depuis l'interface web. Les comptes `post-only` et `tech` seront ensuite réutilisés comme demandeur et technicien pour la démonstration du cycle de ticket.
+Le service étant joignable par l'ensemble du VLAN 700, ces identifiants constituaient **la principale faiblesse de l'installation à sa livraison**. Les quatre mots de passe ont été changés depuis l'interface web le 12 novembre 2026, avant toute autre étape. Les comptes `post-only` et `tech` sont conservés actifs : ils serviront de demandeur et de technicien pour la démonstration du cycle de ticket.
 
-Cette non-conformité est délibérément consignée plutôt que masquée : elle fait partie du déroulé réel de l'installation.
+Conformément à la méthode documentaire du projet, les nouveaux mots de passe ne figurent ni ici ni dans les captures.
+
+Le fait que ces comptes soient livrés actifs avec des identifiants publics est consigné plutôt que passé sous silence : c'est une caractéristique de GLPI qu'un administrateur doit connaître, et le délai entre la fin de l'installation et le changement des mots de passe est une fenêtre d'exposition réelle. Sur un réseau ouvert, le changement devrait précéder toute mise en service.
 
 ## Étapes restantes
 
 - [x] Vérifier les prérequis et préparer la VM.
 - [x] Installer la base, les dépendances et GLPI selon la documentation de la version choisie.
 - [x] Mettre en place les actions automatiques.
-- [ ] Changer les mots de passe des quatre comptes par défaut.
-- [ ] Créer l'enregistrement DNS `glpi.ad.jcorp` sur `JCORP-DC01` et vérifier l'accès par ce nom.
-- [ ] Vérifier l'accès à l'interface depuis le poste client VM 701.
-- [ ] Installer et configurer GLPI Agent sur le poste pilote, relever sa version.
-- [ ] Déclencher un inventaire et vérifier le nom, l'OS et les caractéristiques remontées.
+- [x] Changer les mots de passe des quatre comptes par défaut.
+- [x] Activer l'inventaire natif, désactivé à l'installation.
+- [x] Installer et configurer GLPI Agent, relever sa version. *GLPI Agent 1.21.*
+- [x] Déclencher un inventaire et vérifier le nom, le système et les caractéristiques remontées. *Réalisé sur `JCORP-DC01` et non sur la VM 701, écart assumé.*
 - [ ] Créer un ticket de démonstration avec un compte demandeur.
 - [ ] Attribuer, traiter et résoudre ce ticket avec un compte technicien.
+- [ ] Appliquer le tag `JCorp` à l'agent, resté vide.
+- [ ] Créer l'enregistrement DNS `glpi.ad.jcorp` sur `JCORP-DC01` et vérifier l'accès par ce nom.
+- [ ] Restreindre le dépôt d'inventaire, aujourd'hui sans authentification.
 
 ## Limites
 
