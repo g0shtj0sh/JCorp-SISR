@@ -16,7 +16,8 @@ Le périmètre est complété par GLPI pour l'inventaire et le support, puis Gra
 | [TrueNAS](../Infrastructure/TrueNAS/TrueNAS.md) | Stockage, jonction AD, partage Commun, permissions et lecteur S: | Terminé |
 | [GLPI](../Infrastructure/GLPI/GLPI.md) | Inventaire du poste pilote et cycle de ticket | Planifié |
 | [Grafana et Prometheus](../Infrastructure/Supervision/Grafana-Prometheus.md) | Tableaux de bord et alerte testée | Planifié |
-| [Feuille de route](../Infrastructure/Feuille-de-route.md) | Ordre des étapes et ressources proposées | Préparée |
+| [Feuille de route](../Infrastructure/Feuille-de-route.md) | Ordre des étapes et ressources proposées | Réalisation engagée |
+| [Création des VM Linux](../Infrastructure/VM%20Linux/Creation-des-VM-Linux.md) | VM 705 `JCORP-SRV01` et 706 `JCORP-APP01` | Réalisée et vérifiée |
 | [Postes utilisateurs](../Infrastructure/Postes%20utilisateurs/Postes-utilisateurs.md) | Installation et configuration des clients | Windows et Debian opérationnels |
 
 ## Avancement au 29 octobre 2026
@@ -31,7 +32,11 @@ Le périmètre est complété par GLPI pour l'inventaire et le support, puis Gra
 - [x] Lecteur S: déployé par la GPO `JCORP-Utilisateurs-LecteursReseau`, visible et accessible après reconnexion de Joshua.
 - [x] Debian, VM 702, joint au domaine dans l'OU `Postes` ; SSSD actif, compte Joshua reconnu et connexion graphique validée.
 
-GLPI/MariaDB et Grafana/Prometheus seront regroupés dans une seule nouvelle VM Linux de services (**2 vCPU, 4 Gio RAM, 40 Gio disque**). La seconde nouvelle VM sera dédiée à l'hébergement AP 2. La [feuille de route](../Infrastructure/Feuille-de-route.md#2-deux-vm-supplémentaires-retenues) conserve les paramètres à reprendre lors de leur création.
+GLPI/MariaDB et Grafana/Prometheus sont regroupés dans une seule VM Linux de services (**2 vCPU, 4 Gio RAM, 40 Gio disque**), la VM **705 `JCORP-SRV01`**, créée le 12 novembre 2026. La seconde VM, **706 `JCORP-APP01`**, est dédiée à l'hébergement AP 2. Le déroulé de leur création figure dans la [procédure dédiée](../Infrastructure/VM%20Linux/Creation-des-VM-Linux.md).
+
+## Avancement au 12 novembre 2026
+
+- [x] VM **705 `JCORP-SRV01`** (`10.2.101.153/24`) et VM **706 `JCORP-APP01`** (`10.2.101.154/24`) créées, démarrées et contrôlées : Debian 13, IP fixes, résolution interne et externe par le DNS AD, horloge synchronisée, agent invité actif. Aucun service applicatif n'y est installé.
 
 ## Compléments AP 1 retenus le 29 octobre 2026
 
@@ -41,7 +46,7 @@ GLPI/MariaDB et Grafana/Prometheus seront regroupés dans une seule nouvelle VM 
 - [ ] Afficher CPU, RAM, disque et disponibilité.
 - [ ] Déclencher puis résoudre une alerte de test ; documenter les résultats.
 
-Ces services ne sont pas encore installés. Le socle est terminé. La prochaine étape est de vérifier les ressources et paramètres proposés pour les nouvelles VM. Les critères détaillés sont dans les procédures GLPI et supervision.
+Ces services ne sont pas encore installés. Le socle est terminé et les deux VM qui doivent les accueillir sont en place. La prochaine étape est l'installation de GLPI et de MariaDB sur `JCORP-SRV01`. Les critères détaillés sont dans les procédures GLPI et supervision.
 
 ## Lien avec l'AP 2
 

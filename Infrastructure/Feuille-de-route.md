@@ -1,16 +1,16 @@
 # Feuille de route JCorp
 
-**Statut : préparation documentaire, 29 octobre 2026.** Cette feuille de route décrit les travaux acceptés pour les AP 1 et AP 2. Aucun nouveau service ou aucune nouvelle VM n'a été installé pendant cette préparation.
+**Statut : réalisation engagée, 12 novembre 2026.** Cette feuille de route décrit les travaux acceptés pour les AP 1 et AP 2. Les deux VM Linux prévues sont créées et contrôlées depuis le 12 novembre 2026 ; les services applicatifs qu'elles doivent accueillir ne sont pas encore installés.
 
 ## 1. Ordre de réalisation
 
 | Étape | Travail | Critère pour passer à la suite |
 | --- | --- | --- |
 | 1 — terminé | Jonction du poste Debian existant | Membre du domaine dans l'OU Postes, résolution AD/Internet, identité et test de jonction validés ; connexion graphique confirmée |
-| 2 | Vérifier les ressources Proxmox et les paramètres disponibles | VMID/IP libres, RAM/CPU/disque disponibles, sortie réseau et résolution DNS confirmées |
+| 2 — partiellement couvert | Vérifier les ressources Proxmox et les paramètres disponibles | VMID/IP libres, RAM/CPU/disque disponibles, sortie réseau et résolution DNS confirmées. **VMID et IP contrôlés libres, ressources relevées sans audit formel** (hôte manifestement surdimensionné), réseau et résolution confirmés dans les VM créées |
 | 3 | Installer GLPI et son agent sur un poste pilote | Poste visible dans l'inventaire et ticket créé, attribué puis résolu |
 | 4 | Installer Prometheus, Grafana et les collecteurs nécessaires | Mesures réelles de Windows et Linux, tableau lisible et alerte déclenchée puis résolue |
-| 5 | Préparer la VM Linux et installer Dokploy | Accès d'administration fonctionnel et premier déploiement sain |
+| 5 — VM prêtes | Préparer les VM Linux et installer Dokploy | **Les deux VM sont créées, adressées et accessibles** ([procédure](VM%20Linux/Creation-des-VM-Linux.md)) ; reste l'accès d'administration Dokploy et un premier déploiement sain |
 | 6 | Créer puis déployer le site et sa base | Catalogue et formulaire fonctionnels, données persistantes après redéploiement |
 | 7 | Configurer DNS/HTTPS et intégrer la supervision | URL fonctionnelle depuis un client, certificat valide dans le contexte retenu et disponibilité surveillée |
 | 8 | Réaliser la démonstration et terminer les preuves | Mise à jour depuis GitHub, consultation des logs et retour applicatif à une version connue |
@@ -24,11 +24,11 @@
 | Services AP 1 | GLPI, MariaDB, Grafana, Prometheus | 705 | JCORP-SRV01 | 10.2.101.153/24 | 2 vCPU, 4 Gio RAM (4096 Mio), disque 40 Gio |
 | Hébergement AP 2 | Docker, Dokploy, site et base du site | 706 | JCORP-APP01 | 10.2.101.154/24 | 4 vCPU, 4 Gio RAM (4096 Mio), disque 60 Gio ; passage à 6 Gio (6144 Mio) si les mesures ou les builds le nécessitent |
 
-**Référence pour la future création des « deux VM » : reprendre ce tableau et vérifier d'abord les ressources disponibles sur Proxmox.** Les tailles sont des budgets de départ pour un petit laboratoire, pas des exigences officielles ni une capacité mesurée. Vérifier les prérequis des versions retenues avant installation.
+**Ces deux VM ont été créées le 12 novembre 2026**, conformément à ce tableau. Les tailles retenues étaient des budgets de départ pour un petit laboratoire, pas des exigences officielles ni une capacité mesurée ; elles sont à réévaluer après les premières mesures de charge.
 
-Les VMID, noms et IP restent proposés, non contrôlés ni réservés. L'ancien projet de VM 707 n'est plus nécessaire à cette architecture. Les IP proposées sont hors du pool DHCP `10.2.101.11–10.2.101.150` ; vérifier leur disponibilité avant affectation.
+Les VMID, noms et IP sont désormais **affectés et contrôlés**. Les deux VMID ont été vérifiés libres avant création, et les deux adresses, hors du pool DHCP `10.2.101.11–10.2.101.150`, répondent depuis le VLAN 700. L'ancien projet de VM 707 n'est plus nécessaire à cette architecture.
 
-Paramètres réseau prévus pour les deux VM : pont `vmbr2`, VLAN 700, passerelle `10.2.101.1`, DNS AD `10.2.101.10`, masque `/24`. Distribution Linux et versions à choisir selon les prérequis à jour. Le stockage Proxmox et les autres options matérielles seront confirmés lors de la création selon les capacités disponibles.
+Paramètres réseau effectivement appliqués : pont `vmbr2`, VLAN 700, passerelle `10.2.101.1`, DNS AD `10.2.101.10`, suffixe `ad.jcorp`, masque `/24`. Distribution retenue : **Debian 13 trixie**, déployée depuis l'image cloud officielle et configurée par cloud-init. Stockage retenu : **`Raid5-VMs`**, celui des VM JCorp existantes. Le détail des options matérielles, les écarts avec le plan initial et la recette figurent dans la [procédure de création](VM%20Linux/Creation-des-VM-Linux.md).
 
 ### Compromis et optimisation
 
@@ -41,9 +41,9 @@ Paramètres réseau prévus pour les deux VM : pont `vmbr2`, VLAN 700, passerell
 
 ## 3. Décisions à prendre avant installation
 
-- [ ] Vérifier la mémoire, les CPU et le stockage réellement disponibles.
-- [ ] Vérifier puis affecter les deux VMID, noms et IP.
-- [ ] Choisir les versions Linux et applicatives compatibles ; les consigner.
+- [x] Vérifier la mémoire, les CPU et le stockage réellement disponibles. *Relevés le 12 novembre 2026 : 64 cœurs, 503 Gio de RAM dont 303 disponibles, 3,9 Tio libres sur `Raid5-VMs`. Relevé et non audit : l'hôte est partagé avec la promotion et sa mémoire allouée dépasse déjà sa mémoire physique, ce qui n'est pas de mon ressort.*
+- [x] Vérifier puis affecter les deux VMID, noms et IP. *705 `JCORP-SRV01` `10.2.101.153`, 706 `JCORP-APP01` `10.2.101.154`.*
+- [x] Choisir les versions Linux et applicatives compatibles ; les consigner. *Debian 13 trixie sur les deux VM. Côté applicatif, GLPI 11 exige PHP 8.2 minimum et MariaDB 10.6 minimum : Debian 13 livre PHP 8.4 et MariaDB 11, la pile est donc compatible. Versions Docker, Dokploy, Grafana et Prometheus à relever à l'installation.*
 - [ ] Définir les URL internes : propositions `glpi.ad.jcorp`, `grafana.ad.jcorp`, `dokploy.ad.jcorp` et `games.ad.jcorp`, non créées à ce stade.
 - [ ] Définir le contexte du site : démonstration interne ou publication Internet autorisée. L'installation ne suppose pas une ouverture automatique vers Internet.
 - [ ] Choisir le certificat : autorité de laboratoire approuvée par les clients pour les noms internes, ou domaine public maîtrisé et méthode de validation adaptée. Un nom `.jcorp` interne ne recevra pas un certificat public classique.

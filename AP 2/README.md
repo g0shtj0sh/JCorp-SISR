@@ -1,6 +1,6 @@
 # AP 2 — Hébergement d'un site avec Docker et Dokploy
 
-**Statut au 29 octobre 2026 : sujet retenu, préparation documentaire réalisée ; infrastructure applicative et site non déployés.**
+**Statut au 12 novembre 2026 : sujet retenu, VM d'hébergement créée et contrôlée ; Dokploy, le site et sa base ne sont pas déployés.**
 
 ## Objectif
 
@@ -8,7 +8,7 @@ Déployer et exploiter un site de présentation d'offres de serveurs de jeux sur
 
 Le site de [Nexus Games](https://nexus-games.com/) sert de référence fonctionnelle pour le catalogue et la présentation des offres. Le projet utilisera son propre nom, ses textes et ses visuels. Il s'agit d'une démonstration pédagogique : les commandes sont simulées.
 
-La VM AP 2 fait partie d'une architecture de **deux nouvelles VM** : **4 vCPU, 4 Gio RAM et 60 Gio disque**, avec passage à 6 Gio RAM si nécessaire. GLPI et la supervision partagent l'autre VM, côté AP 1. Les identifiants et paramètres réseau proposés sont dans la [feuille de route](../Infrastructure/Feuille-de-route.md#2-deux-vm-supplémentaires-retenues), à vérifier avant création.
+La VM AP 2 fait partie d'une architecture de **deux VM**, créées le 12 novembre 2026 : la VM **706 `JCORP-APP01`**, `10.2.101.154/24`, **4 vCPU, 4 Gio RAM et 60 Gio disque**, avec passage à 6 Gio RAM si nécessaire. GLPI et la supervision partagent l'autre VM, la 705, côté AP 1. Le déroulé de création, les écarts et la recette figurent dans la [procédure dédiée](../Infrastructure/VM%20Linux/Creation-des-VM-Linux.md).
 
 ## Livrables
 
@@ -22,7 +22,8 @@ La VM AP 2 fait partie d'une architecture de **deux nouvelles VM** : **4 vCPU, 4
 
 ## Travaux prévus
 
-- [ ] Préparer une VM Linux dédiée et installer Docker/Dokploy.
+- [x] Préparer une VM Linux dédiée. *VM 706 `JCORP-APP01`, Debian 13, créée et contrôlée le 12 novembre 2026.*
+- [ ] Installer Docker et Dokploy sur cette VM.
 - [ ] Créer le site et son dépôt source.
 - [ ] Déployer le site et la base avec stockage persistant.
 - [ ] Configurer DNS, accès HTTP/HTTPS et certificat adapté.

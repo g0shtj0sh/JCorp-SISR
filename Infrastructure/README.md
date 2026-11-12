@@ -4,7 +4,8 @@ Je regroupe ici les configurations techniques de mon projet JCorp, communes aux 
 
 | Documentation | Contenu | État |
 | --- | --- | --- |
-| [Feuille de route](Feuille-de-route.md) | Ordre AP 1/AP 2, ressources proposées et décisions | Préparée |
+| [Feuille de route](Feuille-de-route.md) | Ordre AP 1/AP 2, ressources proposées et décisions | Préparée, étape 5 en cours |
+| [Création des VM Linux](VM%20Linux/Creation-des-VM-Linux.md) | VM 705 `JCORP-SRV01` et 706 `JCORP-APP01`, image cloud, cloud-init et recette | Réalisée et vérifiée |
 | [GLPI](GLPI/GLPI.md) | Inventaire et assistance, AP 1 | Planifié, non installé |
 | [Grafana et Prometheus](Supervision/Grafana-Prometheus.md) | Supervision commune aux deux AP | Planifiés, non installés |
 | [Dokploy](Dokploy/Dokploy.md) | Déploiement du site et de sa base, AP 2 | Planifié, non installé |
@@ -26,6 +27,8 @@ Je conserve une infrastructure simple : Proxmox, réseau VLAN 700, deux contrôl
 - [x] Lecteur Commun S: déployé par GPO et ouvert avec succès après reconnexion.
 - [x] Debian VM 702 joint à `ad.jcorp` dans l'OU `Postes` ; SSSD, identité AD et connexion graphique validés.
 
+- [x] VM 705 `JCORP-SRV01` et VM 706 `JCORP-APP01` créées le 12 novembre 2026 : Debian 13, IP fixes, résolution par le DNS AD, agent invité actif. Aucun service installé dessus à ce stade.
+
 Le programme est complété le 29 octobre 2026 :
 
 - [ ] AP 1 : GLPI pour l'inventaire et le cycle d'un ticket.
@@ -33,7 +36,7 @@ Le programme est complété le 29 octobre 2026 :
 - [ ] AP 2 : Dokploy pour déployer un site d'offres de serveurs de jeux et sa base.
 - [ ] AP 2 : DNS/HTTPS, mise à jour depuis GitHub, logs, retour de version applicative et extension de la supervision.
 
-Les procédures sont préparées ; aucune de ces nouvelles installations n'est effectuée. La segmentation complète, le chantier global de sauvegarde/restauration et les autres applications métier restent exclus. Paiement réel et création automatique de VPS ne font pas partie de la première version du site.
+Les deux VM qui accueilleront ces services sont en place ; aucune de ces nouvelles installations applicatives n'est en revanche effectuée. La segmentation complète, le chantier global de sauvegarde/restauration et les autres applications métier restent exclus. Paiement réel et création automatique de VPS ne font pas partie de la première version du site.
 
 ## Scripts
 

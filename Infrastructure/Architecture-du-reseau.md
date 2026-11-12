@@ -19,6 +19,8 @@ Dans le [scénario RedOne](https://docs.google.com/document/d/13dC98HuGbrRNXuTOo
 | Poste Debian | VM 702, `User2-JCorp-Debian`, `User2-JCorp.ad.jcorp`, IP `10.2.101.11/24` observée, joint au domaine dans l'OU `Postes`, connexion AD validée, pont `vmbr2` et VLAN 700 |
 | Second contrôleur de domaine | VM 703, `DC2-JCorp`, fonctionnel selon la validation de Joshua |
 | NAS TrueNAS | VM 704, `NAS-JCorp`, TrueNAS CE 25.10.1 joint au domaine, partage Commun et GPO du lecteur S: opérationnels, IP fixe `10.2.101.152/24` renseignée, pont `vmbr2` et VLAN 700 |
+| Serveur de services AP 1 | VM 705, `JCORP-SRV01`, Debian 13, IP fixe `10.2.101.153/24`, pont `vmbr2` et VLAN 700, créée et contrôlée le 12 novembre 2026, non jointe au domaine |
+| Serveur d'hébergement AP 2 | VM 706, `JCORP-APP01`, Debian 13, IP fixe `10.2.101.154/24`, pont `vmbr2` et VLAN 700, créée et contrôlée le 12 novembre 2026, non jointe au domaine |
 | DHCP | Rôle installé sur `JCORP-DC01`, pool `10.2.101.11` à `10.2.101.150` |
 | Passerelle du premier serveur | `10.2.101.1` |
 
@@ -32,9 +34,11 @@ J'ai relié la carte réseau de la VM au pont `vmbr2`, lui-même relié à l'int
 
 Le DNS AD conserve la résolution interne et transmet les demandes externes à `10.2.101.1`, après correction des redirecteurs le 29 octobre 2026. La résolution Internet a été vérifiée depuis Debian avant l'installation des outils AD.
 
-## Extensions planifiées pour les AP
+## Extensions des AP
 
-Deux VM supplémentaires sont retenues : services AP 1 (GLPI, MariaDB, Grafana et Prometheus, 2 vCPU, 4 Gio RAM, 40 Gio disque) et hébergement AP 2 (Docker/Dokploy, site et sa base, 4 vCPU, 4 Gio RAM extensibles à 6 Gio selon besoin, 60 Gio disque). Les VMID proposés sont 705 et 706, les noms JCORP-SRV01 et JCORP-APP01, les IP 10.2.101.153 et 10.2.101.154. Ces paramètres restent à vérifier : aucune VM ni réservation n'a été créée. Cette décision remplace la proposition de trois VM ; la VM 707 n'est plus prévue. La [feuille de route](Feuille-de-route.md#2-deux-vm-supplémentaires-retenues) sert de référence lors de leur création.
+Les deux VM supplémentaires retenues le 29 octobre 2026 ont été **créées le 12 novembre 2026** : services AP 1 (GLPI, MariaDB, Grafana et Prometheus, 2 vCPU, 4 Gio RAM, 40 Gio disque) et hébergement AP 2 (Docker/Dokploy, site et sa base, 4 vCPU, 4 Gio RAM extensibles à 6 Gio selon besoin, 60 Gio disque). Les VMID 705 et 706, les noms JCORP-SRV01 et JCORP-APP01 et les IP 10.2.101.153 et 10.2.101.154 sont désormais affectés et contrôlés, et non plus seulement proposés. Cette décision remplaçait la proposition de trois VM ; la VM 707 n'est plus prévue. Le déroulé, les écarts et la recette figurent dans la [procédure de création](VM%20Linux/Creation-des-VM-Linux.md).
+
+Les deux adresses sont prises hors du pool DHCP `10.2.101.11–10.2.101.150`, comme celle du NAS. Aucun service n'est encore installé sur ces machines.
 
 L'AP 1 ajoute l'inventaire/support et la supervision. L'AP 2 ajoute un site avec sa base et étend cette supervision aux conteneurs et à la disponibilité HTTP. La VM 702 reste un poste utilisateur Debian.
 
