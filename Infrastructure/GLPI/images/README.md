@@ -18,12 +18,20 @@ Les captures redeviennent nécessaires **à partir de l'interface web**, qui ne 
 | `04-agent-assistant-installation.png` | Assistant d'installation de GLPI Agent 1.21 | **Produite** |
 | `05-agent-service-actif.png` | `sc query glpi-agent` renvoyant `STATE : 4 RUNNING` | **Produite** |
 | `06-inventaire-machine.png` | Fiche de la machine inventoriée : système, matériel, date de collecte | Non produite |
-| `07-ticket-cree-demandeur.png` | Ticket créé depuis le compte demandeur | Non produite |
-| `08-ticket-attribue-technicien.png` | Ticket attribué, vu depuis le compte technicien | Non produite |
-| `09-ticket-resolu-historique.png` | Ticket résolu et son historique de suivi | Non produite |
-| `10-actions-automatiques.png` | Tableau des actions automatiques et de leur dernière exécution | Non produite |
+| `07-ticket-cree-demandeur.png` | Ticket vu depuis le compte demandeur, interface Self-Service | **Produite** |
+| `08-ticket-vue-administrateur.png` | Le même ticket depuis le compte super-administrateur | **Produite** |
+| `09-ticket-resolu-historique.png` | Suivis du technicien avant correction, dates de résolution et de clôture | **Produite** |
+| `10-ticket-solution-cloture.png` | Solution enregistrée et ticket clos après correction | **Produite** |
+| `11-tableau-de-bord-valeurs-demo.png` | Tableau de bord affichant des chiffres sans rapport avec la base | **Produite** |
+| `12-actions-automatiques.png` | Tableau des actions automatiques et de leur dernière exécution | Non produite |
 
-Une remarque sur la capture `05` : elle prouve que le service tourne, **pas** que l'inventaire fonctionne. Au moment où elle a été prise, l'agent n'envoyait rien, faute d'URL de serveur active. C'est précisément ce que la procédure explique, et la capture sert à illustrer ce piège plutôt qu'à valider l'étape.
+## Deux captures qui illustrent un piège plutôt qu'une réussite
+
+La capture `05` prouve que le service de l'agent tourne, **pas** que l'inventaire fonctionne. Au moment où elle a été prise, l'agent n'envoyait rien, faute d'URL de serveur active.
+
+La capture `11` montre un tableau de bord annonçant 1 500 tickets alors que la base n'en contient qu'un seul. Elle ne documente pas un état du parc, elle documente le fait que cet affichage ne mesure rien de réel.
+
+Ces deux images servent la démonstration par ce qu'elles trompent, pas par ce qu'elles valident. Une relecture rapide pourrait leur faire dire le contraire : la procédure précise le contexte de chacune.
 
 ## Règles retenues
 

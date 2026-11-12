@@ -1,6 +1,6 @@
 # GLPI — Inventaire et assistance
 
-**AP 1 — Installé, accessible et inventoriant depuis le 12 novembre 2026. Cycle de ticket non encore réalisé.** GLPI complète le socle AD et NAS avec la gestion du parc et des demandes d'assistance.
+**AP 1 — Terminé le 12 novembre 2026 : serveur installé, inventaire fonctionnel et cycle de ticket démontré.** GLPI complète le socle AD et NAS avec la gestion du parc et des demandes d'assistance.
 
 ## Objectif et périmètre
 
@@ -382,6 +382,84 @@ La directive `auth_required` vaut `none` : **n'importe quelle machine du VLAN 70
 
 Le **tag n'a pas été appliqué** : `TAG=JCorp` figurait dans la commande documentée, mais l'installation ayant été menée par l'assistant graphique, le champ est resté vide et l'agent est enregistré avec un tag `NULL`.
 
+## Étape 10 — Cycle de vie d'un ticket
+
+La démonstration porte sur un incident plausible de l'infrastructure plutôt que sur un ticket de test vide : la disparition du lecteur réseau `S:` déployé par la GPO `JCORP-Utilisateurs-LecteursReseau`. Le ticket relie ainsi l'outil d'assistance au socle Active Directory du projet.
+
+### Création par le demandeur
+
+Le compte **`post-only`** porte le profil *Self-Service* : son interface ne montre ni le menu d'administration ni le parc, seulement la création et le suivi de ses propres demandes. C'est la vue d'un utilisateur ordinaire.
+
+![Ticket créé depuis le compte demandeur](images/07-ticket-cree-demandeur.png)
+
+### Attribution par l'administrateur
+
+![Ticket vu depuis le compte administrateur](images/08-ticket-vue-administrateur.png)
+
+### Traitement et première tentative de résolution
+
+![Historique du ticket côté technicien](images/09-ticket-resolu-historique.png)
+
+### Incident — un ticket résolu sans solution
+
+Le premier passage a produit un ticket en statut `Clos`, avec une date de résolution, deux suivis décrivant le travail et un troisième suivi intitulé « Solution approved ». Visuellement, le cycle semblait complet.
+
+Le contrôle en base a montré le contraire : la table **`glpi_itilsolutions` était vide**. Le ticket avait été passé en `Résolu` par simple changement de statut, et le « Solution approved » n'était qu'un suivi de plus.
+
+La distinction n'est pas formelle. Dans GLPI, le **suivi** est un message enfermé dans son ticket, tandis que la **solution** est un objet à part entière, qui peut être validé, réutilisé sur un autre ticket et versé à la base de connaissances. Un ticket clos sans solution est un incident traité dont l'organisation n'a rien appris.
+
+Le second écart portait sur les acteurs. L'historique montre qu'à 16:51:32 le compte `tech` a été ajouté simultanément comme **demandeur, attributaire et observateur**, et que `post-only` figurait comme demandeur et observateur :
+
+```
+16:51:32  User  15  4   →  tech (4)     ← demandeur
+16:51:32  User  15  5   →  tech (4)     ← attribué à
+16:51:32  User  15  66  →  tech (4)     ← observateur
+```
+
+Un technicien demandeur de son propre ticket ne démontre pas un cycle d'assistance.
+
+### Correction
+
+Le ticket a été rouvert, les rôles surnuméraires retirés, et la résolution reprise en passant par **Répondre → Solution** au lieu du changement de statut.
+
+![Solution enregistrée et ticket clos](images/10-ticket-solution-cloture.png)
+
+### Résultat vérifié en base
+
+| Élément | Valeur |
+| --- | --- |
+| Ticket | n° 1, type Incident, statut `Clos` |
+| Ouverture | 12 novembre 2026, 16:47:55, par `post-only` |
+| Demandeur | `post-only`, et lui seul |
+| Attribué à | `tech`, et lui seul |
+| Solution | `glpi_itilsolutions` id 1, statut « approuvée », 17:04:24 |
+| Résolution | 17:04:24 |
+| Clôture | 17:04:41 |
+| Historique système | 36 entrées |
+
+### Limites de cette démonstration
+
+**Les deux suivis ont été perdus lors de la correction.** La table `glpi_itilfollowups` est vide : la trace du travail intermédiaire — vérification de la GPO, puis rafraîchissement des stratégies — n'existe plus que dans l'historique système. Le contenu du diagnostic a toutefois été repris dans le texte de la solution, qui le conserve.
+
+**La solution est signée `glpi` et non `tech`.** Elle a été saisie depuis le compte super-administrateur lors de la correction. Dans un processus réel, c'est le technicien attributaire qui rédige la solution de son ticket.
+
+### Le tableau de bord n'affiche pas les données du parc
+
+En cherchant le ticket clos, la liste s'est affichée vide — comportement normal, le filtre par défaut masque les tickets clos. Mais le tableau de bord situé au-dessus annonçait des chiffres sans rapport avec l'installation :
+
+![Tableau de bord affichant des valeurs sans rapport avec la base](images/11-tableau-de-bord-valeurs-demo.png)
+
+| Indicateur | Tableau de bord | Base de données |
+| --- | --- | --- |
+| Tickets | 1 500 | **1** |
+| Tickets fermés | 14 600 | **1** |
+| Tickets assignés | 308 | **0** |
+| Tickets en attente | 67 | **0** |
+
+La base contient **un seul ticket**, aucun supprimé, un seul ordinateur et cinq comptes. Les valeurs affichées ne proviennent donc pas de l'installation : ce sont des données de démonstration du tableau de bord livré par défaut. L'origine exacte n'a pas été investiguée, mais le constat est établi par comptage direct.
+
+C'est le même piège que l'interface ClamUI annonçant un système « protégé » après avoir analysé zéro fichier, relevé dans le TP antivirus : **un indicateur peut être affiché correctement et ne rien mesurer de réel**. Avant de présenter un tableau de bord comme une mesure du parc, il faut avoir vérifié qu'il interroge bien les données de l'installation.
+
 ## Recette
 
 | Contrôle | Résultat attendu | Résultat observé | Conforme |
@@ -413,7 +491,14 @@ Le **tag n'a pas été appliqué** : `TAG=JCorp` figurait dans la commande docum
 | Tag de l'agent | `JCorp` | `NULL` | Non |
 | Authentification des agents | dépôt d'inventaire contrôlé | `auth_required` à `none` | Écart documenté |
 | Accès depuis un poste client | page atteinte depuis un poste du VLAN | atteinte depuis `JCORP-DC01` | Partiel |
-| Cycle de ticket | ticket créé, attribué, traité, résolu | non réalisé | À faire |
+| Création d'un ticket | ticket déposé par un compte demandeur | n° 1 créé par `post-only` à 16:47:55 | Oui |
+| Attribution | technicien désigné sur le ticket | `tech` en « Attribué à » | Oui |
+| Rôles des acteurs | un rôle par compte | `post-only` demandeur, `tech` attributaire | Oui, après correction |
+| Solution formalisée | solution enregistrée et approuvée | `glpi_itilsolutions` id 1, statut approuvé | Oui, après correction |
+| Résolution et clôture | dates enregistrées | 17:04:24 et 17:04:41, statut `Clos` | Oui |
+| Trace du traitement | suivis visibles dans le ticket | suivis perdus à la correction, 36 entrées d'historique système | Partiel |
+| Auteur de la solution | le technicien attributaire | `glpi`, super-administrateur | Non |
+| Tableau de bord | indicateurs reflétant le parc | valeurs de démonstration sans rapport avec la base | **Non conforme** |
 
 ## Comptes par défaut — traité le 12 novembre 2026
 
@@ -442,9 +527,10 @@ Le fait que ces comptes soient livrés actifs avec des identifiants publics est 
 - [x] Activer l'inventaire natif, désactivé à l'installation.
 - [x] Installer et configurer GLPI Agent, relever sa version. *GLPI Agent 1.21.*
 - [x] Déclencher un inventaire et vérifier le nom, le système et les caractéristiques remontées. *Réalisé sur `JCORP-DC01` et non sur la VM 701, écart assumé.*
-- [ ] Créer un ticket de démonstration avec un compte demandeur.
-- [ ] Attribuer, traiter et résoudre ce ticket avec un compte technicien.
+- [x] Créer un ticket de démonstration avec un compte demandeur.
+- [x] Attribuer, traiter et résoudre ce ticket, puis le clore.
 - [ ] Appliquer le tag `JCorp` à l'agent, resté vide.
+- [ ] Remplacer le tableau de bord par défaut par un tableau interrogeant réellement le parc.
 - [ ] Créer l'enregistrement DNS `glpi.ad.jcorp` sur `JCORP-DC01` et vérifier l'accès par ce nom.
 - [ ] Restreindre le dépôt d'inventaire, aujourd'hui sans authentification.
 

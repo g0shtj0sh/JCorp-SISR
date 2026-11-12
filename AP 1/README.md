@@ -14,7 +14,7 @@ Le périmètre est complété par GLPI pour l'inventaire et le support, puis Gra
 | [Architecture du réseau](../Infrastructure/Architecture-du-reseau.md) | Réseau VLAN 700 et machines virtuelles | À jour |
 | [Active Directory, GPO, DHCP et contrôleurs](../Infrastructure/Active%20Directory/Active-Directory-GPO-DHCP-Controleurs-de-domaine.md) | Domaine, DNS, DHCP, OU, comptes et GPO | Opérationnel |
 | [TrueNAS](../Infrastructure/TrueNAS/TrueNAS.md) | Stockage, jonction AD, partage Commun, permissions et lecteur S: | Terminé |
-| [GLPI](../Infrastructure/GLPI/GLPI.md) | Inventaire du poste pilote et cycle de ticket | Serveur installé, inventaire fonctionnel ; ticket à faire |
+| [GLPI](../Infrastructure/GLPI/GLPI.md) | Inventaire du poste pilote et cycle de ticket | **Terminé** — serveur, inventaire et ticket démontrés |
 | [Grafana et Prometheus](../Infrastructure/Supervision/Grafana-Prometheus.md) | Tableaux de bord et alerte testée | Planifié |
 | [Feuille de route](../Infrastructure/Feuille-de-route.md) | Ordre des étapes et ressources proposées | Réalisation engagée |
 | [Création des VM Linux](../Infrastructure/VM%20Linux/Creation-des-VM-Linux.md) | VM 705 `JCORP-SRV01` et 706 `JCORP-APP01` | Réalisée et vérifiée |
@@ -43,12 +43,12 @@ GLPI/MariaDB et Grafana/Prometheus sont regroupés dans une seule VM Linux de se
 - [x] Installer GLPI. *GLPI **11.0.13** sur `JCORP-SRV01`, Apache 2.4.71, PHP 8.4.27, MariaDB 11.8.6. Intégrité du code validée, actions automatiques déclenchées chaque minute par un timer systemd, page d'authentification joignable depuis le VLAN 700.*
 - [x] Changer les mots de passe des quatre comptes livrés par défaut.
 - [x] Inventorier au moins un poste Windows avec GLPI Agent. *GLPI Agent **1.21**. Machine inventoriée : `JCORP-DC01` (VM 700) et non la VM 701 prévue — écart assumé et documenté. Windows Server 2022 21H2, 45 logiciels, MAC recoupée avec la configuration Proxmox.*
-- [ ] Créer, attribuer, traiter et résoudre un ticket de démonstration.
+- [x] Créer, attribuer, traiter et résoudre un ticket de démonstration. *Ticket n° 1 sur la disparition du lecteur `S:`, créé par `post-only`, attribué à `tech`, solution enregistrée et approuvée, clos le 12 novembre 2026 à 17:04:41.*
 - [ ] Installer Grafana, Prometheus et les collecteurs d'une cible Windows et d'une cible Linux.
 - [ ] Afficher CPU, RAM, disque et disponibilité.
 - [ ] Déclencher puis résoudre une alerte de test ; documenter les résultats.
 
-Le socle est terminé, les deux VM sont en place, GLPI est en service et inventorie une première machine. La prochaine étape est la démonstration du cycle de ticket, puis l'installation de Grafana et Prometheus. Les critères détaillés sont dans les procédures GLPI et supervision.
+Le socle est terminé, les deux VM sont en place, et **la partie GLPI de l'AP 1 est bouclée** : inventaire fonctionnel et cycle de ticket démontré de la création à la clôture. La prochaine étape est l'installation de Prometheus et Grafana sur `JCORP-SRV01`, avec les collecteurs Windows et Linux, un tableau de bord et une alerte déclenchée puis résolue. Les critères détaillés sont dans la procédure de supervision.
 
 ## Lien avec l'AP 2
 
