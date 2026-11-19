@@ -54,6 +54,26 @@ Ce dossier accompagne la [procédure de supervision](../Grafana-Prometheus.md).
 | `48-tableau-dns-dhcp.png` | Tableau JCorp : DNS et DHCP | **Produite** |
 | `49-tableau-clamav.png` | Tableau JCorp : ClamAV | **Produite** |
 | `50-tableau-machines.png` | Tableau JCorp : ressources des machines | **Produite** |
+| `51-clamav-version-depots.png` | Version ClamAV 1.4.3 et dépôts Debian configurés | **Produite** |
+| `52-prometheus-script-install-ui.png` | Lecture du script `install-ui.sh` avant décision | **Produite** |
+| `53-clamav-aucune-mise-a-jour-debian.png` | Après `apt-get update`, candidat toujours 1.4.3 | **Produite** |
+| `54-prometheus-ui-verifiee-installee.png` | Empreinte SHA-256 OK, interface installée, Prometheus actif | **Produite** |
+| `55-prometheus-interface-moderne.png` | Interface moderne, page *Targets* (cible `debian` DOWN : VM 702 éteinte) | **Produite** |
+| `56-grafana-smtp-parametres.png` | Paramètres SMTP Gmail ajoutés (abandonnés ensuite) | **Produite** |
+| `57-grafana-smtp-secret-masque.png` | Saisie masquée du mot de passe d'application | **Produite** |
+| `58-grafana-smtp-droits-redemarrage.png` | Fichier restreint à root:grafana, Grafana actif | **Produite** |
+| `59-grafana-smtp-controle.png` | Contrôle de la configuration, mot de passe masqué | **Produite** |
+| `60-smtp-echec-identifiants.png` | Incident : Gmail refuse l'authentification (535) | **Produite** |
+| `61-discord-test-reussi.png` | Test du point de contact Discord réussi | **Produite** |
+| `62-discord-message-test.png` | Message de test reçu dans Discord | **Produite** |
+| `63-discord-point-contact.png` | Point de contact `Discord JCorp` enregistré | **Produite** |
+| `64-regle-choix-discord.png` | Règle rattachée au point de contact Discord | **Produite** |
+| `65-regle-livree-discord.png` | Règle : notifications livrées à Discord JCorp | **Produite** |
+| `66-grafana-root-url.png` | Adresse publique de Grafana configurée | **Produite** |
+| `67-dc01-arret-exporteur-discord.png` | Panne simulée : exporteur arrêté | **Produite** |
+| `68-discord-alerte-firing.png` | Alerte FIRING reçue dans Discord | **Produite** |
+| `69-dc01-redemarrage-exporteur-discord.png` | Exporteur relancé | **Produite** |
+| `70-discord-alerte-resolue.png` | Résolution reçue dans Discord | **Produite** |
 
 Les captures `02` et `04` prouvent que les services fonctionnent et que les cibles sont déclarées, **pas** que Prometheus les collecte : c'est la capture `07` qui l'établira. La capture `05` documente une absence, pas une panne.
 

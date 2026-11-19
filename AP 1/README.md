@@ -46,7 +46,7 @@ GLPI/MariaDB et Grafana/Prometheus sont regroupés dans une seule VM Linux de se
 - [x] Créer, attribuer, traiter et résoudre un ticket de démonstration. *Ticket n° 1 sur la disparition du lecteur `S:`, créé par `post-only`, attribué à `tech`, solution enregistrée et approuvée, clos le 12 novembre 2026 à 17:04:41.*
 - [x] Installer Grafana, Prometheus et les collecteurs d'une cible Windows et d'une cible Linux. *Prometheus 2.53.3 et Grafana 13.3.1 sur `JCORP-SRV01`, Node Exporter 1.9.0 (Linux) et Windows Exporter 0.31.3 sur `JCORP-DC01`, les deux cibles UP.*
 - [x] Afficher CPU, RAM, disque et disponibilité. *Tableau Node Exporter Full importé, valeurs réelles affichées.*
-- [x] Déclencher puis résoudre une alerte de test ; documenter les résultats. *Règle `JCORP-DC01 injoignable` passée en Firing après arrêt du seul `windows_exporter`, revenue à Normal au rétablissement. Aucun canal de notification : écart assumé.*
+- [x] Déclencher puis résoudre une alerte de test ; documenter les résultats. *Règle `JCORP-DC01 injoignable` passée en Firing après arrêt du seul `windows_exporter`, revenue à Normal au rétablissement. Alertes et résolutions envoyées sur Discord.*
 
 Le socle est terminé, les deux VM sont en place, et **l'AP 1 est bouclée** : inventaire GLPI et cycle de ticket démontrés le 12 novembre 2026, supervision Prometheus/Grafana installée et validée par une panne simulée le 19 novembre 2026 ([procédure](../Infrastructure/Supervision/Grafana-Prometheus.md)). La suite se joue en AP 2 avec Dokploy.
 

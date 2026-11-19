@@ -1,6 +1,6 @@
 # Supervision — Grafana et Prometheus
 
-**AP 1 — Réalisé le 19 novembre 2026 : Prometheus, Node Exporter et Grafana sur `JCORP-SRV01`, Windows Exporter sur `JCORP-DC01`, tableau de bord et alerte vérifiés par une panne simulée. Reste hors AP 1 : canal de notification et extension AP 2.** La supervision sera ensuite étendue aux services de l'AP 2.
+**AP 1 — Réalisé le 19 novembre 2026 : Prometheus, Node Exporter et Grafana sur `JCORP-SRV01`, Windows Exporter sur `JCORP-DC01`, tableau de bord et alerte vérifiés par une panne simulée. Alertes envoyées sur Discord. Reste : extension AP 2.** La supervision sera ensuite étendue aux services de l'AP 2.
 
 Grafana et Prometheus partagent la VM de services AP 1 avec GLPI et MariaDB : VM **705**, **`JCORP-SRV01`**, **`10.2.101.153/24`**, **2 vCPU, 4 Gio RAM, 40 Gio disque**, créée le 12 novembre 2026 ([procédure](../VM%20Linux/Creation-des-VM-Linux.md)). L'arrêt de cette VM coupe GLPI et la supervision ; ce compromis est accepté pour le laboratoire. Voir la [décision des deux VM](../Feuille-de-route.md#2-deux-vm-supplémentaires-retenues).
 
@@ -172,7 +172,7 @@ C'est le revers du choix des paquets Debian fait à l'étape 1. Il ne remet pas 
 | Solution | Effet | Retenue |
 | --- | --- | --- |
 | Interface classique, lien *Use classic web UI* | disponible immédiatement, sans rien installer | **Oui**, pour les contrôles |
-| Script `/usr/share/prometheus/install-ui.sh` | télécharge l'interface moderne depuis Internet, hors des dépôts signés | Non |
+| Script `/usr/share/prometheus/install-ui.sh` | télécharge l'interface moderne depuis Internet, hors des dépôts signés | Non à ce stade ; repris à l'[étape 16](#étape-16--versions-clamav-et-interface-moderne-de-prometheus) avec une vérification d'empreinte |
 
 Le script réintroduirait un téléchargement non couvert par les signatures APT, précisément ce que le choix des paquets Debian voulait éviter, pour un confort d'affichage que Grafana apporte déjà.
 
@@ -391,7 +391,7 @@ La règle surveille la métrique `up` de la tâche `windows` : Prometheus la met
 
 **Résultat observé :** la règle est enregistrée à l'état **Normal**. Le graphique montre `up` à `1` pour l'instance `JCORP-DC01` et la condition renvoie `0` (non remplie).
 
-**Écart assumé :** le point de contact est vide (*Notifications are delivered to empty*). L'alerte est donc visible dans Grafana, mais aucune notification n'est envoyée. Configurer un canal (courriel, Discord…) supposerait un serveur d'envoi ou un service externe ; ce n'est pas exigé pour démontrer la détection, et c'est noté comme amélioration.
+**Écart assumé :** le point de contact est vide (*Notifications are delivered to empty*). L'alerte est donc visible dans Grafana, mais aucune notification n'est envoyée. Configurer un canal (courriel, Discord…) supposerait un serveur d'envoi ou un service externe ; ce n'est pas exigé pour démontrer la détection, et c'est noté comme amélioration. *Écart levé à l'[étape 17](#étape-17--envoi-des-alertes-sur-discord).*
 
 ## Étape 10 — Simulation d'une panne et rétablissement
 
@@ -566,6 +566,163 @@ Import : *Dashboards* → *New* → *Import* → *Upload dashboard JSON file*, d
 
 Après une première lecture, j'ai raccourci les titres que Grafana tronquait sur les petites tuiles et réimporté le tableau en écrasant la version précédente (même UID).
 
+## Étape 16 — Versions : ClamAV et interface moderne de Prometheus
+
+Deux écarts relevés plus haut ont été réexaminés : l'avertissement de freshclam sur la version de ClamAV, et l'absence de l'interface moderne de Prometheus.
+
+### ClamAV : maintien de la version Debian
+
+Je vérifie d'abord ce que proposent les dépôts configurés sur le poste :
+
+```bash
+apt-cache policy clamav clamav-daemon
+grep -rh "^deb\|^URIs\|^Suites" /etc/apt/sources.list /etc/apt/sources.list.d/ 2>/dev/null
+sudo apt-get update && apt-cache policy clamav | head -4
+```
+
+![Version de ClamAV et dépôts configurés](images/51-clamav-version-depots.png)
+
+![Aucune version plus récente après rafraîchissement](images/53-clamav-aucune-mise-a-jour-debian.png)
+
+**Résultat observé :** les dépôts `trixie`, `trixie-updates` et `trixie-security` sont actifs et l'index est à jour, mais la version candidate reste **1.4.3+dfsg-1**. Debian ne publie pas encore la 1.4.7 pour trixie ; aucune mise à jour n'est donc manquée.
+
+La seule façon d'obtenir la 1.4.7 serait d'installer le paquet officiel de clamav.net. **Je ne le fais pas** :
+
+| Critère | Paquet Debian 1.4.3 | Paquet clamav.net 1.4.7 |
+| --- | --- | --- |
+| Correctifs de sécurité | publiés par l'équipe sécurité Debian, appliqués par `apt` | à surveiller et installer à la main |
+| Intégration | services `clamav-daemon`, `clamav-freshclam`, `clamonacc` fournis | installé dans `/usr/local`, sans ces services : tout serait à recréer |
+| Existant | analyse hebdomadaire, ClamUI et script de métriques fonctionnent | chemins et configuration différents, à reprendre |
+| Cohérence | même origine que tous les autres paquets du poste | une source hors dépôts sur un poste utilisateur |
+
+L'avertissement de freshclam compare la version installée à la dernière version publiée par le projet ; il ne signale pas une faille. Ce qui détermine la détection, ce sont les **signatures**, et elles sont à jour : base daily 28188, mise à jour le jour même. Sur un poste client, la version maintenue par la distribution est le choix le plus sûr et le plus simple à maintenir.
+
+**Écart assumé :** ClamAV reste en 1.4.3, version maintenue par Debian. La tuile *Moteur* du tableau l'affiche, et la mise à jour se fera par `apt` quand Debian la publiera. Si une faille corrigée seulement en 1.4.7 était publiée sans correctif Debian, la décision serait à revoir.
+
+### Prometheus : interface moderne installée avec vérification
+
+À l'étape 2, j'avais écarté le script `install-ui.sh` fourni par le paquet parce qu'il télécharge des fichiers hors des dépôts signés. Je l'ai relu avant de décider :
+
+![Contenu du script install-ui.sh](images/52-prometheus-script-install-ui.png)
+
+Il télécharge l'archive `prometheus-web-ui-<version>.tar.gz` depuis les publications officielles du projet sur GitHub et la décompresse dans `/usr/share/prometheus/web/static/react`, **sans vérifier son empreinte**. Je reproduis donc ses actions à la main, en ajoutant le contrôle SHA-256 de l'archive par rapport à la liste `sha256sums.txt` publiée avec la même version :
+
+```bash
+cd /tmp && V=2.53.3
+wget -q https://github.com/prometheus/prometheus/releases/download/v$V/prometheus-web-ui-$V.tar.gz \
+        https://github.com/prometheus/prometheus/releases/download/v$V/sha256sums.txt
+grep "prometheus-web-ui-$V.tar.gz" sha256sums.txt | sha256sum -c -
+sudo rm -rf /usr/share/prometheus/web/static/react
+sudo tar -xf /tmp/prometheus-web-ui-$V.tar.gz -C /usr/share/prometheus/web static/react
+sudo systemctl restart prometheus && systemctl is-active prometheus
+```
+
+![Empreinte vérifiée, interface installée, Prometheus actif](images/54-prometheus-ui-verifiee-installee.png)
+
+**Résultat observé :** `prometheus-web-ui-2.53.3.tar.gz: OK`, puis Prometheus `active`. L'archive correspond exactement à la version du paquet installé (2.53.3), ce qui évite toute incompatibilité entre l'interface et le serveur.
+
+Depuis l'ancienne interface, le lien *New UI* ouvre l'interface moderne : thème sombre, filtre par point de collecte ou étiquette, tri des cibles par état.
+
+![Interface moderne, page Targets](images/55-prometheus-interface-moderne.png)
+
+Les cibles `node`, `prometheus` et `windows` sont UP. La cible `debian` apparaît DOWN (*no route to host*) : la VM 702 venait simplement d'être éteinte, ce n'est pas une panne.
+
+Limite : la vérification prouve que l'archive est celle publiée par le projet, pas que le projet est digne de confiance ; c'est la même confiance que celle accordée au logiciel lui-même. Autre conséquence : une mise à jour du paquet `prometheus` ne mettra pas l'interface à jour. Il faudra refaire cette étape avec la nouvelle version, sinon l'interface et le serveur ne correspondront plus.
+
+## Étape 17 — Envoi des alertes sur Discord
+
+Jusqu'ici, une alerte n'était visible qu'en ouvrant Grafana. Pour qu'elle atteigne l'exploitant, il faut un point de contact.
+
+### Incident — Envoi par Gmail refusé
+
+Le premier choix était l'envoi par courriel, avec le compte Gmail de la classe `sio2proxmox@gmail.com` et le serveur `smtp.gmail.com:587`. J'ai séparé la configuration du secret : les paramètres SMTP vont dans `/etc/default/grafana-server`, lu par le service au démarrage, et le mot de passe est saisi de façon masquée, sans apparaître à l'écran ni dans l'historique du shell.
+
+```bash
+sudo tee -a /etc/default/grafana-server > /dev/null <<'EOF'
+GF_SMTP_ENABLED=true
+GF_SMTP_HOST=smtp.gmail.com:587
+GF_SMTP_USER=sio2proxmox@gmail.com
+GF_SMTP_FROM_ADDRESS=sio2proxmox@gmail.com
+GF_SMTP_FROM_NAME=Supervision JCorp
+GF_SMTP_STARTTLS_POLICY=MandatoryStartTLS
+EOF
+read -s -p "Mot de passe d'application : " P; echo; echo "GF_SMTP_PASSWORD=${P// /}" | sudo tee -a /etc/default/grafana-server > /dev/null; unset P
+sudo chown root:grafana /etc/default/grafana-server && sudo chmod 640 /etc/default/grafana-server
+```
+
+![Paramètres SMTP ajoutés](images/56-grafana-smtp-parametres.png)
+
+![Mot de passe saisi sans affichage](images/57-grafana-smtp-secret-masque.png)
+
+![Droits restreints et Grafana redémarré](images/58-grafana-smtp-droits-redemarrage.png)
+
+![Contrôle de la configuration, mot de passe masqué](images/59-grafana-smtp-controle.png)
+
+Le fichier était lisible par tous les comptes de la VM (`-rw-r--r-- root root`) ; il ne l'est plus que par root et le groupe `grafana` (`-rw-r----- root grafana`).
+
+**Symptôme :** le test du point de contact échoue avec `535 5.7.8 Username and Password not accepted`.
+
+![Échec d'authentification Gmail](images/60-smtp-echec-identifiants.png)
+
+**Cause :** Google n'accepte plus le mot de passe d'un compte pour l'envoi SMTP ; il exige un *mot de passe d'application*, qui n'existe que si la validation en deux étapes est activée sur le compte. Le compte étant partagé par la classe, je n'ai pas voulu l'activer. Grafana ne gère pas non plus l'authentification OAuth de Google.
+
+**Correction :** abandon de Gmail. J'ai retiré toute la configuration SMTP, mot de passe compris, pour ne pas laisser un secret inutile sur le serveur :
+
+```bash
+sudo sed -i '/^GF_SMTP_/d' /etc/default/grafana-server && sudo systemctl restart grafana-server
+```
+
+**Leçon :** vérifier les conditions d'accès d'un service externe avant de le choisir. Un fournisseur peut imposer une politique de sécurité, ici la double authentification, incompatible avec un compte partagé.
+
+### Choix de Discord
+
+| Option | Retenue | Raison |
+| --- | --- | --- |
+| Gmail | Non | double authentification obligatoire |
+| Serveur interne Postfix + Dovecot | Non pour l'instant | un service de plus à exploiter, environ une heure de mise en place, mails non consultables hors du labo |
+| Relais SMTP tiers (Brevo, Mailjet) | Non | un compte de plus chez un tiers |
+| **Discord (webhook)** | **Oui** | rien à installer, notification immédiate sur téléphone, intégration native dans Grafana |
+
+Le webhook est une URL qui permet de publier dans un salon Discord. **C'est un secret** : quiconque la connaît peut écrire dans le salon. Elle est saisie uniquement dans Grafana et n'apparaît ni dans cette documentation ni sur les captures.
+
+*Alerting* → *Contact points* → *New contact point*, nom `Discord JCorp`, intégration *Discord*, puis *Test* :
+
+![Test du point de contact réussi](images/61-discord-test-reussi.png)
+
+![Message de test reçu dans Discord](images/62-discord-message-test.png)
+
+![Point de contact enregistré](images/63-discord-point-contact.png)
+
+La règle `JCORP-DC01 injoignable` est ensuite rattachée à ce point de contact :
+
+![Choix du point de contact dans la règle](images/64-regle-choix-discord.png)
+
+![Règle livrée à Discord JCorp](images/65-regle-livree-discord.png)
+
+Le message de test contenait des liens vers `http://localhost:3000`, inutilisables depuis un autre poste : Grafana ne connaissait pas son adresse sur le réseau. Je la lui indique :
+
+```bash
+echo "GF_SERVER_ROOT_URL=http://10.2.101.153:3000/" | sudo tee -a /etc/default/grafana-server > /dev/null && sudo systemctl restart grafana-server
+```
+
+![Adresse publique de Grafana configurée](images/66-grafana-root-url.png)
+
+### Démonstration
+
+Même scénario qu'à l'étape 10 : arrêt du seul service `windows_exporter` sur `JCORP-DC01`, sans toucher à l'AD, au DNS ni au DHCP.
+
+![Exporteur arrêté](images/67-dc01-arret-exporteur-discord.png)
+
+![Alerte FIRING reçue dans Discord](images/68-discord-alerte-firing.png)
+
+![Exporteur relancé](images/69-dc01-redemarrage-exporteur-discord.png)
+
+![Résolution reçue dans Discord](images/70-discord-alerte-resolue.png)
+
+**Résultat observé :** à 15:11, Discord reçoit `[FIRING:1] JCORP-DC01 injoignable`, avec l'instance `JCORP-DC01`, la tâche `windows` et la valeur `A=0` ; après le redémarrage du service, le message `[RESOLVED]` suit avec `A=1`. Les liens *Source* et *Silence* pointent vers `http://10.2.101.153:3000` et s'ouvrent depuis le poste d'administration.
+
+Limite : la notification dépend de Discord et de l'accès Internet du SRV01. Si l'un des deux manque, l'alerte reste visible dans Grafana mais n'est pas transmise.
+
 ## Étapes prévues
 
 - [x] Préparer la VM et vérifier l'accès et la place disponible. *Accès par clé rétabli, 2,9 Gi de RAM et 36 G de disque disponibles.*
@@ -579,7 +736,7 @@ Après une première lecture, j'ai raccourci les titres que Grafana tronquait su
 - [x] Définir une règle d'alerte, son seuil et sa durée ; les documenter. *`up{job="windows"} < 1` pendant 1 min, évaluée toutes les 30 s.*
 - [x] Simuler une indisponibilité sans arrêter un service AD/DNS/DHCP essentiel. *Arrêt du seul service `windows_exporter`.*
 - [x] Constater l'alerte puis sa résolution après rétablissement. *Firing puis Normal, sans intervention dans Grafana.*
-- [ ] Si un canal est configuré, vérifier la réception de la notification. *Aucun point de contact pour l'instant : écart assumé.*
+- [x] Si un canal est configuré, vérifier la réception de la notification. *Discord : messages FIRING puis RESOLVED reçus le 19 novembre 2026.*
 - [x] Superviser l'AD (activité et contenu), le DNS, le DHCP et ClamAV dans un tableau propre au projet. *Collecteurs `ad`, `dns`, `dhcp`, scripts textfile AD et ClamAV, tableau `jcorp-infrastructure.json`.*
 - [ ] En AP 2, ajouter Dokploy, les conteneurs et le contrôle HTTP du site.
 
@@ -593,7 +750,7 @@ Après une première lecture, j'ai raccourci les titres que Grafana tronquait su
 | Santé de Prometheus | point de contrôle sain | `Prometheus Server is Healthy.` | Oui |
 | Exposition Linux | métriques publiées sur `9100` | lignes `# HELP` / `# TYPE` | Oui |
 | Rétention bornée | durée et taille limitées, lues dans l'API | `15d` et `5GiB` | Oui |
-| Interface web | page des cibles consultable | interface moderne absente du paquet, interface classique utilisée | Écart documenté |
+| Interface web | page des cibles consultable | interface moderne installée après vérification SHA-256 | Oui |
 | Collecte Linux | cible `node` UP, sans erreur | UP, collecte en 178 ms | Oui |
 | Collecte Windows | cible Windows UP | `JCORP-DC01` UP, collecte en 121,9 ms | Oui |
 | Grafana installé | service actif, interface joignable depuis le réseau | `active`, accueil atteint sur `:3000` | Oui |
@@ -606,6 +763,7 @@ Après une première lecture, j'ai raccourci les titres que Grafana tronquait su
 | Contenu de l'annuaire | comptes, groupes, OU lus dans Prometheus | 45 utilisateurs, 67 groupes, 20 OU | Oui |
 | Antivirus | état et résultats ClamAV dans Prometheus | 15 séries, détection EICAR visible | Oui |
 | Cibles | toutes les machines supervisées UP | 4 cibles UP | Oui |
+| Notification | alerte et résolution reçues hors de Grafana | messages Discord FIRING à 15:11 puis RESOLVED | Oui |
 | Tableau JCorp | toutes les sections alimentées, aucun panneau vide | 57 panneaux affichant des valeurs réelles | Oui |
 | Extension AP 2 | hôte, conteneurs et site observables | — | À faire |
 
