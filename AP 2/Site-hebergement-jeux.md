@@ -1,6 +1,6 @@
-# Site d'offres de serveurs de jeux — Cahier des charges
+# Checkpoint — Cahier des charges du site
 
-**Prévu pour l'AP 2 — développement non commencé.**
+**Prévu pour l'AP 2 — nom et technologies arrêtés le 19 novembre 2026, développement non commencé.**
 
 ## Besoin
 
@@ -20,7 +20,7 @@ Pas de comptes clients ni d'espace d'administration à développer dans la premi
 
 ## Architecture applicative proposée
 
-Un service web applicatif expose le site et son formulaire ; un service de base de données conserve le catalogue et les demandes. Le serveur Dokploy gère le déploiement et l'accès par nom. La technologie web et le moteur de base restent à choisir avant le développement.
+Un service web applicatif expose le site et son formulaire ; un service de base de données conserve le catalogue et les demandes. Le serveur Dokploy gère le déploiement et l'accès par nom. Le service web est écrit en **Next.js** ; la base est **PostgreSQL**, créée comme base gérée dans Dokploy.
 
 | Données minimales | Exemples de champs |
 | --- | --- |
@@ -41,9 +41,10 @@ Le service web valide les entrées et accède à la base avec un compte applicat
 
 ## Décisions ouvertes
 
-- [ ] Nom du site et identité visuelle.
+- [x] Nom du site. *Checkpoint.*
+- [ ] Identité visuelle.
 - [ ] Liste des offres fictives et visuels utilisables.
-- [ ] Technologie du site et moteur de base.
+- [x] Technologie du site et moteur de base. *Next.js et PostgreSQL.*
 - [ ] Dépôt et méthode de déclenchement des déploiements.
 - [ ] URL interne ou domaine public ; méthode de certificat.
 - [ ] Versions, variables nécessaires et volumes.

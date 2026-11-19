@@ -18,6 +18,9 @@ Avant la recette, consigner les versions Linux, Docker, Dokploy, application et 
 | T10 | Rétablir la version précédente | Ancien rendu retrouvé, site et base toujours fonctionnels | À faire |
 | T11 | Consulter Grafana | Mesures hôte/conteneurs et contrôle HTTP présents | À faire |
 | T12 | Simuler l'arrêt du site | Alerte après la durée configurée puis résolution après relance | À faire |
+| T13 | Déployer le serveur Minecraft dans Dokploy | Conteneur sain, port 25565 joignable | À faire |
+| T14 | Se connecter au serveur depuis un client Minecraft | Connexion réussie au monde de démonstration | À faire |
+| T15 | Observer la mémoire de la VM avec le jeu actif | Marge suffisante ou passage à 6 Go justifié par les mesures | À faire |
 
 T12 porte sur le site de démonstration, pas sur les services AD/DNS/DHCP. T10 utilise une modification compatible avec la base et ne prétend pas tester une restauration de données.
 
