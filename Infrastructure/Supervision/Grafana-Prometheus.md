@@ -723,6 +723,14 @@ Même scénario qu'à l'étape 10 : arrêt du seul service `windows_exporter` su
 
 Limite : la notification dépend de Discord et de l'accès Internet du SRV01. Si l'un des deux manque, l'alerte reste visible dans Grafana mais n'est pas transmise.
 
+### Extension de la règle à toutes les cibles
+
+En éteignant la VM 702, j'ai constaté qu'aucune alerte n'était partie : la règle ne surveillait que `JCORP-DC01`. Je l'ai renommée `Cible supervisée injoignable` et sa requête devient `up{job!="prometheus"}`. Grafana crée une alerte par machine supervisée : `JCORP-SRV01`, `JCORP-DC01` et `User2-JCorp`. Prometheus est exclu, puisqu'il ne peut pas mesurer sa propre indisponibilité. Seuil, attente d'une minute et point de contact Discord sont inchangés.
+
+![Règle étendue aux trois machines](images/71-alerte-toutes-cibles.png)
+
+**Résultat observé :** trois instances évaluées ; `JCORP-DC01` et `localhost:9100` (SRV01) sont à l'état Normal, `User2-JCorp` passe en *Firing*, ce qui correspond à la VM 702 éteinte. La nouvelle couverture fonctionne donc dès son enregistrement. Conséquence à connaître : éteindre le poste Debian hors des démonstrations déclenchera désormais une alerte.
+
 ## Étapes prévues
 
 - [x] Préparer la VM et vérifier l'accès et la place disponible. *Accès par clé rétabli, 2,9 Gi de RAM et 36 G de disque disponibles.*

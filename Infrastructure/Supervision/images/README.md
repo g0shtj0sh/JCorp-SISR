@@ -74,6 +74,7 @@ Ce dossier accompagne la [procédure de supervision](../Grafana-Prometheus.md).
 | `68-discord-alerte-firing.png` | Alerte FIRING reçue dans Discord | **Produite** |
 | `69-dc01-redemarrage-exporteur-discord.png` | Exporteur relancé | **Produite** |
 | `70-discord-alerte-resolue.png` | Résolution reçue dans Discord | **Produite** |
+| `71-alerte-toutes-cibles.png` | Règle étendue à toutes les cibles, `User2-JCorp` en Firing (VM éteinte) | **Produite** |
 
 Les captures `02` et `04` prouvent que les services fonctionnent et que les cibles sont déclarées, **pas** que Prometheus les collecte : c'est la capture `07` qui l'établira. La capture `05` documente une absence, pas une panne.
 
