@@ -15,7 +15,7 @@ Le périmètre est complété par GLPI pour l'inventaire et le support, puis Gra
 | [Active Directory, GPO, DHCP et contrôleurs](../Infrastructure/Active%20Directory/Active-Directory-GPO-DHCP-Controleurs-de-domaine.md) | Domaine, DNS, DHCP, OU, comptes et GPO | Opérationnel |
 | [TrueNAS](../Infrastructure/TrueNAS/TrueNAS.md) | Stockage, jonction AD, partage Commun, permissions et lecteur S: | Terminé |
 | [GLPI](../Infrastructure/GLPI/GLPI.md) | Inventaire du poste pilote et cycle de ticket | **Terminé** — serveur, inventaire et ticket démontrés |
-| [Grafana et Prometheus](../Infrastructure/Supervision/Grafana-Prometheus.md) | Tableaux de bord et alerte testée | Planifié |
+| [Grafana et Prometheus](../Infrastructure/Supervision/Grafana-Prometheus.md) | Tableaux de bord et alerte testée | **Réalisé le 19 novembre 2026** |
 | [Feuille de route](../Infrastructure/Feuille-de-route.md) | Ordre des étapes et ressources proposées | Réalisation engagée |
 | [Création des VM Linux](../Infrastructure/VM%20Linux/Creation-des-VM-Linux.md) | VM 705 `JCORP-SRV01` et 706 `JCORP-APP01` | Réalisée et vérifiée |
 | [Postes utilisateurs](../Infrastructure/Postes%20utilisateurs/Postes-utilisateurs.md) | Installation et configuration des clients | Windows et Debian opérationnels |
@@ -44,11 +44,11 @@ GLPI/MariaDB et Grafana/Prometheus sont regroupés dans une seule VM Linux de se
 - [x] Changer les mots de passe des quatre comptes livrés par défaut.
 - [x] Inventorier au moins un poste Windows avec GLPI Agent. *GLPI Agent **1.21**. Machine inventoriée : `JCORP-DC01` (VM 700) et non la VM 701 prévue — écart assumé et documenté. Windows Server 2022 21H2, 45 logiciels, MAC recoupée avec la configuration Proxmox.*
 - [x] Créer, attribuer, traiter et résoudre un ticket de démonstration. *Ticket n° 1 sur la disparition du lecteur `S:`, créé par `post-only`, attribué à `tech`, solution enregistrée et approuvée, clos le 12 novembre 2026 à 17:04:41.*
-- [ ] Installer Grafana, Prometheus et les collecteurs d'une cible Windows et d'une cible Linux.
-- [ ] Afficher CPU, RAM, disque et disponibilité.
-- [ ] Déclencher puis résoudre une alerte de test ; documenter les résultats.
+- [x] Installer Grafana, Prometheus et les collecteurs d'une cible Windows et d'une cible Linux. *Prometheus 2.53.3 et Grafana 13.3.1 sur `JCORP-SRV01`, Node Exporter 1.9.0 (Linux) et Windows Exporter 0.31.3 sur `JCORP-DC01`, les deux cibles UP.*
+- [x] Afficher CPU, RAM, disque et disponibilité. *Tableau Node Exporter Full importé, valeurs réelles affichées.*
+- [x] Déclencher puis résoudre une alerte de test ; documenter les résultats. *Règle `JCORP-DC01 injoignable` passée en Firing après arrêt du seul `windows_exporter`, revenue à Normal au rétablissement. Aucun canal de notification : écart assumé.*
 
-Le socle est terminé, les deux VM sont en place, et **la partie GLPI de l'AP 1 est bouclée** : inventaire fonctionnel et cycle de ticket démontré de la création à la clôture. La prochaine étape est l'installation de Prometheus et Grafana sur `JCORP-SRV01`, avec les collecteurs Windows et Linux, un tableau de bord et une alerte déclenchée puis résolue. Les critères détaillés sont dans la procédure de supervision.
+Le socle est terminé, les deux VM sont en place, et **l'AP 1 est bouclée** : inventaire GLPI et cycle de ticket démontrés le 12 novembre 2026, supervision Prometheus/Grafana installée et validée par une panne simulée le 19 novembre 2026 ([procédure](../Infrastructure/Supervision/Grafana-Prometheus.md)). La suite se joue en AP 2 avec Dokploy.
 
 ## Lien avec l'AP 2
 

@@ -7,7 +7,7 @@ Je regroupe ici les configurations techniques de mon projet JCorp, communes aux 
 | [Feuille de route](Feuille-de-route.md) | Ordre AP 1/AP 2, ressources proposées et décisions | Préparée, étape 5 en cours |
 | [Création des VM Linux](VM%20Linux/Creation-des-VM-Linux.md) | VM 705 `JCORP-SRV01` et 706 `JCORP-APP01`, image cloud, cloud-init et recette | Réalisée et vérifiée |
 | [GLPI](GLPI/GLPI.md) | Inventaire et assistance, AP 1 | **Terminé** — GLPI 11.0.13, inventaire et cycle de ticket démontrés |
-| [Grafana et Prometheus](Supervision/Grafana-Prometheus.md) | Supervision commune aux deux AP | Planifiés, non installés |
+| [Grafana et Prometheus](Supervision/Grafana-Prometheus.md) | Supervision commune aux deux AP | **Installés le 19 novembre 2026**, alerte testée ; extension AP 2 à faire |
 | [Dokploy](Dokploy/Dokploy.md) | Déploiement du site et de sa base, AP 2 | Planifié, non installé |
 | [TrueNAS](TrueNAS/TrueNAS.md) | VM 704, stockage, jonction AD, partage Commun et lecteur S: par GPO | Opérationnel |
 | [Postes utilisateurs](Postes%20utilisateurs/Postes-utilisateurs.md) | Windows 11 et Debian joints au domaine, connexions AD validées | Opérationnels |
@@ -32,7 +32,7 @@ Je conserve une infrastructure simple : Proxmox, réseau VLAN 700, deux contrôl
 Le programme est complété le 29 octobre 2026 :
 
 - [x] AP 1 : GLPI pour l'inventaire et le cycle d'un ticket. *Réalisé le 12 novembre 2026 : GLPI 11.0.13 sur `JCORP-SRV01`, actions automatiques en service, comptes par défaut sécurisés, GLPI Agent 1.21 remontant l'inventaire de `JCORP-DC01`, ticket n° 1 créé, attribué, résolu et clos.*
-- [ ] AP 1 : Grafana/Prometheus pour les métriques Windows/Linux et une alerte testée.
+- [x] AP 1 : Grafana/Prometheus pour les métriques Windows/Linux et une alerte testée. *`JCORP-SRV01` et `JCORP-DC01` supervisés, alerte déclenchée puis résolue le 19 novembre 2026.*
 - [ ] AP 2 : Dokploy pour déployer un site d'offres de serveurs de jeux et sa base.
 - [ ] AP 2 : DNS/HTTPS, mise à jour depuis GitHub, logs, retour de version applicative et extension de la supervision.
 

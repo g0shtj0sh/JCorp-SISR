@@ -1,6 +1,6 @@
 # Feuille de route JCorp
 
-**Statut : réalisation engagée, 12 novembre 2026.** Cette feuille de route décrit les travaux acceptés pour les AP 1 et AP 2. Les deux VM Linux prévues sont créées et contrôlées depuis le 12 novembre 2026 ; les services applicatifs qu'elles doivent accueillir ne sont pas encore installés.
+**Statut : réalisation engagée, mis à jour le 19 novembre 2026.** Cette feuille de route décrit les travaux acceptés pour les AP 1 et AP 2. Les deux VM Linux prévues sont créées et contrôlées depuis le 12 novembre 2026 ; GLPI et la supervision sont installés sur `JCORP-SRV01` ; Dokploy reste à installer sur `JCORP-APP01`.
 
 ## 1. Ordre de réalisation
 
@@ -9,7 +9,7 @@
 | 1 — terminé | Jonction du poste Debian existant | Membre du domaine dans l'OU Postes, résolution AD/Internet, identité et test de jonction validés ; connexion graphique confirmée |
 | 2 — partiellement couvert | Vérifier les ressources Proxmox et les paramètres disponibles | VMID/IP libres, RAM/CPU/disque disponibles, sortie réseau et résolution DNS confirmées. **VMID et IP contrôlés libres, ressources relevées sans audit formel** (hôte manifestement surdimensionné), réseau et résolution confirmés dans les VM créées |
 | 3 — terminé | Installer GLPI et son agent sur un poste pilote | **GLPI 11.0.13 installé, GLPI Agent 1.21 remontant l'inventaire de `JCORP-DC01`, ticket n° 1 créé, attribué, résolu et clos** ([procédure](GLPI/GLPI.md)) |
-| 4 | Installer Prometheus, Grafana et les collecteurs nécessaires | Mesures réelles de Windows et Linux, tableau lisible et alerte déclenchée puis résolue |
+| 4 — terminé | Installer Prometheus, Grafana et les collecteurs nécessaires | **Prometheus 2.53.3, Grafana 13.3.1, Node Exporter sur `JCORP-SRV01` et Windows Exporter sur `JCORP-DC01` ; tableau de bord en valeurs réelles, alerte déclenchée puis résolue le 19 novembre 2026** ([procédure](Supervision/Grafana-Prometheus.md)) |
 | 5 — VM prêtes | Préparer les VM Linux et installer Dokploy | **Les deux VM sont créées, adressées et accessibles** ([procédure](VM%20Linux/Creation-des-VM-Linux.md)) ; reste l'accès d'administration Dokploy et un premier déploiement sain |
 | 6 | Créer puis déployer le site et sa base | Catalogue et formulaire fonctionnels, données persistantes après redéploiement |
 | 7 | Configurer DNS/HTTPS et intégrer la supervision | URL fonctionnelle depuis un client, certificat valide dans le contexte retenu et disponibilité surveillée |
@@ -43,7 +43,7 @@ Paramètres réseau effectivement appliqués : pont `vmbr2`, VLAN 700, passerell
 
 - [x] Vérifier la mémoire, les CPU et le stockage réellement disponibles. *Relevés le 12 novembre 2026 : 64 cœurs, 503 Gio de RAM dont 303 disponibles, 3,9 Tio libres sur `Raid5-VMs`. Relevé et non audit : l'hôte est partagé avec la promotion et sa mémoire allouée dépasse déjà sa mémoire physique, ce qui n'est pas de mon ressort.*
 - [x] Vérifier puis affecter les deux VMID, noms et IP. *705 `JCORP-SRV01` `10.2.101.153`, 706 `JCORP-APP01` `10.2.101.154`.*
-- [x] Choisir les versions Linux et applicatives compatibles ; les consigner. *Debian 13 trixie sur les deux VM. Côté applicatif, GLPI 11 exige PHP 8.2 minimum et MariaDB 10.6 minimum : Debian 13 livre PHP 8.4 et MariaDB 11, la pile est donc compatible. Versions Docker, Dokploy, Grafana et Prometheus à relever à l'installation.*
+- [x] Choisir les versions Linux et applicatives compatibles ; les consigner. *Debian 13 trixie sur les deux VM. Côté applicatif, GLPI 11 exige PHP 8.2 minimum et MariaDB 10.6 minimum : Debian 13 livre PHP 8.4 et MariaDB 11, la pile est donc compatible. Grafana 13.3.1 et Prometheus 2.53.3 relevés le 19 novembre 2026 ; versions Docker et Dokploy à relever à l'installation.*
 - [ ] Définir les URL internes : propositions `glpi.ad.jcorp`, `grafana.ad.jcorp`, `dokploy.ad.jcorp` et `games.ad.jcorp`, non créées à ce stade.
 - [ ] Définir le contexte du site : démonstration interne ou publication Internet autorisée. L'installation ne suppose pas une ouverture automatique vers Internet.
 - [ ] Choisir le certificat : autorité de laboratoire approuvée par les clients pour les noms internes, ou domaine public maîtrisé et méthode de validation adaptée. Un nom `.jcorp` interne ne recevra pas un certificat public classique.
