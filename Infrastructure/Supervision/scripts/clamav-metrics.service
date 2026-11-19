@@ -1,0 +1,6 @@
+[Unit]
+Description=Export des metriques ClamAV pour Prometheus
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/clamav-metrics.sh

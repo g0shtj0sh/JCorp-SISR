@@ -425,6 +425,147 @@ L'état intermédiaire *Pending* n'a pas été capturé : il dure une minute au 
 
 En relançant par erreur la commande de l'étape 8, j'ai créé une seconde règle identique (identifiant différent). Elle ne changeait rien au filtrage mais rendait la configuration ambiguë. Correction : suppression du doublon par son identifiant avec `Remove-NetFirewallRule -Name`, puis contrôle qu'une seule règle *Windows Exporter (Prometheus)* subsiste. Leçon : avant de relancer une commande de création, vérifier si l'objet existe déjà.
 
+## Étape 11 — Collecteurs AD, DNS et DHCP sur JCORP-DC01
+
+Le tableau communautaire ne montrait que les ressources des machines. Pour superviser les **services** du contrôleur de domaine, je réinstalle Windows Exporter avec les collecteurs `ad`, `dns`, `dhcp`, `textfile` (pour mes propres métriques) et `time` (décalage NTP, critique pour Kerberos) :
+
+```powershell
+msiexec /x "$env:TEMP\windows_exporter.msi" /qn
+msiexec /i "$env:TEMP\windows_exporter.msi" ENABLED_COLLECTORS="ad,cpu,dhcp,dns,logical_disk,memory,net,os,service,system,textfile,time" /qn
+Start-Sleep 5; Get-Service windows_exporter; (Invoke-WebRequest http://localhost:9182/metrics -UseBasicParsing).Content -split "`n" | Select-String "^windows_(ad|dns|dhcp)_" | Measure-Object | Select-Object Count
+```
+
+![Collecteurs AD, DNS et DHCP actifs](images/33-dc01-collecteurs-ad-dns-dhcp.png)
+
+**Résultat observé :** service `Running`, **202** séries AD, DNS et DHCP exposées.
+
+## Étape 12 — Contenu de l'annuaire par le collecteur *textfile*
+
+Le collecteur `ad` mesure l'**activité** du contrôleur (liaisons LDAP, réplication, opérations), pas le **contenu** de l'annuaire. Pour compter les comptes, j'ai écrit le script [`ad-metrics.ps1`](scripts/ad-metrics.ps1) : il interroge l'AD et écrit un fichier `ad.prom` dans `C:\Program Files\windows_exporter\textfile_inputs`, que Windows Exporter publie avec ses propres métriques. L'écriture passe par un fichier temporaire puis un renommage, pour que Prometheus ne lise jamais un fichier à moitié écrit.
+
+```powershell
+powershell -ExecutionPolicy Bypass -File C:\Scripts\ad-metrics.ps1; Get-Content "C:\Program Files\windows_exporter\textfile_inputs\ad.prom"
+```
+
+![Métriques de l'annuaire générées](images/34-script-ad-metriques.png)
+
+Une tâche planifiée l'exécute toutes les 5 minutes sous le compte SYSTEM :
+
+```powershell
+$a = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-NoProfile -ExecutionPolicy Bypass -File C:\Scripts\ad-metrics.ps1"
+$t = New-ScheduledTaskTrigger -Once -At (Get-Date) -RepetitionInterval (New-TimeSpan -Minutes 5)
+Register-ScheduledTask -TaskName "JCorp - Metriques AD" -Action $a -Trigger $t -User "SYSTEM" -RunLevel Highest
+```
+
+![Tâche planifiée prête](images/35-tache-planifiee-ad.png)
+
+![Métriques de l'annuaire lues par Prometheus](images/36-prometheus-metriques-ad.png)
+
+**Résultat observé :** 45 utilisateurs (43 actifs, 2 désactivés, 0 verrouillé), 4 ordinateurs, 67 groupes, 20 OU, 1 administrateur du domaine ; Prometheus les lit avec l'étiquette `instance="JCORP-DC01"`.
+
+Deux valeurs demandent une lecture attentive : les **43 mots de passe « expirés »** correspondent à des comptes créés avec l'obligation de changer de mot de passe à la première connexion, que l'AD compte comme expirés ; les **41 comptes inactifs** depuis 30 jours sont des comptes de démonstration qui ne se sont jamais connectés. Ce ne sont pas des anomalies, mais le tableau les rend visibles.
+
+## Étape 13 — ClamAV sur le poste Debian
+
+ClamAV est installé sur le poste `User2-JCorp` (VM 702, `10.2.101.11`). Cette VM, installée manuellement, n'a pas d'agent invité QEMU : la clé SSH ne pouvait pas être déposée par `qm guest exec` comme pour `JCORP-SRV01`. Je l'ai donc copiée depuis le poste d'administration, après avoir vérifié en console que `ssh` était actif :
+
+```powershell
+type $env:USERPROFILE\.ssh\id_ed25519.pub | ssh administrateur@10.2.101.11 "mkdir -p ~/.ssh && chmod 700 ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"
+```
+
+![Clé copiée puis connexion sans mot de passe](images/37-vm702-cle-ssh.png)
+
+État de départ :
+
+![Services ClamAV, timer d'analyse et journaux](images/38-vm702-etat-clamav.png)
+
+`clamav-daemon` et `clamav-freshclam` sont actifs, l'analyse hebdomadaire `scan-home-hebdo.timer` est programmée le dimanche à 2 h et a été rattrapée au démarrage. Freshclam signale une installation **obsolète** : 1.4.3 en place, 1.4.7 recommandée. Les signatures, elles, sont à jour.
+
+J'installe Node Exporter et relève le format exact du rapport d'analyse avant d'écrire le script :
+
+![Node Exporter installé](images/39-vm702-node-exporter.png)
+
+![Service d'analyse et rapport](images/40-vm702-rapport-analyse.png)
+
+L'analyse du 19 novembre a détecté le fichier de test **EICAR** laissé dans la quarantaine de ClamUI et l'a déplacé vers `/var/quarantine` : c'est une vraie détection, visible dans le tableau.
+
+Le script [`clamav-metrics.sh`](scripts/clamav-metrics.sh) lit le dernier résumé d'analyse, l'état des services, la version du moteur et de la base, la prochaine analyse et le contenu de la quarantaine, puis écrit `clamav.prom` dans `/var/lib/prometheus/node-exporter`, dossier *textfile* de Node Exporter sous Debian. Un service et un timer systemd ([`clamav-metrics.service`](scripts/clamav-metrics.service), [`clamav-metrics.timer`](scripts/clamav-metrics.timer)) l'exécutent toutes les 5 minutes, sur le même principe que l'analyse hebdomadaire.
+
+```powershell
+scp "...\Supervision\scripts\clamav-metrics.*" administrateur@10.2.101.11:/tmp/
+```
+
+```bash
+sudo install -m 755 /tmp/clamav-metrics.sh /usr/local/bin/
+sudo install -m 644 /tmp/clamav-metrics.service /tmp/clamav-metrics.timer /etc/systemd/system/
+sudo systemctl daemon-reload && sudo systemctl enable --now clamav-metrics.timer && sudo systemctl start clamav-metrics.service
+```
+
+![Envoi des scripts depuis le poste d'administration](images/41-scp-scripts-clamav.png)
+
+![Métriques ClamAV générées](images/42-clamav-metriques-generees.png)
+
+**Résultat observé :** 15 séries : trois services actifs, moteur 1.4.3, base daily 28188, 3 628 258 signatures, dernière analyse de 99 fichiers dont **1 infecté** en 32,5 s, 5 fichiers en quarantaine.
+
+Une première copie avait échoué parce que j'avais lancé `scp` depuis la session SSH de la VM et non depuis Windows : la VM interprétait `C:` comme un nom d'hôte. Le prompt indique toujours sur quelle machine on se trouve.
+
+## Étape 14 — Déclaration du poste Debian dans Prometheus
+
+Depuis `JCORP-SRV01`, `curl -s http://10.2.101.11:9100/metrics | grep -c "^clamav_"` renvoie `15` : le port est joignable sans règle de pare-feu supplémentaire. J'ajoute la tâche `debian` :
+
+```yaml
+  - job_name: debian
+    static_configs:
+      - targets: ['10.2.101.11:9100']
+        labels:
+          instance: User2-JCorp
+```
+
+Après `promtool check config` et redémarrage, l'API confirme les **quatre cibles UP** : `prometheus`, `node` (`JCORP-SRV01`), `windows` (`JCORP-DC01`) et `debian` (`User2-JCorp`).
+
+![Quatre cibles UP dans l'API Prometheus](images/43-quatre-cibles-up.png)
+
+Avant d'écrire le tableau, j'ai relevé les noms exacts des métriques AD, DNS et DHCP exposées par cette version de Windows Exporter, plutôt que de les supposer — la leçon de l'incident `cs`.
+
+![Noms des métriques AD, DNS et DHCP](images/44-noms-metriques-ad-dns-dhcp.png)
+
+## Étape 15 — Tableau de bord JCorp
+
+Le tableau [`jcorp-infrastructure.json`](dashboards/jcorp-infrastructure.json) est écrit pour le projet et versionné dans le dépôt. Il compte 57 panneaux en cinq sections, toutes alimentées par Prometheus :
+
+| Section | Contenu |
+| --- | --- |
+| Vue d'ensemble | cibles UP, état du DC et du poste Debian, comptes actifs et verrouillés, adresses DHCP libres, menaces, âge des signatures |
+| Active Directory | comptes par état, ordinateurs, groupes, OU, administrateurs, liaisons LDAP, opérations annuaire, réplication, décalage NTP, fraîcheur du script |
+| DNS et DHCP | trafic et anomalies DNS, mises à jour dynamiques, occupation des étendues, échanges DORA, refus |
+| ClamAV | services, moteur, base, signatures, quarantaine, dernière et prochaine analyse, résultats |
+| Machines | CPU, mémoire, disque et réseau des trois machines |
+
+Les seuils colorent les tuiles en orange puis en rouge : compte verrouillé, menace détectée, signatures de plus de 24 h puis 3 jours, script AD silencieux depuis plus de 10 minutes, étendue DHCP remplie à plus de 70 % puis 85 %. La source de données est une variable : le tableau s'importe sur une autre instance Grafana sans modification.
+
+Import : *Dashboards* → *New* → *Import* → *Upload dashboard JSON file*, dossier `JCorp`, celui de la règle d'alerte.
+
+![Import du tableau JCorp](images/45-import-tableau-jcorp.png)
+
+![Vue d'ensemble](images/46-tableau-vue-ensemble.png)
+
+![Section Active Directory](images/47-tableau-active-directory.png)
+
+![Section DNS et DHCP](images/48-tableau-dns-dhcp.png)
+
+![Section ClamAV](images/49-tableau-clamav.png)
+
+![Section ressources des machines](images/50-tableau-machines.png)
+
+**Résultat observé :** aucun panneau vide. Les valeurs concordent avec les relevés en ligne de commande des étapes précédentes : 45 utilisateurs, 67 groupes, 20 OU, 4 ordinateurs ; ClamAV actif avec 99 fichiers analysés, 1 infecté et 5 en quarantaine ; trois machines dont le SRV01 affiché sous son nom et non `localhost:9100`. Le tableau montre aussi des faits que je n'avais pas relevés :
+
+- la tuile **Menaces** passe au rouge : c'est la détection EICAR de l'étape 13, attendue ;
+- une seule adresse DHCP est attribuée sur 140 (139 libres, 0,7 % d'occupation) : les autres machines du VLAN ont une adresse fixe ;
+- le décalage NTP du DC est quasi nul, bien sous la limite de 5 minutes de Kerberos ;
+- le script AD a tourné il y a moins d'une minute : la tâche planifiée fonctionne.
+
+Après une première lecture, j'ai raccourci les titres que Grafana tronquait sur les petites tuiles et réimporté le tableau en écrasant la version précédente (même UID).
+
 ## Étapes prévues
 
 - [x] Préparer la VM et vérifier l'accès et la place disponible. *Accès par clé rétabli, 2,9 Gi de RAM et 36 G de disque disponibles.*
@@ -439,6 +580,7 @@ En relançant par erreur la commande de l'étape 8, j'ai créé une seconde règ
 - [x] Simuler une indisponibilité sans arrêter un service AD/DNS/DHCP essentiel. *Arrêt du seul service `windows_exporter`.*
 - [x] Constater l'alerte puis sa résolution après rétablissement. *Firing puis Normal, sans intervention dans Grafana.*
 - [ ] Si un canal est configuré, vérifier la réception de la notification. *Aucun point de contact pour l'instant : écart assumé.*
+- [x] Superviser l'AD (activité et contenu), le DNS, le DHCP et ClamAV dans un tableau propre au projet. *Collecteurs `ad`, `dns`, `dhcp`, scripts textfile AD et ClamAV, tableau `jcorp-infrastructure.json`.*
 - [ ] En AP 2, ajouter Dokploy, les conteneurs et le contrôle HTTP du site.
 
 ## Recette
@@ -460,6 +602,11 @@ En relançant par erreur la commande de l'étape 8, j'ai créé une seconde règ
 | Visualisation | métriques réelles et période visible dans Grafana | CPU 5,9 %, RAM 30,3 %, disque 16,6 %, uptime 6,9 j, sur 24 h | Oui |
 | Détection | alerte déclenchée après la durée définie | `up` à 0, règle en Firing après 1 min d'attente | Oui |
 | Rétablissement | alerte résolue après retour à la normale | `up` à 1, règle revenue à Normal | Oui |
+| Services AD/DNS/DHCP | métriques exposées par le DC | 202 séries | Oui |
+| Contenu de l'annuaire | comptes, groupes, OU lus dans Prometheus | 45 utilisateurs, 67 groupes, 20 OU | Oui |
+| Antivirus | état et résultats ClamAV dans Prometheus | 15 séries, détection EICAR visible | Oui |
+| Cibles | toutes les machines supervisées UP | 4 cibles UP | Oui |
+| Tableau JCorp | toutes les sections alimentées, aucun panneau vide | 57 panneaux affichant des valeurs réelles | Oui |
 | Extension AP 2 | hôte, conteneurs et site observables | — | À faire |
 
 Voir le [guide des captures](images/README.md).

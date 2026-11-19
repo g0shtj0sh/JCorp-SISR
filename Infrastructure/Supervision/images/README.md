@@ -36,6 +36,24 @@ Ce dossier accompagne la [procédure de supervision](../Grafana-Prometheus.md).
 | `30-alerte-declenchee.png` | Règle `JCORP-DC01 injoignable` en état Firing | **Produite** |
 | `31-dc01-exporteur-redemarre.png` | Service `windows_exporter` relancé (`Running`) | **Produite** |
 | `32-alerte-resolue.png` | Règle revenue à l'état Normal après rétablissement | **Produite** |
+| `33-dc01-collecteurs-ad-dns-dhcp.png` | Collecteurs AD, DNS, DHCP actifs, 202 séries | **Produite** |
+| `34-script-ad-metriques.png` | Sortie du script `ad-metrics.ps1` | **Produite** |
+| `35-tache-planifiee-ad.png` | Tâche planifiée « JCorp - Metriques AD » prête | **Produite** |
+| `36-prometheus-metriques-ad.png` | `jcorp_ad_users` lu dans Prometheus | **Produite** |
+| `37-vm702-cle-ssh.png` | Clé copiée sur la VM 702, connexion sans mot de passe | **Produite** |
+| `38-vm702-etat-clamav.png` | Services ClamAV, timer d'analyse, journaux, freshclam | **Produite** |
+| `39-vm702-node-exporter.png` | Installation de Node Exporter sur la VM 702 | **Produite** |
+| `40-vm702-rapport-analyse.png` | Service d'analyse et rapport avec détection EICAR | **Produite** |
+| `41-scp-scripts-clamav.png` | Envoi des scripts ClamAV par `scp` | **Produite** |
+| `42-clamav-metriques-generees.png` | Métriques ClamAV générées par le script | **Produite** |
+| `43-quatre-cibles-up.png` | Quatre cibles UP dans l'API Prometheus | **Produite** |
+| `44-noms-metriques-ad-dns-dhcp.png` | Noms des métriques AD, DNS et DHCP | **Produite** |
+| `45-import-tableau-jcorp.png` | Import du tableau JCorp dans le dossier `JCorp` | **Produite** |
+| `46-tableau-vue-ensemble.png` | Tableau JCorp : vue d'ensemble | **Produite** |
+| `47-tableau-active-directory.png` | Tableau JCorp : Active Directory | **Produite** |
+| `48-tableau-dns-dhcp.png` | Tableau JCorp : DNS et DHCP | **Produite** |
+| `49-tableau-clamav.png` | Tableau JCorp : ClamAV | **Produite** |
+| `50-tableau-machines.png` | Tableau JCorp : ressources des machines | **Produite** |
 
 Les captures `02` et `04` prouvent que les services fonctionnent et que les cibles sont déclarées, **pas** que Prometheus les collecte : c'est la capture `07` qui l'établira. La capture `05` documente une absence, pas une panne.
 
