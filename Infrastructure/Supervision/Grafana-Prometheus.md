@@ -731,6 +731,63 @@ En éteignant la VM 702, j'ai constaté qu'aucune alerte n'était partie : la r�
 
 **Résultat observé :** trois instances évaluées ; `JCORP-DC01` et `localhost:9100` (SRV01) sont à l'état Normal, `User2-JCorp` passe en *Firing*, ce qui correspond à la VM 702 éteinte. La nouvelle couverture fonctionne donc dès son enregistrement. Conséquence à connaître : éteindre le poste Debian hors des démonstrations déclenchera désormais une alerte.
 
+## Étape 18 — Alertes complémentaires en provisioning
+
+La seule règle existante surveille la disponibilité des machines. Les métriques collectées depuis l'étape 11 permettent d'alerter sur bien plus : saturation, services du contrôleur de domaine, événements de sécurité de l'annuaire, antivirus.
+
+### Règles retenues
+
+| Groupe | Règle | Condition | Durée | Gravité | Ce qu'elle détecte |
+| --- | --- | --- | --- | --- | --- |
+| ressources | Processeur saturé | > 90 % | 10 min | avertissement | charge anormale durable |
+| ressources | Mémoire saturée | > 90 % | 10 min | avertissement | manque de mémoire, utile en AP 2 avec le serveur de jeu |
+| ressources | Disque presque plein | > 85 % | 5 min | avertissement | anticipation avant blocage |
+| ressources | Disque plein | > 95 % | 5 min | critique | GLPI, Prometheus ou une base menacés |
+| active-directory | Service AD arrêté | `NTDS`, `DNS`, `DHCPServer`, `Netlogon`, `Kdc` ou `W32Time` non démarré | 1 min | critique | panne d'un service dont dépend tout le domaine |
+| active-directory | Compte AD verrouillé | au moins un compte verrouillé | immédiat | avertissement | tentative de force brute possible |
+| active-directory | Nouvel administrateur du domaine | plus d'un membre dans Admins du domaine | immédiat | critique | élévation de privilèges |
+| active-directory | Décalage horaire du DC | écart NTP > 60 s | 5 min | avertissement | dérive avant la limite de 5 min de Kerberos |
+| active-directory | Réplication AD en attente | synchronisations en attente | 30 min | avertissement | réplication bloquée, utile quand DC2 sera remis en service |
+| active-directory | Métriques AD figées | script AD silencieux depuis 15 min | immédiat | avertissement | tableau affichant des chiffres périmés |
+| dhcp-dns | Étendue DHCP presque pleine | occupation > 80 % | 5 min | avertissement | nouveaux postes bientôt sans adresse |
+| dhcp-dns | Échecs de résolution DNS | > 1 échec récursif/s | 10 min | avertissement | résolution Internet cassée |
+| clamav | Nouvelle menace en quarantaine | le nombre de fichiers en quarantaine augmente sur 15 min | immédiat | critique | détection réelle |
+| clamav | Service ClamAV arrêté | `clamd`, `freshclam` ou `clamonacc` arrêté | 5 min | critique | poste sans protection |
+| clamav | Signatures ClamAV périmées | base de plus de 48 h | immédiat | avertissement | mises à jour bloquées |
+| clamav | Analyse hebdomadaire manquée | dernière analyse il y a plus de 8 jours | immédiat | avertissement | timer du dimanche non exécuté |
+
+Pour ClamAV, la règle porte sur l'**augmentation** de la quarantaine plutôt que sur « fichiers infectés > 0 » : le fichier EICAR détecté à l'étape 13 la ferait sonner en permanence.
+
+Quand une machine est éteinte, ses règles passent à l'état *Normal* faute de données (`noDataState: OK`) : c'est la règle de disponibilité qui signale l'absence, une seule fois, au lieu de seize.
+
+### Méthode : un fichier plutôt que seize formulaires
+
+Les règles sont décrites dans [`alerting/jcorp-alertes.yaml`](alerting/jcorp-alertes.yaml), versionné dans le dépôt, et chargées par Grafana au démarrage depuis `/etc/grafana/provisioning/alerting/`. Elles sont reproductibles : si `JCORP-SRV01` est reconstruit, elles reviennent avec le fichier. Contrepartie : une règle chargée ainsi n'est plus modifiable dans l'interface, il faut modifier le fichier et redémarrer Grafana.
+
+Avant le déploiement, j'ai exécuté chacune des seize requêtes dans Prometheus : toutes sont valides, renvoient des séries, et aucune ne dépassait son seuil.
+
+```bash
+scp alerting/jcorp-alertes.yaml administrateur@10.2.101.153:/tmp/
+sudo install -o root -g grafana -m 640 /tmp/jcorp-alertes.yaml /etc/grafana/provisioning/alerting/
+sudo systemctl restart grafana-server
+```
+
+### Incident — Source de données introuvable
+
+**Symptôme :** après le premier chargement, le journal de Grafana affiche pour chaque règle `failed to build query 'A': data source not found`.
+
+**Cause :** le fichier désigne la source Prometheus par son identifiant interne (UID). Je l'avais relevé sur une capture d'écran, où un `i` majuscule se lisait comme un `l` : `fg4rc36laca2oe` au lieu de `fg4rc36iaca2oe`.
+
+**Correction :** lecture de l'UID exact dans la base de Grafana, ouverte en lecture seule, puis nouveau déploiement.
+
+```bash
+sudo python3 -c "import sqlite3; c=sqlite3.connect('file:/var/lib/grafana/grafana.db?mode=ro', uri=True); print(c.execute('select uid,name from data_source').fetchall())"
+```
+
+**Résultat observé :** 17 règles chargées (les 16 du fichier et la règle de disponibilité créée dans l'interface), marquées d'origine `file`, et plus aucune erreur d'évaluation dans le journal depuis le redémarrage. Les règles en erreur pendant les deux minutes de l'incident ont pu envoyer une notification *DatasourceError* sur Discord.
+
+**Leçon :** un identifiant technique se copie depuis sa source, jamais depuis une capture.
+
 ## Étapes prévues
 
 - [x] Préparer la VM et vérifier l'accès et la place disponible. *Accès par clé rétabli, 2,9 Gi de RAM et 36 G de disque disponibles.*
@@ -772,6 +829,7 @@ En éteignant la VM 702, j'ai constaté qu'aucune alerte n'était partie : la r�
 | Antivirus | état et résultats ClamAV dans Prometheus | 15 séries, détection EICAR visible | Oui |
 | Cibles | toutes les machines supervisées UP | 4 cibles UP | Oui |
 | Notification | alerte et résolution reçues hors de Grafana | messages Discord FIRING à 15:11 puis RESOLVED | Oui |
+| Alertes complémentaires | règles chargées depuis un fichier versionné, évaluées sans erreur | 16 règles, origine `file`, 0 erreur après correction de l'UID | Oui |
 | Tableau JCorp | toutes les sections alimentées, aucun panneau vide | 57 panneaux affichant des valeurs réelles | Oui |
 | Extension AP 2 | hôte, conteneurs et site observables | — | À faire |
 

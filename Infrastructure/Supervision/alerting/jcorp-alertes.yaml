@@ -1,0 +1,634 @@
+# Règles d'alerte JCorp, chargées par Grafana au démarrage (provisioning).
+# Emplacement : /etc/grafana/provisioning/alerting/jcorp-alertes.yaml
+# Les règles chargées ainsi ne sont pas modifiables dans l'interface : modifier ce fichier puis redémarrer grafana-server.
+# Sans données (machine éteinte), une règle reste à l'état Normal : la règle de disponibilité couvre ce cas.
+apiVersion: 1
+groups:
+  - orgId: 1
+    name: "ressources"
+    folder: "JCorp"
+    interval: "1m"
+    rules:
+      - uid: "jcorp-cpu"
+        title: "Processeur saturé"
+        condition: "C"
+        data:
+          - refId: "A"
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: "fg4rc36iaca2oe"
+            model:
+              refId: "A"
+              expr: "label_replace(100 * (1 - avg by (instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m]))), \"instance\", \"JCORP-SRV01\", \"instance\", \"localhost:9100\") or 100 * (1 - avg by (instance) (rate(windows_cpu_time_total{mode=\"idle\"}[5m])))"
+              instant: true
+              range: false
+              intervalMs: 1000
+              maxDataPoints: 43200
+          - refId: "C"
+            datasourceUid: "__expr__"
+            model:
+              refId: "C"
+              type: "threshold"
+              expression: "A"
+              conditions:
+                - evaluator:
+                    type: "gt"
+                    params:
+                      - 90
+        noDataState: "OK"
+        execErrState: "Error"
+        for: "10m"
+        labels:
+          severite: "avertissement"
+          projet: "jcorp"
+        annotations:
+          summary: "Processeur de {{ $labels.instance }} au-dessus de 90 % depuis 10 minutes"
+        isPaused: false
+        notification_settings:
+          receiver: "Discord JCorp"
+      - uid: "jcorp-ram"
+        title: "Mémoire saturée"
+        condition: "C"
+        data:
+          - refId: "A"
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: "fg4rc36iaca2oe"
+            model:
+              refId: "A"
+              expr: "label_replace(100 * (1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes), \"instance\", \"JCORP-SRV01\", \"instance\", \"localhost:9100\") or 100 * (1 - windows_memory_physical_free_bytes / windows_memory_physical_total_bytes)"
+              instant: true
+              range: false
+              intervalMs: 1000
+              maxDataPoints: 43200
+          - refId: "C"
+            datasourceUid: "__expr__"
+            model:
+              refId: "C"
+              type: "threshold"
+              expression: "A"
+              conditions:
+                - evaluator:
+                    type: "gt"
+                    params:
+                      - 90
+        noDataState: "OK"
+        execErrState: "Error"
+        for: "10m"
+        labels:
+          severite: "avertissement"
+          projet: "jcorp"
+        annotations:
+          summary: "Mémoire de {{ $labels.instance }} au-dessus de 90 % depuis 10 minutes"
+        isPaused: false
+        notification_settings:
+          receiver: "Discord JCorp"
+      - uid: "jcorp-disque-85"
+        title: "Disque presque plein"
+        condition: "C"
+        data:
+          - refId: "A"
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: "fg4rc36iaca2oe"
+            model:
+              refId: "A"
+              expr: "label_replace(100 * (1 - node_filesystem_avail_bytes{mountpoint=\"/\"} / node_filesystem_size_bytes{mountpoint=\"/\"}), \"instance\", \"JCORP-SRV01\", \"instance\", \"localhost:9100\") or 100 * (1 - windows_logical_disk_free_bytes{volume=\"C:\"} / windows_logical_disk_size_bytes{volume=\"C:\"})"
+              instant: true
+              range: false
+              intervalMs: 1000
+              maxDataPoints: 43200
+          - refId: "C"
+            datasourceUid: "__expr__"
+            model:
+              refId: "C"
+              type: "threshold"
+              expression: "A"
+              conditions:
+                - evaluator:
+                    type: "gt"
+                    params:
+                      - 85
+        noDataState: "OK"
+        execErrState: "Error"
+        for: "5m"
+        labels:
+          severite: "avertissement"
+          projet: "jcorp"
+        annotations:
+          summary: "Disque système de {{ $labels.instance }} rempli à plus de 85 %"
+        isPaused: false
+        notification_settings:
+          receiver: "Discord JCorp"
+      - uid: "jcorp-disque-95"
+        title: "Disque plein"
+        condition: "C"
+        data:
+          - refId: "A"
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: "fg4rc36iaca2oe"
+            model:
+              refId: "A"
+              expr: "label_replace(100 * (1 - node_filesystem_avail_bytes{mountpoint=\"/\"} / node_filesystem_size_bytes{mountpoint=\"/\"}), \"instance\", \"JCORP-SRV01\", \"instance\", \"localhost:9100\") or 100 * (1 - windows_logical_disk_free_bytes{volume=\"C:\"} / windows_logical_disk_size_bytes{volume=\"C:\"})"
+              instant: true
+              range: false
+              intervalMs: 1000
+              maxDataPoints: 43200
+          - refId: "C"
+            datasourceUid: "__expr__"
+            model:
+              refId: "C"
+              type: "threshold"
+              expression: "A"
+              conditions:
+                - evaluator:
+                    type: "gt"
+                    params:
+                      - 95
+        noDataState: "OK"
+        execErrState: "Error"
+        for: "5m"
+        labels:
+          severite: "critique"
+          projet: "jcorp"
+        annotations:
+          summary: "Disque système de {{ $labels.instance }} rempli à plus de 95 % : services menacés"
+        isPaused: false
+        notification_settings:
+          receiver: "Discord JCorp"
+  - orgId: 1
+    name: "active-directory"
+    folder: "JCorp"
+    interval: "1m"
+    rules:
+      - uid: "jcorp-ad-service"
+        title: "Service AD arrêté"
+        condition: "C"
+        data:
+          - refId: "A"
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: "fg4rc36iaca2oe"
+            model:
+              refId: "A"
+              expr: "windows_service_state{job=\"windows\",name=~\"NTDS|DNS|DHCPServer|Netlogon|Kdc|W32Time\",state=\"running\"}"
+              instant: true
+              range: false
+              intervalMs: 1000
+              maxDataPoints: 43200
+          - refId: "C"
+            datasourceUid: "__expr__"
+            model:
+              refId: "C"
+              type: "threshold"
+              expression: "A"
+              conditions:
+                - evaluator:
+                    type: "lt"
+                    params:
+                      - 1
+        noDataState: "OK"
+        execErrState: "Error"
+        for: "1m"
+        labels:
+          severite: "critique"
+          projet: "jcorp"
+        annotations:
+          summary: "Service {{ $labels.name }} arrêté sur {{ $labels.instance }}"
+        isPaused: false
+        notification_settings:
+          receiver: "Discord JCorp"
+      - uid: "jcorp-ad-verrouille"
+        title: "Compte AD verrouillé"
+        condition: "C"
+        data:
+          - refId: "A"
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: "fg4rc36iaca2oe"
+            model:
+              refId: "A"
+              expr: "jcorp_ad_users{state=\"locked\"}"
+              instant: true
+              range: false
+              intervalMs: 1000
+              maxDataPoints: 43200
+          - refId: "C"
+            datasourceUid: "__expr__"
+            model:
+              refId: "C"
+              type: "threshold"
+              expression: "A"
+              conditions:
+                - evaluator:
+                    type: "gt"
+                    params:
+                      - 0
+        noDataState: "OK"
+        execErrState: "Error"
+        for: "0s"
+        labels:
+          severite: "avertissement"
+          projet: "jcorp"
+        annotations:
+          summary: "Compte(s) verrouillé(s) dans ad.jcorp : tentative de force brute possible"
+        isPaused: false
+        notification_settings:
+          receiver: "Discord JCorp"
+      - uid: "jcorp-ad-admins"
+        title: "Nouvel administrateur du domaine"
+        condition: "C"
+        data:
+          - refId: "A"
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: "fg4rc36iaca2oe"
+            model:
+              refId: "A"
+              expr: "jcorp_ad_domain_admins"
+              instant: true
+              range: false
+              intervalMs: 1000
+              maxDataPoints: 43200
+          - refId: "C"
+            datasourceUid: "__expr__"
+            model:
+              refId: "C"
+              type: "threshold"
+              expression: "A"
+              conditions:
+                - evaluator:
+                    type: "gt"
+                    params:
+                      - 1
+        noDataState: "OK"
+        execErrState: "Error"
+        for: "0s"
+        labels:
+          severite: "critique"
+          projet: "jcorp"
+        annotations:
+          summary: "Le groupe Admins du domaine compte plus d'un membre : élévation de privilèges à vérifier"
+        isPaused: false
+        notification_settings:
+          receiver: "Discord JCorp"
+      - uid: "jcorp-ad-ntp"
+        title: "Décalage horaire du DC"
+        condition: "C"
+        data:
+          - refId: "A"
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: "fg4rc36iaca2oe"
+            model:
+              refId: "A"
+              expr: "abs(windows_time_computed_time_offset_seconds)"
+              instant: true
+              range: false
+              intervalMs: 1000
+              maxDataPoints: 43200
+          - refId: "C"
+            datasourceUid: "__expr__"
+            model:
+              refId: "C"
+              type: "threshold"
+              expression: "A"
+              conditions:
+                - evaluator:
+                    type: "gt"
+                    params:
+                      - 60
+        noDataState: "OK"
+        execErrState: "Error"
+        for: "5m"
+        labels:
+          severite: "avertissement"
+          projet: "jcorp"
+        annotations:
+          summary: "Horloge de {{ $labels.instance }} décalée de plus de 60 s (Kerberos refuse au-delà de 5 min)"
+        isPaused: false
+        notification_settings:
+          receiver: "Discord JCorp"
+      - uid: "jcorp-ad-replication"
+        title: "Réplication AD en attente"
+        condition: "C"
+        data:
+          - refId: "A"
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: "fg4rc36iaca2oe"
+            model:
+              refId: "A"
+              expr: "sum by (instance) (windows_ad_replication_pending_synchronizations)"
+              instant: true
+              range: false
+              intervalMs: 1000
+              maxDataPoints: 43200
+          - refId: "C"
+            datasourceUid: "__expr__"
+            model:
+              refId: "C"
+              type: "threshold"
+              expression: "A"
+              conditions:
+                - evaluator:
+                    type: "gt"
+                    params:
+                      - 0
+        noDataState: "OK"
+        execErrState: "Error"
+        for: "30m"
+        labels:
+          severite: "avertissement"
+          projet: "jcorp"
+        annotations:
+          summary: "Synchronisations AD en attente depuis 30 minutes sur {{ $labels.instance }}"
+        isPaused: false
+        notification_settings:
+          receiver: "Discord JCorp"
+      - uid: "jcorp-ad-script"
+        title: "Métriques AD figées"
+        condition: "C"
+        data:
+          - refId: "A"
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: "fg4rc36iaca2oe"
+            model:
+              refId: "A"
+              expr: "time() - jcorp_ad_script_last_run_timestamp_seconds"
+              instant: true
+              range: false
+              intervalMs: 1000
+              maxDataPoints: 43200
+          - refId: "C"
+            datasourceUid: "__expr__"
+            model:
+              refId: "C"
+              type: "threshold"
+              expression: "A"
+              conditions:
+                - evaluator:
+                    type: "gt"
+                    params:
+                      - 900
+        noDataState: "OK"
+        execErrState: "Error"
+        for: "0s"
+        labels:
+          severite: "avertissement"
+          projet: "jcorp"
+        annotations:
+          summary: "Le script ad-metrics.ps1 n'a pas tourné depuis plus de 15 minutes"
+        isPaused: false
+        notification_settings:
+          receiver: "Discord JCorp"
+  - orgId: 1
+    name: "dhcp-dns"
+    folder: "JCorp"
+    interval: "1m"
+    rules:
+      - uid: "jcorp-dhcp"
+        title: "Étendue DHCP presque pleine"
+        condition: "C"
+        data:
+          - refId: "A"
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: "fg4rc36iaca2oe"
+            model:
+              refId: "A"
+              expr: "100 * windows_dhcp_scope_addresses_in_use / (windows_dhcp_scope_addresses_in_use + windows_dhcp_scope_addresses_free)"
+              instant: true
+              range: false
+              intervalMs: 1000
+              maxDataPoints: 43200
+          - refId: "C"
+            datasourceUid: "__expr__"
+            model:
+              refId: "C"
+              type: "threshold"
+              expression: "A"
+              conditions:
+                - evaluator:
+                    type: "gt"
+                    params:
+                      - 80
+        noDataState: "OK"
+        execErrState: "Error"
+        for: "5m"
+        labels:
+          severite: "avertissement"
+          projet: "jcorp"
+        annotations:
+          summary: "Étendue {{ $labels.scope }} occupée à plus de 80 %"
+        isPaused: false
+        notification_settings:
+          receiver: "Discord JCorp"
+      - uid: "jcorp-dns-echecs"
+        title: "Échecs de résolution DNS"
+        condition: "C"
+        data:
+          - refId: "A"
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: "fg4rc36iaca2oe"
+            model:
+              refId: "A"
+              expr: "sum by (instance) (rate(windows_dns_recursive_query_failures_total[5m]))"
+              instant: true
+              range: false
+              intervalMs: 1000
+              maxDataPoints: 43200
+          - refId: "C"
+            datasourceUid: "__expr__"
+            model:
+              refId: "C"
+              type: "threshold"
+              expression: "A"
+              conditions:
+                - evaluator:
+                    type: "gt"
+                    params:
+                      - 1
+        noDataState: "OK"
+        execErrState: "Error"
+        for: "10m"
+        labels:
+          severite: "avertissement"
+          projet: "jcorp"
+        annotations:
+          summary: "Plus d'un échec de résolution récursive par seconde sur {{ $labels.instance }}"
+        isPaused: false
+        notification_settings:
+          receiver: "Discord JCorp"
+  - orgId: 1
+    name: "clamav"
+    folder: "JCorp"
+    interval: "1m"
+    rules:
+      - uid: "jcorp-clamav-menace"
+        title: "Nouvelle menace en quarantaine"
+        condition: "C"
+        data:
+          - refId: "A"
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: "fg4rc36iaca2oe"
+            model:
+              refId: "A"
+              expr: "delta(clamav_quarantine_files[15m])"
+              instant: true
+              range: false
+              intervalMs: 1000
+              maxDataPoints: 43200
+          - refId: "C"
+            datasourceUid: "__expr__"
+            model:
+              refId: "C"
+              type: "threshold"
+              expression: "A"
+              conditions:
+                - evaluator:
+                    type: "gt"
+                    params:
+                      - 0
+        noDataState: "OK"
+        execErrState: "Error"
+        for: "0s"
+        labels:
+          severite: "critique"
+          projet: "jcorp"
+        annotations:
+          summary: "Nouveau fichier placé en quarantaine par ClamAV sur {{ $labels.instance }}"
+        isPaused: false
+        notification_settings:
+          receiver: "Discord JCorp"
+      - uid: "jcorp-clamav-service"
+        title: "Service ClamAV arrêté"
+        condition: "C"
+        data:
+          - refId: "A"
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: "fg4rc36iaca2oe"
+            model:
+              refId: "A"
+              expr: "clamav_service_up"
+              instant: true
+              range: false
+              intervalMs: 1000
+              maxDataPoints: 43200
+          - refId: "C"
+            datasourceUid: "__expr__"
+            model:
+              refId: "C"
+              type: "threshold"
+              expression: "A"
+              conditions:
+                - evaluator:
+                    type: "lt"
+                    params:
+                      - 1
+        noDataState: "OK"
+        execErrState: "Error"
+        for: "5m"
+        labels:
+          severite: "critique"
+          projet: "jcorp"
+        annotations:
+          summary: "Service {{ $labels.service }} arrêté sur {{ $labels.instance }}"
+        isPaused: false
+        notification_settings:
+          receiver: "Discord JCorp"
+      - uid: "jcorp-clamav-signatures"
+        title: "Signatures ClamAV périmées"
+        condition: "C"
+        data:
+          - refId: "A"
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: "fg4rc36iaca2oe"
+            model:
+              refId: "A"
+              expr: "time() - clamav_database_timestamp_seconds"
+              instant: true
+              range: false
+              intervalMs: 1000
+              maxDataPoints: 43200
+          - refId: "C"
+            datasourceUid: "__expr__"
+            model:
+              refId: "C"
+              type: "threshold"
+              expression: "A"
+              conditions:
+                - evaluator:
+                    type: "gt"
+                    params:
+                      - 172800
+        noDataState: "OK"
+        execErrState: "Error"
+        for: "0s"
+        labels:
+          severite: "avertissement"
+          projet: "jcorp"
+        annotations:
+          summary: "Base de signatures de {{ $labels.instance }} vieille de plus de 48 heures"
+        isPaused: false
+        notification_settings:
+          receiver: "Discord JCorp"
+      - uid: "jcorp-clamav-analyse"
+        title: "Analyse hebdomadaire manquée"
+        condition: "C"
+        data:
+          - refId: "A"
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: "fg4rc36iaca2oe"
+            model:
+              refId: "A"
+              expr: "time() - clamav_last_scan_end_timestamp_seconds"
+              instant: true
+              range: false
+              intervalMs: 1000
+              maxDataPoints: 43200
+          - refId: "C"
+            datasourceUid: "__expr__"
+            model:
+              refId: "C"
+              type: "threshold"
+              expression: "A"
+              conditions:
+                - evaluator:
+                    type: "gt"
+                    params:
+                      - 691200
+        noDataState: "OK"
+        execErrState: "Error"
+        for: "0s"
+        labels:
+          severite: "avertissement"
+          projet: "jcorp"
+        annotations:
+          summary: "Aucune analyse ClamAV terminée depuis plus de 8 jours sur {{ $labels.instance }}"
+        isPaused: false
+        notification_settings:
+          receiver: "Discord JCorp"
