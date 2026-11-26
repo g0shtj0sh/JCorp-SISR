@@ -190,13 +190,38 @@ L'indication *Validate DNS* reste orange : Dokploy vérifie le nom depuis Intern
 
 **Résultat observé :** depuis la VM 701, jointe au domaine, `http://checkpoint.ad.jcorp/` affiche la page du site. La chaîne complète fonctionne : DNS de l'AD → Traefik sur le port 80 → conteneur sur le port 3000 → Next.js. Le navigateur signale *Non sécurisé* : la connexion est en HTTP.
 
+### Accès depuis le poste d'administration
+
+Le poste d'administration n'est pas membre du domaine : il utilise le DNS de l'établissement, qui ignore `ad.jcorp`. Depuis ce poste, le DNS de l'AD répondait bien quand on l'interrogeait directement (`Resolve-DnsName checkpoint.ad.jcorp -Server 10.2.101.10`), et le site répondait par son adresse IP ; seule la résolution normale échouait.
+
+Plutôt que de remplacer le DNS de toute la carte réseau, ce qui couperait la résolution Internet dès que le contrôleur est éteint, j'ajoute une **règle NRPT** : les seuls noms en `.ad.jcorp` sont envoyés au DNS de l'AD, tout le reste continue de passer par le DNS habituel. Les futurs noms du domaine fonctionneront sans nouvelle manipulation.
+
+```powershell
+Add-DnsClientNrptRule -Namespace ".ad.jcorp" -NameServers "10.2.101.10" -Comment "JCorp : noms du domaine AD"
+Clear-DnsClientCache; Resolve-DnsName checkpoint.ad.jcorp -DnsOnly
+```
+
+![Règle NRPT ajoutée sur le poste d'administration](images/21-nrpt-poste-administration.png)
+
+![Site ouvert depuis le poste d'administration](images/22-site-depuis-poste-administration.png)
+
+**Résultat observé :** le poste résout `checkpoint.ad.jcorp` en `10.2.101.154` et le navigateur affiche le site.
+
+Deux essais ont échoué avant : la commande avait d'abord été lancée dans la console de `JCORP-DC01`, où elle est inutile puisque le contrôleur est lui-même le DNS de la zone (règle retirée ensuite), puis dans une fenêtre PowerShell non élevée du poste, qui a renvoyé *accès refusé*. La règle demande les droits d'administrateur.
+
+Retrait de la règle :
+
+```powershell
+Get-DnsClientNrptRule | Where-Object Namespace -eq ".ad.jcorp" | Remove-DnsClientNrptRule -Force
+```
+
 ## Étapes prévues
 
 - [x] Créer le projet et son environnement. *`Checkpoint`, environnement unique `production`.*
 - [x] Créer la base avec son stockage persistant. *PostgreSQL 18, aucun port publié.*
 - [x] Créer le dépôt et le projet Next.js. *[g0shtj0sh/checkpoint](https://github.com/g0shtj0sh/checkpoint), Next.js 16.4.6, Node 22.*
 - [x] Déployer une première version depuis GitHub. *Commit `4882a99`, après correction de la version de Node.*
-- [x] Publier le site sous un nom DNS interne. *`checkpoint.ad.jcorp`, testé depuis la VM 701.*
+- [x] Publier le site sous un nom DNS interne. *`checkpoint.ad.jcorp`, testé depuis la VM 701 et depuis le poste d'administration.*
 - [ ] Développer les pages du site : accueil, catalogue, fiche d'offre, demande simulée.
 - [ ] Relier le site à la base et charger les offres de démonstration.
 - [ ] Mettre en place le HTTPS avec un certificat adapté au domaine interne.

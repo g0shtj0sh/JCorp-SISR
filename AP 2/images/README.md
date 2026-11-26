@@ -24,6 +24,8 @@ Ce dossier accompagne la [procédure de déploiement de Checkpoint](../Deploieme
 | `18-dokploy-domaine-formulaire.png` | Domaine checkpoint.ad.jcorp, port 3000, HTTPS désactivé | **Produite** |
 | `19-dokploy-domaine-actif.png` | Domaine actif dans Dokploy | **Produite** |
 | `20-site-vm701-checkpoint-ad-jcorp.png` | Site ouvert depuis la VM 701 par son nom DNS | **Produite** |
+| `21-nrpt-poste-administration.png` | Règle NRPT `.ad.jcorp` vers le DNS de l'AD, nom résolu | **Produite** |
+| `22-site-depuis-poste-administration.png` | Site ouvert depuis le poste d'administration | **Produite** |
 | — | Site HTTPS, catalogue, demande simulée, mise à jour, retour de version, supervision | Non produites |
 
 ## Règles retenues
