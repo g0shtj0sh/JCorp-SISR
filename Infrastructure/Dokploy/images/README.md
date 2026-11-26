@@ -1,12 +1,18 @@
 # Captures — Dokploy
 
-Ce dossier est préparé pour les futures preuves. Aucune capture d'installation ou de validation n'est disponible pour le moment.
+Ce dossier accompagne la [procédure Dokploy](../Dokploy.md).
 
-Noms indicatifs à utiliser après réalisation :
+| Fichier | Contenu | État |
+| --- | --- | --- |
+| `01-dokploy-premier-acces.png` | Premier accès : formulaire de création du compte administrateur | **Produite** |
+| `02-docker-dokploy-controles.png` | Versions Docker, dépôt signé, services Dokploy 1/1, Swarm et mémoire | **Produite** |
+| `03-dokploy-connexion.png` | Page de connexion après création du compte | **Produite** |
+| `04-dokploy-tableau-de-bord.png` | Tableau de bord Dokploy après connexion | Non produite |
 
-- 01-version-dokploy.png
-- 02-projet-services.png
-- 03-deploiement.png
-- 04-volumes.png
+Les journaux d'installation complets ne sont pas versionnés : ils contiennent le jeton d'adhésion au Swarm.
 
-Ajouter les captures réelles avec leur date, une légende et le résultat qu'elles démontrent dans la procédure. Vérifier que les mots de passe, jetons et données personnelles inutiles sont masqués avant publication. Une liste de captures prévues ne vaut pas validation.
+## Règles retenues
+
+Format PNG, nom en minuscules avec des tirets, résultat visible sur la capture, légende décrivant ce qu'elle prouve. Mots de passe, jetons et données personnelles inutiles masqués avant publication. Une liste de captures prévues ne vaut pas validation.
+
+[Retour à la procédure](../Dokploy.md)

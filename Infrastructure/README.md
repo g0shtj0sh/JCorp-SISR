@@ -8,7 +8,7 @@ Je regroupe ici les configurations techniques de mon projet JCorp, communes aux 
 | [Création des VM Linux](VM%20Linux/Creation-des-VM-Linux.md) | VM 705 `JCORP-SRV01` et 706 `JCORP-APP01`, image cloud, cloud-init et recette | Réalisée et vérifiée |
 | [GLPI](GLPI/GLPI.md) | Inventaire et assistance, AP 1 | **Terminé** — GLPI 11.0.13, inventaire et cycle de ticket démontrés |
 | [Grafana et Prometheus](Supervision/Grafana-Prometheus.md) | Supervision commune aux deux AP | **Installés le 19 novembre 2026**, alerte testée ; extension AP 2 à faire |
-| [Dokploy](Dokploy/Dokploy.md) | Déploiement du site et de sa base, AP 2 | Planifié, non installé |
+| [Dokploy](Dokploy/Dokploy.md) | Déploiement du site et de sa base, AP 2 | **Installé le 26 novembre 2026** (v0.31.4), déploiements à venir |
 | [TrueNAS](TrueNAS/TrueNAS.md) | VM 704, stockage, jonction AD, partage Commun et lecteur S: par GPO | Opérationnel |
 | [Postes utilisateurs](Postes%20utilisateurs/Postes-utilisateurs.md) | Windows 11 et Debian joints au domaine, connexions AD validées | Opérationnels |
 | [Architecture du réseau](Architecture-du-reseau.md) | Plages IP, VLAN, pont Proxmox et machines virtuelles | En cours |
