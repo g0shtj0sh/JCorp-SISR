@@ -766,6 +766,26 @@ Les règles sont décrites dans [`alerting/jcorp-alertes.yaml`](alerting/jcorp-a
 
 Avant le déploiement, j'ai exécuté chacune des seize requêtes dans Prometheus : toutes sont valides, renvoient des séries, et aucune ne dépassait son seuil.
 
+Sortie relevée le 26 novembre 2026 (valeur actuelle de chaque requête, comparée ensuite au seuil) :
+
+```text
+jcorp-cpu                  success series=3  3.8  1.8  2.8
+jcorp-ram                  success series=3  29.5 35.8 25.6
+jcorp-disque-85            success series=3  17.9 27.9 23.7
+jcorp-ad-service           success series=6  1 1 1 1 1 1
+jcorp-ad-verrouille        success series=1  0
+jcorp-ad-admins            success series=1  1
+jcorp-ad-ntp               success series=1  0.0098
+jcorp-ad-replication       success series=1  0
+jcorp-ad-script            success series=1  25.3
+jcorp-dhcp                 success series=1  0.71
+jcorp-dns-echecs           success series=1  0
+jcorp-clamav-menace        success series=1  0
+jcorp-clamav-service       success series=3  1 1 1
+jcorp-clamav-signatures    success series=1  100834.6
+jcorp-clamav-analyse       success series=1  6315.6
+```
+
 ```bash
 scp alerting/jcorp-alertes.yaml administrateur@10.2.101.153:/tmp/
 sudo install -o root -g grafana -m 640 /tmp/jcorp-alertes.yaml /etc/grafana/provisioning/alerting/
@@ -783,6 +803,12 @@ sudo systemctl restart grafana-server
 ```bash
 sudo python3 -c "import sqlite3; c=sqlite3.connect('file:/var/lib/grafana/grafana.db?mode=ro', uri=True); print(c.execute('select uid,name from data_source').fetchall())"
 ```
+
+![Règles du dossier JCorp, marquées Provisioned, toutes à l'état Normal (1/2)](images/72-alertes-liste-provisionnees-1.png)
+
+![Suite de la liste : 17 règles au total, dont la règle de disponibilité créée dans l'interface (2/2)](images/72-alertes-liste-provisionnees-2.png)
+
+![Détail de la règle Service AD arrêté : six services évalués, livraison à Discord JCorp, mise à jour par Provisioning](images/73-alerte-service-ad-detail.png)
 
 **Résultat observé :** 17 règles chargées (les 16 du fichier et la règle de disponibilité créée dans l'interface), marquées d'origine `file`, et plus aucune erreur d'évaluation dans le journal depuis le redémarrage. Les règles en erreur pendant les deux minutes de l'incident ont pu envoyer une notification *DatasourceError* sur Discord.
 
