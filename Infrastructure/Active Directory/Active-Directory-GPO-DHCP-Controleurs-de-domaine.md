@@ -40,6 +40,43 @@ Le second contrôleur sur la VM Proxmox **703**, nommée `DC2-JCorp`, est foncti
 
 La résolution des noms du domaine fonctionnait mais le DNS ne répondait pas aux demandes externes de Debian. Dans les propriétés DNS de `JCORP-DC01`, onglet **Redirecteurs**, j'ai remplacé les trois anciennes adresses `fec0:0:0:ffff::1`, `::2` et `::3` par `10.2.101.1`, puis appliqué la configuration. Depuis Debian, `deb.debian.org` est ensuite résolu via le DNS AD `10.2.101.10` et APT a pu installer les outils AD. Les captures avant/après et les contrôles se trouvent dans la [procédure Debian](../Postes%20utilisateurs/Postes-utilisateurs.md#corriger-la-résolution-dns-externe).
 
+### Synchronisation horaire du domaine — 26 novembre 2026
+
+Kerberos refuse une authentification dès que l'horloge d'un client et celle du contrôleur divergent de plus de **5 minutes**. Toutes les machines du domaine prennent leur heure sur la hiérarchie AD, dont le sommet est le contrôleur qui détient le rôle d'**émulateur PDC**. C'est donc lui, et lui seul, qui doit se synchroniser sur une source fiable.
+
+**Constat.**
+
+```powershell
+w32tm /query /status
+```
+
+![Horloge du DC sur sa propre horloge matérielle](images/ntp-avant-horloge-locale.png)
+
+**Résultat observé :** source `Local CMOS Clock`, identifiant de référence `LOCL`, strate 1. Le contrôleur ne se synchronisait sur aucun serveur de temps : il suivait l'horloge matérielle fournie par Proxmox et se déclarait pourtant référence de premier niveau.
+
+Le domaine fonctionnait, puisque toutes les machines suivaient la même horloge. Mais une dérive de l'hôte se serait propagée à tout le domaine sans être détectée : le panneau *Décalage horaire NTP du DC* du tableau Grafana mesure l'écart entre le DC et sa source, qui était lui-même, et affichait donc zéro.
+
+**Correction.** Je vérifie d'abord quel contrôleur porte les rôles FSMO, puis je configure l'émulateur PDC sur le pool NTP public français :
+
+```powershell
+netdom query fsmo
+w32tm /config /manualpeerlist:"0.fr.pool.ntp.org,0x8 1.fr.pool.ntp.org,0x8 2.fr.pool.ntp.org,0x8" /syncfromflags:manual /reliable:yes /update
+Restart-Service w32time; w32tm /resync /rediscover
+w32tm /query /status
+```
+
+| Option | Rôle |
+| --- | --- |
+| `/manualpeerlist` | trois serveurs du pool français ; l'indicateur `0x8` demande des requêtes en mode client |
+| `/syncfromflags:manual` | utiliser cette liste plutôt que la hiérarchie du domaine |
+| `/reliable:yes` | annoncer le DC comme source de temps fiable aux autres machines |
+
+![Rôles FSMO, configuration et nouvelle source NTP](images/ntp-apres-pool-fr.png)
+
+**Résultat observé :** `JCORP-DC01` détient les cinq rôles FSMO, dont l'émulateur PDC. Après la resynchronisation, la source est `2.fr.pool.ntp.org`, l'identifiant de référence est l'adresse `45.138.55.62` et la strate passe à **2** : le contrôleur se situe désormais un niveau sous une horloge de référence réelle. Le port UDP 123 sortant n'est donc pas bloqué par le réseau de l'établissement.
+
+Les postes du domaine n'ont rien à changer : ils continuent de suivre le contrôleur, qui suit maintenant une source externe. Le second contrôleur `DC2-JCorp`, s'il est remis en service, doit rester en mode hiérarchie de domaine (`NT5DS`) et ne pas recevoir cette configuration.
+
 ## 4. Organiser les unités d'organisation et les groupes
 
 J'ai placé les cinq OU principales **directement sous `ad.jcorp`** : `Administration`, `Groupes`, `Postes`, `Serveurs` et `Utilisateurs`. Les OU des services se trouvent dans `Utilisateurs`. Le contrôleur de domaine reste dans l'OU système `Domain Controllers`.
@@ -145,7 +182,8 @@ hostname
 ipconfig /all
 Get-ADDomain | Select-Object DNSRoot, NetBIOSName
 dcdiag /test:Advertising /test:Services /test:DNS
+w32tm /query /status
 ```
 
-Windows 11 est joint au domaine, la connexion utilisateur et le lecteur S: sont fonctionnels. Le NAS est terminé selon les contrôles documentés et la validation complémentaire de Joshua. Le poste Debian est maintenant joint dans l'OU `Postes` ; `adcli testjoin`, SSSD et l'identité de Joshua ont été contrôlés, puis sa connexion graphique a été confirmée. Les preuves figurent dans la [documentation des postes](../Postes%20utilisateurs/Postes-utilisateurs.md). Le programme est ensuite complété par GLPI et Grafana/Prometheus en AP 1, puis Dokploy et un site avec sa base en AP 2. Ces services sont planifiés, pas encore installés ; voir la [feuille de route](../Feuille-de-route.md). La segmentation complète, le chantier global de sauvegarde/restauration et les autres applications restent exclus.
+Windows 11 est joint au domaine, la connexion utilisateur et le lecteur S: sont fonctionnels. Le NAS est terminé selon les contrôles documentés et la validation complémentaire de Joshua. Le poste Debian est maintenant joint dans l'OU `Postes` ; `adcli testjoin`, SSSD et l'identité de Joshua ont été contrôlés, puis sa connexion graphique a été confirmée. Les preuves figurent dans la [documentation des postes](../Postes%20utilisateurs/Postes-utilisateurs.md). Le programme est ensuite complété par GLPI et Grafana/Prometheus en AP 1, puis Dokploy et un site avec sa base en AP 2. GLPI et la supervision sont installés depuis novembre 2026, Dokploy reste à faire ; voir la [feuille de route](../Feuille-de-route.md). La segmentation complète, le chantier global de sauvegarde/restauration et les autres applications restent exclus.
 
