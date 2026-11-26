@@ -1,13 +1,13 @@
 # AP 2 — Plan de validation et preuves
 
-**Tous les tests ci-dessous sont à faire.** Ce document ne constitue pas une preuve de déploiement.
+**T01 et T02 réussis le 26 novembre 2026 ; les autres tests sont à faire.** Les preuves sont dans la [procédure de déploiement](Deploiement-Checkpoint.md).
 
 Avant la recette, consigner les versions Linux, Docker, Dokploy, application et base, le commit testé, l'URL, la date et l'opérateur.
 
 | ID | Contrôle | Résultat attendu | État |
 | --- | --- | --- | --- |
-| T01 | Déployer depuis le dépôt source | Déploiement réussi, services sains | À faire |
-| T02 | Ouvrir le site depuis le client | Nom DNS résolu et page accessible | À faire |
+| T01 | Déployer depuis le dépôt source | Déploiement réussi, services sains | **Réussi le 26/11/2026** : commit `4882a99`, après l'incident Node 18 ([procédure](Deploiement-Checkpoint.md#étape-6--application-dans-dokploy)) |
+| T02 | Ouvrir le site depuis le client | Nom DNS résolu et page accessible | **Réussi le 26/11/2026** : `http://checkpoint.ad.jcorp` depuis la VM 701 |
 | T03 | Vérifier HTTPS | Certificat valide et approuvé dans le contexte retenu | À faire |
 | T04 | Consulter le catalogue et une offre | Contenu issu de la base, données cohérentes | À faire |
 | T05 | Envoyer une demande simulée valide | Confirmation et enregistrement en base | À faire |

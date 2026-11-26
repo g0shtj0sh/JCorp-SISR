@@ -1,6 +1,6 @@
 # AP 2 — Hébergement d'un site avec Docker et Dokploy
 
-**Statut au 26 novembre 2026 : sujet, nom, technologies et périmètre arrêtés ; Docker et Dokploy installés et sains sur `JCORP-APP01` ; le site, sa base et le serveur de jeu ne sont pas déployés.**
+**Statut au 26 novembre 2026 : sujet, nom, technologies et périmètre arrêtés ; Docker et Dokploy installés et sains sur `JCORP-APP01` ; première version du site et base PostgreSQL déployées, site joignable à `http://checkpoint.ad.jcorp` ; contenu du site, HTTPS et serveur de jeu restent à faire.**
 
 ## Objectif
 
@@ -20,6 +20,7 @@ La VM AP 2 fait partie d'une architecture de **deux VM**, créées le 12 novembr
 | Document | Contenu |
 | --- | --- |
 | [Feuille de route](../Infrastructure/Feuille-de-route.md) | Ordre, ressources proposées, décisions et prérequis |
+| [Déploiement de Checkpoint](Deploiement-Checkpoint.md) | Projet, base, dépôt, application et nom DNS ; premier déploiement réussi le 26 novembre 2026 |
 | [Dokploy](../Infrastructure/Dokploy/Dokploy.md) | Docker et Dokploy installés le 26 novembre 2026 ; déploiements à venir |
 | [Site d'hébergement de jeux](Site-hebergement-jeux.md) | Fonctionnalités, données et périmètre de la première version |
 | [Plan de validation](Plan-de-validation.md) | Tests, preuves et résultats à renseigner |
@@ -30,7 +31,7 @@ La VM AP 2 fait partie d'une architecture de **deux VM**, créées le 12 novembr
 - [x] Préparer une VM Linux dédiée. *VM 706 `JCORP-APP01`, Debian 13, créée et contrôlée le 12 novembre 2026.*
 - [x] Installer Docker et Dokploy sur cette VM. *Docker 29.10.1 depuis le dépôt officiel, Dokploy v0.31.4, compte administrateur créé le 26 novembre 2026.*
 - [x] Arrêter le nom, les technologies et le périmètre. *Checkpoint, Next.js et PostgreSQL, Dokploy seul, serveur Minecraft de démonstration, le 19 novembre 2026.*
-- [ ] Créer le site et son dépôt source.
+- [x] Créer le site et son dépôt source. *[g0shtj0sh/checkpoint](https://github.com/g0shtj0sh/checkpoint), Next.js 16.4.6.*
 - [ ] Déployer le site et la base avec stockage persistant.
 - [ ] Configurer DNS, accès HTTP/HTTPS et certificat adapté.
 - [ ] Tester le catalogue, les offres et le formulaire.

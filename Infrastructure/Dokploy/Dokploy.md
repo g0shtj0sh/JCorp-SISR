@@ -141,11 +141,11 @@ J'ai créé ce compte moi-même, avec un mot de passe propre à Dokploy qui n'ap
 - [x] Vérifier les ressources et affecter des paramètres réseau libres. *VMID 706 et IP `10.2.101.154` contrôlés libres puis affectés le 12 novembre 2026.*
 - [x] Préparer Linux et les accès d'administration nécessaires. *Debian 13 installée, accès SSH par clé opérationnel. Reste à définir un mot de passe local pour la console.*
 - [x] Installer Dokploy selon ses prérequis et relever les versions. *Docker 29.10.1 depuis le dépôt officiel, Dokploy v0.31.4, script lu avant exécution, compte administrateur créé le 26 novembre 2026.*
-- [ ] Créer le projet et son environnement de démonstration.
+- [x] Créer le projet et son environnement de démonstration. *Suite dans la [procédure de déploiement de Checkpoint](../../AP%202/Deploiement-Checkpoint.md).*
 - [ ] Préparer le dépôt applicatif et sa configuration de déploiement.
-- [ ] Déployer la base avec son stockage persistant.
+- [x] Déployer la base avec son stockage persistant. *PostgreSQL 18, sans port publié.*
 - [ ] Déployer le site et vérifier la connexion à la base.
-- [ ] Configurer le nom DNS, le routage HTTP et le certificat adapté.
+- [ ] Configurer le nom DNS, le routage HTTP et le certificat adapté. *Nom et routage HTTP faits (`checkpoint.ad.jcorp`), certificat à faire.*
 - [ ] Tester les fonctions du site depuis le poste client.
 - [ ] Déployer une modification identifiable depuis GitHub et observer les logs.
 - [ ] Revenir à une version applicative connue et vérifier les fonctions.
