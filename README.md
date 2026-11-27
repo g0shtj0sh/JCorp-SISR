@@ -8,6 +8,21 @@ Je documente l'infrastructure JCorp réalisée sur Proxmox et son évolution au 
 | [AP 1](AP%201/README.md) | Administrer le parc, gérer le support avec GLPI et superviser avec Grafana/Prometheus | Socle réalisé, **GLPI et supervision terminés** (inventaire, ticket, tableau de bord et alerte testée) |
 | [AP 2](AP%202/README.md) | Déployer avec Dokploy un site de présentation d'offres de serveurs de jeux et sa base | Site Checkpoint v1.1 en ligne à `http://checkpoint.ad.jcorp`, déployé automatiquement par Dokploy ; recette T04 à T10 réussie ; HTTPS, supervision et serveur Minecraft à faire |
 
+## Accès pour la démonstration
+
+**Mot de passe commun à toute l'AP : `JCorp-123`.**
+
+Dans le cadre de l'atelier, un seul mot de passe est utilisé pour les comptes de connexion de l'infrastructure, afin que l'enseignant et le jury puissent naviguer d'un service à l'autre sans liste d'identifiants. Il est volontairement publié ici : l'infrastructure tourne sur le réseau de laboratoire `10.2.101.0/24` et n'est pas joignable depuis Internet. Les procédures continuent de ne montrer aucun mot de passe dans les commandes ni sur les captures.
+
+**Écart assumé, à ne pas reproduire en entreprise.** Dans une vraie entreprise, ce choix serait une faute de sécurité : une seule fuite donnerait accès à tout, et le mot de passe serait connu de toute personne lisant ce dépôt public. On appliquerait au contraire :
+
+- un mot de passe **différent pour chaque service et chaque compte**, jamais publié ;
+- une **politique de complexité** : 12 caractères minimum (14 pour les comptes d'administration), avec majuscules, minuscules, chiffres et symboles, sans mot du dictionnaire ni nom de l'entreprise ;
+- un **gestionnaire de mots de passe** d'équipe (par exemple Bitwarden ou KeePass) pour les stocker et les partager ;
+- l'**authentification à plusieurs facteurs** sur les comptes d'administration et les accès distants ;
+- le **renouvellement** des mots de passe après le départ d'un administrateur ou un incident, et le verrouillage du compte après plusieurs échecs ;
+- des **comptes nominatifs** plutôt que partagés, pour savoir qui a fait quoi.
+
 ## État du socle
 
 - [x] Domaine `ad.jcorp`, DNS, OU, comptes et groupes.
