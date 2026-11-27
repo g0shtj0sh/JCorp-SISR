@@ -1,0 +1,9 @@
+[Unit]
+Description=Vérifie chaque minute si Checkpoint a un nouveau commit
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=1min
+
+[Install]
+WantedBy=timers.target

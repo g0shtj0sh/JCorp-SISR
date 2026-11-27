@@ -1,0 +1,8 @@
+[Unit]
+Description=Déploiement automatique de Checkpoint depuis GitHub
+Wants=network-online.target
+After=network-online.target docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/checkpoint-autodeploy.sh

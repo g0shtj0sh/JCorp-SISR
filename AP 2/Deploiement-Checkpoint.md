@@ -251,6 +251,8 @@ L'étape 6 avait laissé une limite : GitHub ne peut pas appeler Dokploy, dont l
 | `/etc/checkpoint-autodeploy.env` | Jeton Dokploy, dépôt et branche ; propriétaire `root`, droits `600` |
 | `/var/lib/checkpoint-autodeploy/dernier-commit` | Dernier commit déployé avec succès |
 
+Les trois fichiers sont versionnés dans [Infrastructure/Dokploy/scripts](../Infrastructure/Dokploy/scripts/) ; le fichier `.env` qui contient le jeton ne l'est pas.
+
 Le script lit la branche avec `git ls-remote`, sans cloner, puis envoie à `http://127.0.0.1:3000/api/deploy/<jeton>` la même requête qu'un webhook GitHub (`X-GitHub-Event: push`). Le commit n'est mémorisé que si Dokploy répond `200` : un échec est retenté à la minute suivante.
 
 ```bash
