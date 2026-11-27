@@ -6,7 +6,7 @@ Je documente l'infrastructure JCorp réalisée sur Proxmox et son évolution au 
 | --- | --- | --- |
 | [Infrastructure commune](Infrastructure/README.md) | Réseau, AD, DNS, DHCP, GPO, postes et NAS ; documentation des futurs services | Socle terminé ; les deux VM Linux de services sont créées, contrôlées et la première porte GLPI |
 | [AP 1](AP%201/README.md) | Administrer le parc, gérer le support avec GLPI et superviser avec Grafana/Prometheus | Socle réalisé, **GLPI et supervision terminés** (inventaire, ticket, tableau de bord et alerte testée) |
-| [AP 2](AP%202/README.md) | Déployer avec Dokploy un site de présentation d'offres de serveurs de jeux et sa base | Site Checkpoint v1.1 en ligne à `http://checkpoint.ad.jcorp`, déployé automatiquement par Dokploy ; recette T04 à T10 réussie ; HTTPS, supervision et serveur Minecraft à faire |
+| [AP 2](AP%202/README.md) | Déployer avec Dokploy un site de présentation d'offres de serveurs de jeux et sa base | Site Checkpoint v1.1 en ligne à `http://checkpoint.ad.jcorp`, déployé automatiquement par Dokploy ; paiement simulé, pages légales, espace client et panel ; recette T04 à T10 réussie ; HTTPS, supervision et serveur Minecraft à faire |
 
 ## Accès pour la démonstration
 

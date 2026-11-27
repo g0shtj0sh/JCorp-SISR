@@ -1,6 +1,6 @@
 # AP 2 — Hébergement d'un site avec Docker et Dokploy
 
-**Statut au 27 novembre 2026 : site Checkpoint v1.1 en ligne à `http://checkpoint.ad.jcorp`, relié à sa base PostgreSQL et redéployé automatiquement à chaque commit ; recette T01, T02 et T04 à T10 réussie ; HTTPS, supervision et serveur Minecraft restent à faire.**
+**Statut au 27 novembre 2026 : site Checkpoint v1.1 en ligne à `http://checkpoint.ad.jcorp`, relié à sa base et redéployé automatiquement à chaque commit ; commande avec paiement simulé et pages légales conformes ; espace client fictif avec panel de serveur et support traçable ; recette T01, T02 et T04 à T10 réussie ; HTTPS, supervision et serveur Minecraft restent à faire.**
 
 ## Objectif
 
@@ -35,6 +35,7 @@ La VM AP 2 fait partie d'une architecture de **deux VM**, créées le 12 novembr
 - [x] Déployer le site et la base avec stockage persistant. *PostgreSQL 18 sans port publié, site relié par `DATABASE_URL`, le 26 novembre 2026.*
 - [ ] Configurer DNS, accès HTTP/HTTPS et certificat adapté. *DNS et HTTP faits (`checkpoint.ad.jcorp`) ; HTTPS à faire.*
 - [x] Tester le catalogue, les offres et le formulaire. *T04, T05 et T06 réussis le 27 novembre 2026.*
+- [x] Ajouter le paiement simulé, les pages légales, l'espace client et son panel de serveur. *Le 27 novembre 2026.*
 - [ ] Déployer un serveur Minecraft avec Dokploy et s'y connecter depuis un client.
 - [x] Déployer une mise à jour depuis GitHub. *Automatique à chaque commit ; T07 et T08 réussis le 27 novembre 2026.*
 - [x] Consulter les logs et revenir à une version applicative précédente. *T09 et T10 réussis le 27 novembre 2026.*
@@ -45,7 +46,7 @@ La VM AP 2 fait partie d'une architecture de **deux VM**, créées le 12 novembr
 
 Le 27 novembre 2026, les noms de domaine et le VPS Pterodactyl ont été retirés de l'offre : le second faisait doublon avec les serveurs de jeux, les premiers sortaient du métier d'hébergeur de jeux.
 
-La première version n'inclut ni paiement réel, ni facturation, ni création automatique de serveurs à la commande, ni panel client de gestion de serveurs. Le serveur de jeu est créé par l'administrateur dans Dokploy ; le lien entre une commande du site et ce serveur est simulé.
+Le site n'effectue aucun paiement réel et ne crée aucun serveur à la commande. Le panel de l'espace client est développé dans le site, sans Pterodactyl, et son serveur est simulé. Le serveur de jeu est créé par l'administrateur dans Dokploy ; le lien entre une commande du site et ce serveur est simulé.
 
 La publication Internet n'est pas décidée. Une démonstration interne avec DNS et certificat de laboratoire est possible. Le chantier global de sauvegarde/restauration et la segmentation complète ne sont pas ajoutés au périmètre.
 

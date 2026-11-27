@@ -1,6 +1,6 @@
 # Checkpoint — Déploiement avec Dokploy
 
-**AP 2 — En cours depuis le 26 novembre 2026, mis à jour le 27 novembre 2026 : site Checkpoint v1.1 relié à sa base PostgreSQL, joignable à `http://checkpoint.ad.jcorp` et redéployé automatiquement à chaque commit ; recette T04 à T10 réussie le 27/11. HTTPS, supervision et serveur de jeu restent à faire.**
+**AP 2 — En cours depuis le 26 novembre 2026, mis à jour le 27 novembre 2026 : site Checkpoint v1.1 relié à sa base, redéployé automatiquement à chaque commit ; commande avec paiement simulé et pages légales conformes ; espace client fictif avec panel de serveur et support traçable ; recette T04 à T10 réussie. HTTPS, supervision et serveur de jeu restent à faire.**
 
 Cette procédure suit le déploiement de **Checkpoint**, le site de JCorp, sur la plateforme Dokploy installée sur `JCORP-APP01` ([procédure d'installation](../Infrastructure/Dokploy/Dokploy.md)). Le contenu attendu du site est décrit dans le [cahier des charges](Site-hebergement-jeux.md) et la recette dans le [plan de validation](Plan-de-validation.md).
 
@@ -281,6 +281,76 @@ Le prix d'une commande est recalculé côté serveur à partir du catalogue : un
 
 **Retrait du 27 novembre 2026 :** les noms de domaine et le VPS Pterodactyl ont été retirés. Le VPS Pterodactyl servait à héberger soi-même plusieurs serveurs de jeux, ce que l'offre de serveurs de jeux couvre déjà ; les noms de domaine sortaient du métier d'hébergeur de jeux. Le retrait du code a supprimé les deux produits de la base au déploiement suivant ; leurs pages renvoient désormais « introuvable ».
 
+## Étape 11 — Paiement simulé et conformité légale
+
+Une revue du site sous l'angle juridique, le 27 novembre 2026, a relevé cinq manques ; tous sont corrigés.
+
+| Manque relevé | Règle | Correction |
+| --- | --- | --- |
+| La commande s'arrêtait à une « demande », sans paiement | Parcours de vente complet attendu | Étape de paiement ajoutée : carte, Apple Pay ou Google Pay, simulée |
+| Bouton final « Envoyer la demande » | Code de la consommation, L221-14 : le bouton doit indiquer l'obligation de payer | Bouton « Commander avec obligation de paiement » |
+| Aucune acceptation des CGV, aucune renonciation au délai de rétractation | L221-28 1° : un service exécuté avant la fin des 14 jours exige la demande expresse du client | Deux cases obligatoires, vérifiées par le serveur et horodatées en base |
+| Mentions légales, CGV et confidentialité de quelques lignes | LCEN article 6 ; Code de la consommation ; RGPD articles 13 et 14 | Trois pages réécrites (détail ci-dessous) |
+| Police chargée depuis Google Fonts | RGPD : l'adresse IP de chaque visiteur part vers les États-Unis sans consentement | Police Geist servie par le site lui-même (`next/font`), plus aucun appel à Google |
+
+**Parcours de commande.** Après la configuration, le client saisit son nom et son adresse, coche les deux cases et valide ; la commande est enregistrée avec l'état `en_attente_paiement`, la date d'acceptation des CGV et la demande d'exécution immédiate. La page de paiement rappelle la configuration et le montant ; le paiement passe la commande à l'état `payee`, avec le moyen choisi et un numéro de facture. Aucun numéro de carte n'est demandé : la page indique qu'en production la saisie se ferait chez un prestataire certifié PCI DSS, avec 3-D Secure, sans que le site voie les données de carte.
+
+![Formulaire refusé sans les cases, puis cases cochées](images/34-commande-cases-et-bouton-legal.png)
+
+*Après un premier envoi sans les cases : un message d'erreur sous chacune ; une fois cochées, le bouton conforme permet de commander.*
+
+![Page de paiement simulé](images/35-paiement-simule.png)
+
+![Commande confirmée avec sa facture](images/36-commande-confirmee.png)
+
+**Pages légales.** Les mentions légales indiquent l'éditeur, le directeur de la publication, le contact, l'hébergeur, la propriété intellectuelle et le droit applicable. Les CGV comptent quatorze articles : prix TTC, étapes de commande, paiement, livraison, rétractation, reconduction tacite, résiliation en ligne (L215-1-1), garantie légale de conformité, réclamations et médiation. La politique de confidentialité précise le responsable du traitement, les finalités et leurs bases légales, les durées de conservation (dont dix ans pour les factures), les droits, la réclamation auprès de la CNIL et l'absence de cookies soumis à consentement. La page Crédits cite désormais les images réellement utilisées.
+
+![Conditions générales de vente](images/39-cgv.png)
+
+**Écart assumé : une entreprise fictive.** JCorp n'est pas immatriculée : les pages l'écrivent plutôt que d'inventer un numéro SIREN ou RCS qui pourrait appartenir à une vraie société. De même, aucun médiateur de la consommation n'est nommé : la page explique qu'une entreprise réelle indiquerait celui auquel elle adhère.
+
+## Étape 12 — Espace client et panel de serveur
+
+Le bouton « Choisir un serveur » de la barre devient « Mon espace client ». Il ouvre le compte de démonstration d'un client fictif, Alex Martin, propriétaire d'un serveur Minecraft. L'espace client est une application web : la navigation à gauche, la page à droite, une barre de navigation en haut sur téléphone.
+
+Pour que l'espace client n'ait ni la barre ni le pied de page du site, les pages publiques sont regroupées dans le dossier `app/(site)/` avec leur propre gabarit ; ce groupe ne change aucune adresse.
+
+| Page | Contenu |
+| --- | --- |
+| Accueil | Serveurs actifs, prochaine facture, tickets ouverts, carte du serveur, activité récente, dernières factures |
+| Serveurs | Liste des serveurs, avec accès au panel |
+| Factures | Historique, moyen de paiement, prochain prélèvement |
+| Support | Tickets et conversations (étape 13) |
+| Paramètres | Profil, double authentification, export des données, résiliation en quelques clics |
+
+![Accueil de l'espace client](images/37-espace-client-accueil.png)
+
+**Panel du serveur.** Comme décidé en début d'AP, Pterodactyl n'est pas utilisé : le panel est développé dans le site, sur le modèle de ce qu'il propose. Il offre les boutons Démarrer, Redémarrer et Arrêter avec leur journal, une console qui répond aux commandes du jeu (`help`, `list`, `say`, `time set`, `op`, `kick`, `save-all`, `stop`), des courbes processeur, mémoire et réseau mises à jour toutes les deux secondes, et les onglets Fichiers, Sauvegardes, Joueurs, Réseau et Paramètres.
+
+![Panel du serveur, console et ressources](images/38-panel-serveur-console.png)
+
+**Limite :** le serveur du panel est simulé dans la page ; il n'est relié à aucun conteneur. Le raccordement au vrai serveur Minecraft déployé par Dokploy est prévu avec les tests T13 à T15.
+
+## Étape 13 — Support traçable
+
+Les tickets sont enregistrés dans PostgreSQL : une table `tickets` pour le sujet et l'état, une table `ticket_messages` pour chaque message, avec son auteur (client, support ou système) et son heure. Rien n'est jamais supprimé.
+
+Chaque ticket s'ouvre sur sa conversation complète. Le client peut répondre, marquer le ticket comme résolu ou le rouvrir ; répondre à un ticket résolu le rouvre automatiquement. Chaque changement d'état laisse une ligne datée dans la conversation : l'historique reste consultable par le client, ce qui garantit la traçabilité des échanges.
+
+![Conversation d'un ticket](images/40-ticket-conversation.png)
+
+**Résultat observé le 27/11/2026 :** le ticket de test T-1188 a été ouvert, complété, marqué comme résolu puis rouvert par une réponse ; la base contient ses trois messages et les trois lignes d'état dans l'ordre.
+
+### Incident — Build refusé par Next.js
+
+**Symptôme :** après l'envoi du support traçable, la page d'un ticket renvoyait 404. Dokploy indiquait *Application deployed successfully*, mais le journal de build se terminait par `Next.js build worker exited with code: 1`.
+
+**Cause :** deux règles du rendu de Next.js 16. La liste des tickets lisait la base dans un `try` sans avoir d'abord déclaré la page dynamique par `await connection()` ; et la navigation de l'espace client lisait l'adresse courante (`usePathname`) hors d'un bloc `<Suspense>`, ce que Next.js refuse sur une page à paramètre.
+
+**Correction :** `await connection()` placé avant le `try`, comme sur les autres pages du site, et la navigation enveloppée dans `<Suspense>`. Le build est cette fois lancé sur le poste avant l'envoi : il se termine sans erreur.
+
+**Leçon :** un build qui échoue ne coupe pas le site, Dokploy gardant l'ancienne version en service ; mais le message « deployed successfully » du point d'entrée signifie seulement que le déploiement est lancé. La vérification se fait sur la page elle-même, et le build local avant l'envoi évite l'aller-retour.
+
 ## Étapes prévues
 
 - [x] Créer le projet et son environnement. *`Checkpoint`, environnement unique `production`.*
@@ -291,6 +361,8 @@ Le prix d'une commande est recalculé côté serveur à partir du catalogue : un
 - [x] Relier le site à la base et charger les offres. *Variable `DATABASE_URL` dans Dokploy, catalogue aligné à chaque démarrage.*
 - [x] Développer les pages du site. *Version 1.0.0, voir l'étape 10.*
 - [x] Déployer automatiquement à chaque commit. *Minuteur systemd sur `JCORP-APP01`, 24 déploiements au 27/11.*
+- [x] Ajouter le paiement simulé et mettre les pages légales en conformité. *Étape 11, le 27 novembre 2026.*
+- [x] Créer l'espace client, le panel de serveur et le support traçable. *Étapes 12 et 13, le 27 novembre 2026.*
 - [ ] Mettre en place le HTTPS avec un certificat adapté au domaine interne.
 - [x] Dérouler la recette : commande de test, journaux, retour à une version précédente. *T04 à T10 réussis le 27 novembre 2026, voir le [plan de validation](Plan-de-validation.md#recette-du-27-novembre-2026-t04-à-t10).*
 - [ ] Déployer le serveur Minecraft et s'y connecter.
@@ -301,6 +373,7 @@ Le prix d'une commande est recalculé côté serveur à partir du catalogue : un
 - Site en HTTP : rien n'est encore chiffré entre le poste et le serveur.
 - Un seul environnement, sans préproduction : chaque commit sur `main` part directement en ligne.
 - Le déploiement automatique dépend de l'accès de la VM à GitHub ; s'il est coupé, le site reste sur la dernière version déployée.
-- Commandes simulées : aucun paiement, aucun serveur créé à la commande.
+- Commandes et paiements simulés : rien n'est débité, aucun serveur n'est créé à la commande.
+- Espace client de démonstration, sans authentification : un seul compte fictif, accessible à tout visiteur du réseau de laboratoire.
 
 [Retour AP 2](README.md) · [Dokploy](../Infrastructure/Dokploy/Dokploy.md) · [Plan de validation](Plan-de-validation.md)

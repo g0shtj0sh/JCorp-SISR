@@ -135,6 +135,19 @@ git push
 
 **Leçon :** enchaîner des commandes Git sans contrôler le résultat de chacune peut transformer une erreur sans gravité en réécriture d'historique ; `--amend` ne se lance qu'en connaissant le commit qu'il modifie.
 
+## Contrôles complémentaires du 27 novembre 2026
+
+| Contrôle | Résultat observé |
+| --- | --- |
+| Parcours de toutes les pages par leurs liens | 70 pages, toutes en `200`, espace client compris |
+| Liens « Commander » des 19 offres et des formules | 29 liens, chacun ouvre un récapitulatif avec son prix |
+| Commande sans les deux cases | Refusée, un message sous chaque case |
+| Commande complète et paiement | Commande `CP-CECDBD76` à l'état `payee`, Google Pay, facture `F-2026-29F8A1`, CGV et exécution immédiate horodatées |
+| Retour sur le paiement d'une commande payée | « Commande déjà payée » |
+| Référence de commande inventée | « Commande introuvable » |
+| Appels à des services tiers | Plus aucun appel à Google Fonts |
+| Ticket de support | T-1188 ouvert, complété, résolu puis rouvert ; trois messages et trois lignes d'état en base |
+
 ## Résultat à renseigner pour chaque test
 
 - Date, opérateur et versions/commit.

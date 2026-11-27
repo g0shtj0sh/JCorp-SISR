@@ -13,10 +13,13 @@ Présenter des offres d'hébergement de serveurs de jeux dans un site accessible
 | Accueil | Présentation du projet et accès au catalogue | Navigation lisible sur ordinateur et mobile | Oui |
 | Catalogue | Quelques offres de jeux et de VPS fictifs | Offres chargées depuis la base | Oui : 19 jeux, 2 VPS, bot Discord |
 | Fiche offre | Jeu, CPU/RAM/disque, prix de démonstration et caractéristiques | Informations cohérentes avec le catalogue | Oui, avec configurateur |
-| Demande simulée/contact | Offre choisie, nom, adresse de contact, message | Saisie validée et demande enregistrée | Développé, non testé (T05, T06) |
-| Confirmation | Résumé et indication explicite de simulation | Aucun paiement ou serveur réel créé | Développé, non testé |
+| Demande simulée/contact | Offre choisie, nom, adresse de contact, message | Saisie validée et demande enregistrée | Oui, testé (T05, T06) |
+| Confirmation | Résumé et indication explicite de simulation | Aucun paiement ou serveur réel créé | Oui, testé (T05) |
+| Paiement simulé | Choix du moyen de paiement, passage de la commande à l'état payé | Aucun numéro de carte demandé | Ajouté le 27/11, testé |
+| Pages légales | Mentions légales, CGV, confidentialité conformes | Exigences de la LCEN, du Code de la consommation et du RGPD | Ajouté le 27/11 |
+| Espace client | Compte fictif, serveurs, factures, support traçable, paramètres, panel de serveur | Navigation type application web | Ajouté le 27/11, testé |
 
-Pas de comptes clients ni d'espace d'administration à développer dans la première version. Le catalogue peut être initialisé avec des données de démonstration. Les demandes de test utilisent des données fictives.
+La première version ne prévoyait ni compte client ni espace d'administration ; un espace client de démonstration, sans authentification, a été ajouté le 27 novembre 2026. Le catalogue peut être initialisé avec des données de démonstration. Les demandes de test utilisent des données fictives.
 
 ## Architecture applicative proposée
 

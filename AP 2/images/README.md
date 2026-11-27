@@ -37,6 +37,13 @@ Ce dossier accompagne la [procédure de déploiement de Checkpoint](../Deploieme
 | `31-t06-erreurs-formulaire.png` | T06 : erreurs sous les champs, demande refusée | **Produite** |
 | `32-t08-version-1-1-0-en-ligne.png` | T08 : version 1.1.0 en pied de page après le commit b501bd0 | **Produite** |
 | `33-t10-retour-version-1-0-0.png` | T10 : version 1.0.0 rétablie par git revert | **Produite** |
+| `34-commande-cases-et-bouton-legal.png` | Commande refusée sans les cases, puis cases cochées et bouton conforme | **Produite** |
+| `35-paiement-simule.png` | Page de paiement simulé | **Produite** |
+| `36-commande-confirmee.png` | Commande payée, numéro de facture | **Produite** |
+| `37-espace-client-accueil.png` | Accueil de l'espace client | **Produite** |
+| `38-panel-serveur-console.png` | Panel du serveur : console et ressources | **Produite** |
+| `39-cgv.png` | Conditions générales de vente | **Produite** |
+| `40-ticket-conversation.png` | Conversation d'un ticket de support | **Produite** |
 | — | Site HTTPS, supervision, alerte | Non produites |
 
 ## Règles retenues
