@@ -311,7 +311,7 @@ Une revue du site sous l'angle juridique, le 27 novembre 2026, a relevé cinq ma
 
 ## Étape 12 — Espace client et panel de serveur
 
-Le bouton « Choisir un serveur » de la barre devient « Mon espace client ». Il ouvre le compte de démonstration d'un client fictif, Alex Martin, propriétaire d'un serveur Minecraft. L'espace client est une application web : la navigation à gauche, la page à droite, une barre de navigation en haut sur téléphone.
+Le bouton « Choisir un serveur » de la barre devient « Mon espace client ». Il ouvre le compte de démonstration d'un client fictif, Alex Martin, propriétaire d'un serveur Minecraft. L'espace client est une application web : la navigation à gauche, la page à droite, une barre de navigation en haut sur téléphone. Le logo Checkpoint, en haut de la navigation, ramène au site public, comme le lien « Retour au site » en bas.
 
 Pour que l'espace client n'ait ni la barre ni le pied de page du site, les pages publiques sont regroupées dans le dossier `app/(site)/` avec leur propre gabarit ; ce groupe ne change aucune adresse.
 
