@@ -1,6 +1,6 @@
 # Checkpoint — Déploiement avec Dokploy
 
-**AP 2 — En cours depuis le 26 novembre 2026, mis à jour le 27 novembre 2026 : site Checkpoint v1.0 relié à sa base PostgreSQL, joignable à `http://checkpoint.ad.jcorp` et redéployé automatiquement à chaque commit (24 déploiements automatiques au 27/11). HTTPS, recette formelle et serveur de jeu restent à faire.**
+**AP 2 — En cours depuis le 26 novembre 2026, mis à jour le 27 novembre 2026 : site Checkpoint v1.1 relié à sa base PostgreSQL, joignable à `http://checkpoint.ad.jcorp` et redéployé automatiquement à chaque commit ; recette T04 à T10 réussie le 27/11. HTTPS, supervision et serveur de jeu restent à faire.**
 
 Cette procédure suit le déploiement de **Checkpoint**, le site de JCorp, sur la plateforme Dokploy installée sur `JCORP-APP01` ([procédure d'installation](../Infrastructure/Dokploy/Dokploy.md)). Le contenu attendu du site est décrit dans le [cahier des charges](Site-hebergement-jeux.md) et la recette dans le [plan de validation](Plan-de-validation.md).
 
@@ -292,7 +292,7 @@ Le prix d'une commande est recalculé côté serveur à partir du catalogue : un
 - [x] Développer les pages du site. *Version 1.0.0, voir l'étape 10.*
 - [x] Déployer automatiquement à chaque commit. *Minuteur systemd sur `JCORP-APP01`, 24 déploiements au 27/11.*
 - [ ] Mettre en place le HTTPS avec un certificat adapté au domaine interne.
-- [ ] Dérouler la recette : commande de test, journaux, retour à une version précédente.
+- [x] Dérouler la recette : commande de test, journaux, retour à une version précédente. *T04 à T10 réussis le 27 novembre 2026, voir le [plan de validation](Plan-de-validation.md#recette-du-27-novembre-2026-t04-à-t10).*
 - [ ] Déployer le serveur Minecraft et s'y connecter.
 - [ ] Ajouter `JCORP-APP01`, ses conteneurs et le site à la supervision.
 

@@ -30,7 +30,14 @@ Ce dossier accompagne la [procédure de déploiement de Checkpoint](../Deploieme
 | `24-git-status-v020.png` | État du dépôt avant l'envoi du catalogue | **Produite** |
 | `25-aucun-secret-dans-le-code.png` | `git grep "postgresql://"` ne trouve rien dans le code | **Produite** |
 | `26-commit-push-v020.png` | Commit `42b16c1` : catalogue, fiches et formulaire envoyés | **Produite** |
-| — | Site HTTPS, commande de test, données après redéploiement, retour de version, supervision | Non produites |
+| `27-t04-catalogue-depuis-la-base.png` | T04 : liste des jeux et prix lus en base | **Produite** |
+| `28-t04-fiche-minecraft.png` | T04 : fiche Minecraft à 6,99 € | **Produite** |
+| `29-t05-formulaire-rempli.png` | T05 : formulaire rempli avec des données fictives | **Produite** |
+| `30-t05-confirmation.png` | T05 : confirmation, référence CP-B0E995A7 | **Produite** |
+| `31-t06-erreurs-formulaire.png` | T06 : erreurs sous les champs, demande refusée | **Produite** |
+| `32-t08-version-1-1-0-en-ligne.png` | T08 : version 1.1.0 en pied de page après le commit b501bd0 | **Produite** |
+| `33-t10-retour-version-1-0-0.png` | T10 : version 1.0.0 rétablie par git revert | **Produite** |
+| — | Site HTTPS, supervision, alerte | Non produites |
 
 ## Règles retenues
 

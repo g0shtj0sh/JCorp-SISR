@@ -1,6 +1,6 @@
 # AP 2 — Hébergement d'un site avec Docker et Dokploy
 
-**Statut au 27 novembre 2026 : site Checkpoint v1.0 en ligne à `http://checkpoint.ad.jcorp`, relié à sa base PostgreSQL et redéployé automatiquement à chaque commit ; HTTPS, recette formelle (T03 à T15) et serveur Minecraft restent à faire.**
+**Statut au 27 novembre 2026 : site Checkpoint v1.1 en ligne à `http://checkpoint.ad.jcorp`, relié à sa base PostgreSQL et redéployé automatiquement à chaque commit ; recette T01, T02 et T04 à T10 réussie ; HTTPS, supervision et serveur Minecraft restent à faire.**
 
 ## Objectif
 
@@ -34,10 +34,10 @@ La VM AP 2 fait partie d'une architecture de **deux VM**, créées le 12 novembr
 - [x] Créer le site et son dépôt source. *[g0shtj0sh/checkpoint](https://github.com/g0shtj0sh/checkpoint), Next.js 16.4.6.*
 - [x] Déployer le site et la base avec stockage persistant. *PostgreSQL 18 sans port publié, site relié par `DATABASE_URL`, le 26 novembre 2026.*
 - [ ] Configurer DNS, accès HTTP/HTTPS et certificat adapté. *DNS et HTTP faits (`checkpoint.ad.jcorp`) ; HTTPS à faire.*
-- [ ] Tester le catalogue, les offres et le formulaire. *Catalogue en ligne ; aucune commande de test encore envoyée.*
+- [x] Tester le catalogue, les offres et le formulaire. *T04, T05 et T06 réussis le 27 novembre 2026.*
 - [ ] Déployer un serveur Minecraft avec Dokploy et s'y connecter depuis un client.
-- [x] Déployer une mise à jour depuis GitHub. *Automatique à chaque commit depuis le 26 novembre 2026 ; capture de preuve à produire pour T08.*
-- [ ] Consulter les logs et revenir à une version applicative précédente.
+- [x] Déployer une mise à jour depuis GitHub. *Automatique à chaque commit ; T07 et T08 réussis le 27 novembre 2026.*
+- [x] Consulter les logs et revenir à une version applicative précédente. *T09 et T10 réussis le 27 novembre 2026.*
 - [ ] Superviser l'hôte, les conteneurs et la disponibilité HTTP dans Grafana.
 - [ ] Compléter les captures, incidents et résultats réels.
 
