@@ -26,7 +26,11 @@ Ce dossier accompagne la [procédure de déploiement de Checkpoint](../Deploieme
 | `20-site-vm701-checkpoint-ad-jcorp.png` | Site ouvert depuis la VM 701 par son nom DNS | **Produite** |
 | `21-nrpt-poste-administration.png` | Règle NRPT `.ad.jcorp` vers le DNS de l'AD, nom résolu | **Produite** |
 | `22-site-depuis-poste-administration.png` | Site ouvert depuis le poste d'administration | **Produite** |
-| — | Site HTTPS, catalogue, demande simulée, mise à jour, retour de version, supervision | Non produites |
+| `23-variable-database-url-masquee.png` | Variable `DATABASE_URL` saisie et masquée dans Dokploy | **Produite** |
+| `24-git-status-v020.png` | État du dépôt avant l'envoi du catalogue | **Produite** |
+| `25-aucun-secret-dans-le-code.png` | `git grep "postgresql://"` ne trouve rien dans le code | **Produite** |
+| `26-commit-push-v020.png` | Commit `42b16c1` : catalogue, fiches et formulaire envoyés | **Produite** |
+| — | Site HTTPS, commande de test, données après redéploiement, retour de version, supervision | Non produites |
 
 ## Règles retenues
 

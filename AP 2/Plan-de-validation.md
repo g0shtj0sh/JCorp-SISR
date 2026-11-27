@@ -1,6 +1,6 @@
 # AP 2 — Plan de validation et preuves
 
-**T01 et T02 réussis le 26 novembre 2026 ; les autres tests sont à faire.** Les preuves sont dans la [procédure de déploiement](Deploiement-Checkpoint.md).
+**T01 et T02 réussis le 26 novembre 2026 ; T04 et T08 constatés en usage les 26 et 27 novembre, à formaliser avec leurs captures ; les autres tests sont à faire.** Les preuves sont dans la [procédure de déploiement](Deploiement-Checkpoint.md).
 
 Avant la recette, consigner les versions Linux, Docker, Dokploy, application et base, le commit testé, l'URL, la date et l'opérateur.
 
@@ -9,11 +9,11 @@ Avant la recette, consigner les versions Linux, Docker, Dokploy, application et 
 | T01 | Déployer depuis le dépôt source | Déploiement réussi, services sains | **Réussi le 26/11/2026** : commit `4882a99`, après l'incident Node 18 ([procédure](Deploiement-Checkpoint.md#étape-6--application-dans-dokploy)) |
 | T02 | Ouvrir le site depuis le client | Nom DNS résolu et page accessible | **Réussi le 26/11/2026** : `http://checkpoint.ad.jcorp` depuis la VM 701 |
 | T03 | Vérifier HTTPS | Certificat valide et approuvé dans le contexte retenu | À faire |
-| T04 | Consulter le catalogue et une offre | Contenu issu de la base, données cohérentes | À faire |
+| T04 | Consulter le catalogue et une offre | Contenu issu de la base, données cohérentes | Constaté : 19 jeux, 2 VPS et le bot lus en base ; capture à produire |
 | T05 | Envoyer une demande simulée valide | Confirmation et enregistrement en base | À faire |
 | T06 | Envoyer un formulaire incomplet | Erreurs compréhensibles, absence d'enregistrement invalide | À faire |
 | T07 | Redéployer l'application | Offres et demande précédente conservées | À faire |
-| T08 | Déployer une modification visuelle depuis GitHub | Nouveau commit identifié et modification visible | À faire |
+| T08 | Déployer une modification visuelle depuis GitHub | Nouveau commit identifié et modification visible | Constaté : 24 déploiements automatiques ; capture à produire |
 | T09 | Consulter les journaux | Requête ou démarrage identifiable, aucun secret visible | À faire |
 | T10 | Rétablir la version précédente | Ancien rendu retrouvé, site et base toujours fonctionnels | À faire |
 | T11 | Consulter Grafana | Mesures hôte/conteneurs et contrôle HTTP présents | À faire |

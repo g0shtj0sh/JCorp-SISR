@@ -1,6 +1,6 @@
 # Feuille de route JCorp
 
-**Statut : réalisation engagée, mis à jour le 19 novembre 2026.** Cette feuille de route décrit les travaux acceptés pour les AP 1 et AP 2. Les deux VM Linux prévues sont créées et contrôlées depuis le 12 novembre 2026 ; GLPI et la supervision sont installés sur `JCORP-SRV01` ; Dokploy reste à installer sur `JCORP-APP01`.
+**Statut : réalisation engagée, mis à jour le 27 novembre 2026.** Cette feuille de route décrit les travaux acceptés pour les AP 1 et AP 2. Les deux VM Linux prévues sont créées et contrôlées depuis le 12 novembre 2026 ; GLPI et la supervision sont installés sur `JCORP-SRV01`  ; Dokploy est installé sur `JCORP-APP01` depuis le 26 novembre 2026 et y déploie le site Checkpoint.
 
 ## 1. Ordre de réalisation
 
@@ -43,8 +43,8 @@ Paramètres réseau effectivement appliqués : pont `vmbr2`, VLAN 700, passerell
 
 - [x] Vérifier la mémoire, les CPU et le stockage réellement disponibles. *Relevés le 12 novembre 2026 : 64 cœurs, 503 Gio de RAM dont 303 disponibles, 3,9 Tio libres sur `Raid5-VMs`. Relevé et non audit : l'hôte est partagé avec la promotion et sa mémoire allouée dépasse déjà sa mémoire physique, ce qui n'est pas de mon ressort.*
 - [x] Vérifier puis affecter les deux VMID, noms et IP. *705 `JCORP-SRV01` `10.2.101.153`, 706 `JCORP-APP01` `10.2.101.154`.*
-- [x] Choisir les versions Linux et applicatives compatibles ; les consigner. *Debian 13 trixie sur les deux VM. Côté applicatif, GLPI 11 exige PHP 8.2 minimum et MariaDB 10.6 minimum : Debian 13 livre PHP 8.4 et MariaDB 11, la pile est donc compatible. Grafana 13.3.1 et Prometheus 2.53.3 relevés le 19 novembre 2026 ; versions Docker et Dokploy à relever à l'installation.*
-- [ ] Définir les URL internes : propositions `glpi.ad.jcorp`, `grafana.ad.jcorp`, `dokploy.ad.jcorp` et `checkpoint.ad.jcorp`, non créées à ce stade.
+- [x] Choisir les versions Linux et applicatives compatibles ; les consigner. *Debian 13 trixie sur les deux VM. Côté applicatif, GLPI 11 exige PHP 8.2 minimum et MariaDB 10.6 minimum : Debian 13 livre PHP 8.4 et MariaDB 11, la pile est donc compatible. Grafana 13.3.1 et Prometheus 2.53.3 relevés le 19 novembre 2026 ; Docker 29.10.1 et Dokploy v0.31.4 relevés le 26 novembre 2026.*
+- [ ] Définir les URL internes : propositions `glpi.ad.jcorp`, `grafana.ad.jcorp`, `dokploy.ad.jcorp` et `checkpoint.ad.jcorp`. *`checkpoint.ad.jcorp` créée le 26 novembre 2026 ; les autres restent à créer.*
 - [ ] Définir le contexte du site : démonstration interne ou publication Internet autorisée. L'installation ne suppose pas une ouverture automatique vers Internet.
 - [ ] Choisir le certificat : autorité de laboratoire approuvée par les clients pour les noms internes, ou domaine public maîtrisé et méthode de validation adaptée. Un nom `.jcorp` interne ne recevra pas un certificat public classique.
 - [x] Choisir le nom du site et la technologie du site et de sa base. *Checkpoint, Next.js et PostgreSQL, déployés par Dokploy avec un serveur Minecraft de démonstration ; Pelican écarté (voir [AP 2](../AP%202/README.md#choix-techniques-du-19-novembre-2026)).*

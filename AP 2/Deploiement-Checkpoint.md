@@ -1,6 +1,6 @@
 # Checkpoint — Déploiement avec Dokploy
 
-**AP 2 — En cours depuis le 26 novembre 2026 : projet Dokploy, base PostgreSQL et première version du site déployés ; site joignable depuis un poste du domaine à `http://checkpoint.ad.jcorp`. Contenu du site, liaison à la base, HTTPS et serveur de jeu restent à faire.**
+**AP 2 — En cours depuis le 26 novembre 2026, mis à jour le 27 novembre 2026 : site Checkpoint v1.0 relié à sa base PostgreSQL, joignable à `http://checkpoint.ad.jcorp` et redéployé automatiquement à chaque commit (24 déploiements automatiques au 27/11). HTTPS, recette formelle et serveur de jeu restent à faire.**
 
 Cette procédure suit le déploiement de **Checkpoint**, le site de JCorp, sur la plateforme Dokploy installée sur `JCORP-APP01` ([procédure d'installation](../Infrastructure/Dokploy/Dokploy.md)). Le contenu attendu du site est décrit dans le [cahier des charges](Site-hebergement-jeux.md) et la recette dans le [plan de validation](Plan-de-validation.md).
 
@@ -121,7 +121,7 @@ Git avait signé ce commit avec une identité déduite du compte Windows, au dom
 
 ![Source GitHub configurée](images/11-dokploy-provider-github.png)
 
-**Limite :** le déclenchement *On Push* repose sur un appel de GitHub vers Dokploy. `10.2.101.154` est une adresse privée, injoignable depuis Internet : après un `git push`, le déploiement est lancé à la main par le bouton *Deploy*.
+**Limite :** le déclenchement *On Push* repose sur un appel de GitHub vers Dokploy. `10.2.101.154` est une adresse privée, injoignable depuis Internet : après un `git push`, le déploiement est lancé à la main par le bouton *Deploy*. *Limite levée le 26 novembre 2026 par le déploiement automatique de l'[étape 9](#étape-9--déploiement-automatique-depuis-github).*
 
 ### Incident — Build en Node 18
 
@@ -215,6 +215,70 @@ Retrait de la règle :
 Get-DnsClientNrptRule | Where-Object Namespace -eq ".ad.jcorp" | Remove-DnsClientNrptRule -Force
 ```
 
+## Étape 8 — Liaison du site à la base
+
+Le site lit son catalogue dans PostgreSQL et y enregistre les demandes. L'adresse de connexion, mot de passe compris, est saisie uniquement dans l'onglet **Environment** de l'application Dokploy, sous la forme `DATABASE_URL=postgresql://…@checkpoint-checkpointdb-aowmfw:5432/…` : le site joint la base par son nom de service interne, sans port publié.
+
+![Variable DATABASE_URL masquée dans Dokploy](images/23-variable-database-url-masquee.png)
+
+*La variable est saisie dans Dokploy et masquée à l'écran ; sa valeur n'apparaît ni ici ni dans le dépôt.*
+
+Avant l'envoi, je vérifie qu'aucune adresse de base n'est restée dans le code :
+
+```powershell
+git grep -n "postgresql://"
+```
+
+**Résultat observé :** aucune ligne trouvée.
+
+![Aucune adresse de base dans le code](images/25-aucun-secret-dans-le-code.png)
+
+Au démarrage, le site crée ses tables s'il ne les trouve pas (`produits`, `avis`, `demandes`), puis aligne le catalogue sur le fichier `lib/catalogue.ts` du dépôt : un produit ajouté ou modifié dans le code l'est en base au déploiement suivant, un produit retiré du code est supprimé de la base. Les demandes ne sont jamais supprimées.
+
+![Commit 42b16c1 : catalogue, fiches et formulaire](images/26-commit-push-v020.png)
+
+**Résultat observé le 27/11/2026 :** la base contient 19 jeux, 2 VPS, 1 offre de bot Discord et 10 avis de démonstration ; **0 demande**, aucune commande de test n'ayant encore été envoyée (test T05).
+
+## Étape 9 — Déploiement automatique depuis GitHub
+
+L'étape 6 avait laissé une limite : GitHub ne peut pas appeler Dokploy, dont l'adresse `10.2.101.154` est privée. J'ai inversé le sens : c'est **la VM qui interroge GitHub** chaque minute, et qui déclenche Dokploy en local quand un nouveau commit apparaît.
+
+| Élément | Rôle |
+| --- | --- |
+| `checkpoint-autodeploy.timer` | Lance le service 2 minutes après le démarrage, puis chaque minute |
+| `checkpoint-autodeploy.service` | Exécute le script une fois, après le réseau et Docker |
+| `/usr/local/bin/checkpoint-autodeploy.sh` | Compare le dernier commit de `main` sur GitHub au dernier déployé ; s'il diffère, appelle le point d'entrée de déploiement de Dokploy |
+| `/etc/checkpoint-autodeploy.env` | Jeton Dokploy, dépôt et branche ; propriétaire `root`, droits `600` |
+| `/var/lib/checkpoint-autodeploy/dernier-commit` | Dernier commit déployé avec succès |
+
+Le script lit la branche avec `git ls-remote`, sans cloner, puis envoie à `http://127.0.0.1:3000/api/deploy/<jeton>` la même requête qu'un webhook GitHub (`X-GitHub-Event: push`). Le commit n'est mémorisé que si Dokploy répond `200` : un échec est retenté à la minute suivante.
+
+```bash
+systemctl list-timers checkpoint-autodeploy.timer
+journalctl -u checkpoint-autodeploy.service | grep "Nouveau commit"
+```
+
+**Résultat observé :** le minuteur est actif ; le journal compte **24 déploiements** déclenchés du 26 au 27 novembre 2026, chacun en ligne 1 à 3 minutes après le `git push`. Sans nouveau commit, le service se termine en une seconde sans rien déployer.
+
+**Écart assumé :** une interrogation chaque minute plutôt qu'un webhook. Le délai d'une minute et une requête légère vers GitHub conviennent à une démonstration ; en production, la VM serait joignable depuis Internet par un proxy et le webhook natif de Dokploy suffirait.
+
+## Étape 10 — Contenu et identité du site
+
+Une fois le déploiement automatique en place, le site a été développé par petits commits, chacun visible en ligne quelques minutes plus tard. La version **1.0.0** comprend :
+
+| Partie | Contenu |
+| --- | --- |
+| Offres | 17 jeux disponibles et 2 annoncés (GTA 6, SixM), 2 VPS (Linux, Windows), hébergement de bot Discord |
+| Pages | Accueil, liste des jeux, fiche de chaque jeu avec configurateur et prix, VPS, bot Discord, commande et confirmation, statut, à propos, blog, lexique, outils, mentions légales, CGV, confidentialité, crédits |
+| Statut | Page qui interroge Prometheus (`PROMETHEUS_URL`) à chaque chargement et affiche l'état réel des machines de l'infrastructure |
+| Visuels | Images officielles des jeux (éditeurs), illustrations générées avec ChatGPT, logos réels des logiciels ; sources sur la page Crédits |
+| Identité | Logo « drapeau-étape », palette noyer et beige, police Geist ; kit complet dans le dossier `brand/` du dépôt |
+| Mise en page | Adaptée au téléphone, menus en fenêtres, animations désactivées si le système demande moins de mouvement |
+
+Le prix d'une commande est recalculé côté serveur à partir du catalogue : un prix modifié dans le navigateur n'est pas pris en compte.
+
+**Retrait du 27 novembre 2026 :** les noms de domaine et le VPS Pterodactyl ont été retirés. Le VPS Pterodactyl servait à héberger soi-même plusieurs serveurs de jeux, ce que l'offre de serveurs de jeux couvre déjà ; les noms de domaine sortaient du métier d'hébergeur de jeux. Le retrait du code a supprimé les deux produits de la base au déploiement suivant ; leurs pages renvoient désormais « introuvable ».
+
 ## Étapes prévues
 
 - [x] Créer le projet et son environnement. *`Checkpoint`, environnement unique `production`.*
@@ -222,17 +286,19 @@ Get-DnsClientNrptRule | Where-Object Namespace -eq ".ad.jcorp" | Remove-DnsClien
 - [x] Créer le dépôt et le projet Next.js. *[g0shtj0sh/checkpoint](https://github.com/g0shtj0sh/checkpoint), Next.js 16.4.6, Node 22.*
 - [x] Déployer une première version depuis GitHub. *Commit `4882a99`, après correction de la version de Node.*
 - [x] Publier le site sous un nom DNS interne. *`checkpoint.ad.jcorp`, testé depuis la VM 701 et depuis le poste d'administration.*
-- [ ] Développer les pages du site : accueil, catalogue, fiche d'offre, demande simulée.
-- [ ] Relier le site à la base et charger les offres de démonstration.
+- [x] Relier le site à la base et charger les offres. *Variable `DATABASE_URL` dans Dokploy, catalogue aligné à chaque démarrage.*
+- [x] Développer les pages du site. *Version 1.0.0, voir l'étape 10.*
+- [x] Déployer automatiquement à chaque commit. *Minuteur systemd sur `JCORP-APP01`, 24 déploiements au 27/11.*
 - [ ] Mettre en place le HTTPS avec un certificat adapté au domaine interne.
-- [ ] Déployer une mise à jour, consulter les journaux, revenir à une version précédente.
+- [ ] Dérouler la recette : commande de test, journaux, retour à une version précédente.
 - [ ] Déployer le serveur Minecraft et s'y connecter.
 - [ ] Ajouter `JCORP-APP01`, ses conteneurs et le site à la supervision.
 
 ## Limites
 
 - Site en HTTP : rien n'est encore chiffré entre le poste et le serveur.
-- Déploiement manuel après chaque `git push`, GitHub ne pouvant pas joindre Dokploy.
-- Un seul environnement, sans préproduction.
+- Un seul environnement, sans préproduction : chaque commit sur `main` part directement en ligne.
+- Le déploiement automatique dépend de l'accès de la VM à GitHub ; s'il est coupé, le site reste sur la dernière version déployée.
+- Commandes simulées : aucun paiement, aucun serveur créé à la commande.
 
 [Retour AP 2](README.md) · [Dokploy](../Infrastructure/Dokploy/Dokploy.md) · [Plan de validation](Plan-de-validation.md)

@@ -1,6 +1,6 @@
 # Checkpoint — Cahier des charges du site
 
-**Prévu pour l'AP 2 — nom et technologies arrêtés le 19 novembre 2026, développement non commencé.**
+**Réalisé pour l'AP 2 — version 1.0.0 en ligne au 27 novembre 2026 ; HTTPS et recette formelle restent à faire.**
 
 ## Besoin
 
@@ -8,13 +8,13 @@ Présenter des offres d'hébergement de serveurs de jeux dans un site accessible
 
 ## Première version attendue
 
-| Page ou fonction | Contenu attendu | Validation |
-| --- | --- | --- |
-| Accueil | Présentation du projet et accès au catalogue | Navigation lisible sur ordinateur et mobile |
-| Catalogue | Quelques offres de jeux et de VPS fictifs | Offres chargées depuis la base |
-| Fiche offre | Jeu, CPU/RAM/disque, prix de démonstration et caractéristiques | Informations cohérentes avec le catalogue |
-| Demande simulée/contact | Offre choisie, nom, adresse de contact, message | Saisie validée et demande enregistrée |
-| Confirmation | Résumé et indication explicite de simulation | Aucun paiement ou serveur réel créé |
+| Page ou fonction | Contenu attendu | Validation | Réalisé |
+| --- | --- | --- | --- |
+| Accueil | Présentation du projet et accès au catalogue | Navigation lisible sur ordinateur et mobile | Oui |
+| Catalogue | Quelques offres de jeux et de VPS fictifs | Offres chargées depuis la base | Oui : 19 jeux, 2 VPS, bot Discord |
+| Fiche offre | Jeu, CPU/RAM/disque, prix de démonstration et caractéristiques | Informations cohérentes avec le catalogue | Oui, avec configurateur |
+| Demande simulée/contact | Offre choisie, nom, adresse de contact, message | Saisie validée et demande enregistrée | Développé, non testé (T05, T06) |
+| Confirmation | Résumé et indication explicite de simulation | Aucun paiement ou serveur réel créé | Développé, non testé |
 
 Pas de comptes clients ni d'espace d'administration à développer dans la première version. Le catalogue peut être initialisé avec des données de démonstration. Les demandes de test utilisent des données fictives.
 
@@ -42,11 +42,11 @@ Le service web valide les entrées et accède à la base avec un compte applicat
 ## Décisions ouvertes
 
 - [x] Nom du site. *Checkpoint.*
-- [ ] Identité visuelle.
-- [ ] Liste des offres fictives et visuels utilisables.
+- [x] Identité visuelle. *Logo « drapeau-étape », palette noyer et beige, police Geist, le 27 novembre 2026.*
+- [x] Liste des offres fictives et visuels utilisables. *17 jeux et 2 annoncés, VPS Linux et Windows, bot Discord ; images officielles des éditeurs et illustrations générées, sources sur la page Crédits.*
 - [x] Technologie du site et moteur de base. *Next.js et PostgreSQL.*
-- [ ] Dépôt et méthode de déclenchement des déploiements.
-- [ ] URL interne ou domaine public ; méthode de certificat.
-- [ ] Versions, variables nécessaires et volumes.
+- [x] Dépôt et méthode de déclenchement des déploiements. *Dépôt public g0shtj0sh/checkpoint ; la VM interroge GitHub chaque minute et déclenche Dokploy.*
+- [ ] URL interne ou domaine public ; méthode de certificat. *URL interne `checkpoint.ad.jcorp` ; certificat à choisir.*
+- [x] Versions, variables nécessaires et volumes. *Node 22, Next.js 16.4.6, PostgreSQL 18 ; variables `DATABASE_URL` et `PROMETHEUS_URL` dans Dokploy ; volume de la base géré par Dokploy.*
 
 [Retour AP 2](README.md) · [Recette](Plan-de-validation.md)

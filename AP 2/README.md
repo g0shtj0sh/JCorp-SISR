@@ -1,12 +1,12 @@
 # AP 2 — Hébergement d'un site avec Docker et Dokploy
 
-**Statut au 26 novembre 2026 : sujet, nom, technologies et périmètre arrêtés ; Docker et Dokploy installés et sains sur `JCORP-APP01` ; première version du site et base PostgreSQL déployées, site joignable à `http://checkpoint.ad.jcorp` ; contenu du site, HTTPS et serveur de jeu restent à faire.**
+**Statut au 27 novembre 2026 : site Checkpoint v1.0 en ligne à `http://checkpoint.ad.jcorp`, relié à sa base PostgreSQL et redéployé automatiquement à chaque commit ; HTTPS, recette formelle (T03 à T15) et serveur Minecraft restent à faire.**
 
 ## Objectif
 
 JCorp est une entreprise fictive d'hébergement de serveurs de jeux. Sa marque grand public s'appelle **Checkpoint**. L'AP 2 déploie et exploite, sur une VM Linux dédiée et avec Dokploy :
 
-- le **site Checkpoint** : catalogue d'offres, fiches, demande simulée, avec sa base de données ;
+- le **site Checkpoint** : catalogue de serveurs de jeux, de VPS et d'hébergement de bots, fiches avec configurateur, demande simulée, avec sa base de données ;
 - un **serveur de jeu Minecraft** de démonstration, le produit vendu sur le site, auquel un joueur se connecte réellement.
 
 La supervision créée en AP 1 sera étendue à cette plateforme.
@@ -20,9 +20,9 @@ La VM AP 2 fait partie d'une architecture de **deux VM**, créées le 12 novembr
 | Document | Contenu |
 | --- | --- |
 | [Feuille de route](../Infrastructure/Feuille-de-route.md) | Ordre, ressources proposées, décisions et prérequis |
-| [Déploiement de Checkpoint](Deploiement-Checkpoint.md) | Projet, base, dépôt, application et nom DNS ; premier déploiement réussi le 26 novembre 2026 |
-| [Dokploy](../Infrastructure/Dokploy/Dokploy.md) | Docker et Dokploy installés le 26 novembre 2026 ; déploiements à venir |
-| [Site d'hébergement de jeux](Site-hebergement-jeux.md) | Fonctionnalités, données et périmètre de la première version |
+| [Déploiement de Checkpoint](Deploiement-Checkpoint.md) | Projet, base, dépôt, application, nom DNS, liaison à la base, déploiement automatique et contenu de la v1.0 |
+| [Dokploy](../Infrastructure/Dokploy/Dokploy.md) | Docker et Dokploy installés le 26 novembre 2026 |
+| [Site d'hébergement de jeux](Site-hebergement-jeux.md) | Cahier des charges, offres retenues et décisions prises |
 | [Plan de validation](Plan-de-validation.md) | Tests, preuves et résultats à renseigner |
 | [Supervision](../Infrastructure/Supervision/Grafana-Prometheus.md) | Extension Grafana/Prometheus aux applications |
 
@@ -32,16 +32,18 @@ La VM AP 2 fait partie d'une architecture de **deux VM**, créées le 12 novembr
 - [x] Installer Docker et Dokploy sur cette VM. *Docker 29.10.1 depuis le dépôt officiel, Dokploy v0.31.4, compte administrateur créé le 26 novembre 2026.*
 - [x] Arrêter le nom, les technologies et le périmètre. *Checkpoint, Next.js et PostgreSQL, Dokploy seul, serveur Minecraft de démonstration, le 19 novembre 2026.*
 - [x] Créer le site et son dépôt source. *[g0shtj0sh/checkpoint](https://github.com/g0shtj0sh/checkpoint), Next.js 16.4.6.*
-- [ ] Déployer le site et la base avec stockage persistant.
-- [ ] Configurer DNS, accès HTTP/HTTPS et certificat adapté.
-- [ ] Tester le catalogue, les offres et le formulaire.
+- [x] Déployer le site et la base avec stockage persistant. *PostgreSQL 18 sans port publié, site relié par `DATABASE_URL`, le 26 novembre 2026.*
+- [ ] Configurer DNS, accès HTTP/HTTPS et certificat adapté. *DNS et HTTP faits (`checkpoint.ad.jcorp`) ; HTTPS à faire.*
+- [ ] Tester le catalogue, les offres et le formulaire. *Catalogue en ligne ; aucune commande de test encore envoyée.*
 - [ ] Déployer un serveur Minecraft avec Dokploy et s'y connecter depuis un client.
-- [ ] Déployer une mise à jour depuis GitHub.
+- [x] Déployer une mise à jour depuis GitHub. *Automatique à chaque commit depuis le 26 novembre 2026 ; capture de preuve à produire pour T08.*
 - [ ] Consulter les logs et revenir à une version applicative précédente.
 - [ ] Superviser l'hôte, les conteneurs et la disponibilité HTTP dans Grafana.
 - [ ] Compléter les captures, incidents et résultats réels.
 
 ## Limites retenues
+
+Le 27 novembre 2026, les noms de domaine et le VPS Pterodactyl ont été retirés de l'offre : le second faisait doublon avec les serveurs de jeux, les premiers sortaient du métier d'hébergeur de jeux.
 
 La première version n'inclut ni paiement réel, ni facturation, ni création automatique de serveurs à la commande, ni panel client de gestion de serveurs. Le serveur de jeu est créé par l'administrateur dans Dokploy ; le lien entre une commande du site et ce serveur est simulé.
 
